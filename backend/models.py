@@ -76,3 +76,10 @@ class ExercicioBanco(Base):
     __tablename__ = "exercicios_banco"
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(Text, unique=True, index=True)
+
+
+class AcademiaStatus(Base):
+    __tablename__ = "academia_status"
+    id      = Column(Integer, primary_key=True, default=1)
+    ativo   = Column(Boolean, default=False)
+    status  = Column(Text, default="fechado")  # fechado | vazio | tranquilo | cheio | lotado

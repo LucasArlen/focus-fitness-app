@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
 import { getTreinoHoje } from "../api/treino";
+import { getStatus } from "../api/academia";
 import BlocoCard from "../components/BlocoCard";
 import SugestaoCard from "../components/SugestaoCard";
 import DesafioRanking from "../components/DesafioRanking";
+
+const STATUS_CFG = {
+  fechado:   { label: "Academia fechada", emoji: "🔒", cor: "#ff5252",  bg: "rgba(255,82,82,0.08)",   borda: "rgba(255,82,82,0.25)" },
+  vazio:     { label: "Bem vazio",        emoji: "😌", cor: "#64b5f6",  bg: "rgba(100,181,246,0.08)", borda: "rgba(100,181,246,0.25)" },
+  tranquilo: { label: "Tranquilo",        emoji: "👌", cor: "#4cd964",  bg: "rgba(76,217,100,0.08)",  borda: "rgba(76,217,100,0.25)" },
+  cheio:     { label: "Cheio",            emoji: "🔥", cor: "#ff9800",  bg: "rgba(255,152,0,0.08)",   borda: "rgba(255,152,0,0.25)" },
+  lotado:    { label: "Lotado",           emoji: "🚨", cor: "#ff5252",  bg: "rgba(255,82,82,0.08)",   borda: "rgba(255,82,82,0.25)" },
+};
 
 function formatarData(dataStr) {
   const [ano, mes, dia] = dataStr.split("-");
@@ -14,12 +23,18 @@ function formatarData(dataStr) {
 export default function Hoje() {
   const [treino, setTreino] = useState(null);
   const [estado, setEstado] = useState("carregando");
+  const [statusAcad, setStatusAcad] = useState(null);
 
   useEffect(() => {
     getTreinoHoje()
       .then(t => { setTreino(t); setEstado("ok"); })
       .catch(err => setEstado(err.message.includes("404") ? "vazio" : "erro"));
+    getStatus()
+      .then(s => { if (s.ativo) setStatusAcad(s.status); })
+      .catch(() => {});
   }, []);
+
+  const cfg = statusAcad ? STATUS_CFG[statusAcad] : null;
 
   return (
     <div className="page">
@@ -29,6 +44,18 @@ export default function Hoje() {
       </header>
 
       <main className="feed">
+
+        {/* Banner de status da academia */}
+        {cfg && (
+          <div className="status-banner" style={{ background: cfg.bg, borderColor: cfg.borda }}>
+            <span className="status-banner-emoji">{cfg.emoji}</span>
+            <div className="status-banner-texto">
+              <span className="status-banner-label" style={{ color: cfg.cor }}>{cfg.label}</span>
+              <span className="status-banner-sub">Agora na academia</span>
+            </div>
+          </div>
+        )}
+
         {estado === "carregando" && (
           <div className="estado-vazio">
             <span className="estado-vazio-icon">⏳</span>
@@ -49,7 +76,12 @@ export default function Hoje() {
             <span className="estado-vazio-icon">📡</span>
             <p className="estado-vazio-titulo">Sem conexão</p>
             <p className="estado-vazio-sub">Verifique sua internet e tente novamente.</p>
-            <button className="btn-publicar" style={{ marginTop: 16 }} onClick={() => { setEstado("carregando"); getTreinoHoje().then(t => { setTreino(t); setEstado("ok"); }).catch(() => setEstado("erro")); }}>
+            <button className="btn-publicar" style={{ marginTop: 16 }} onClick={() => {
+              setEstado("carregando");
+              getTreinoHoje()
+                .then(t => { setTreino(t); setEstado("ok"); })
+                .catch(() => setEstado("erro"));
+            }}>
               Tentar novamente
             </button>
           </div>

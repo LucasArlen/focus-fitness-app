@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from database import Base, engine
-from routers import aluno, banco, desafio, ranking, reacao, treino
+from routers import academia, aluno, banco, desafio, ranking, reacao, treino
 
 Base.metadata.create_all(bind=engine)
 
@@ -20,6 +20,7 @@ app.add_middleware(
 )
 
 api = APIRouter(prefix="/api")
+api.include_router(academia.router)
 api.include_router(treino.router)
 api.include_router(desafio.router)
 api.include_router(aluno.router)

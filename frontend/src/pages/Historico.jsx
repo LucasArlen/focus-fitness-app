@@ -73,7 +73,7 @@ export default function Historico() {
               <div className="hist-row">
                 <div className="hist-info">
                   <p className="hist-data">{fmt(item.data)}</p>
-                  <p className="hist-blocos">{item.qtd_blocos} bloco{item.qtd_blocos !== 1 ? "s" : ""}</p>
+                  <p className="hist-blocos">{item.total_blocos} bloco{item.total_blocos !== 1 ? "s" : ""} · {item.total_exercicios} exercício{item.total_exercicios !== 1 ? "s" : ""}</p>
                 </div>
                 {item.desafio_nome && (
                   <span className="hist-desafio">🏆 {item.desafio_nome}</span>

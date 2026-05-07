@@ -125,19 +125,39 @@ export default function AdminDesafio({ isAdmin }) {
                 )}
 
                 {ranking.length > 0
-                  ? <ol className="ranking-list" style={{ padding: "12px" }}>
-                      {ranking.map((p, i) => (
-                        <li key={p.id} className={`ranking-item pos-${i + 1}`}>
-                          <span className="medalha">{MEDALHAS[i] ?? `${i + 1}º`}</span>
-                          <span className="ranking-nome">{p.aluno_nome}</span>
-                          <span className="ranking-valor">{p.valor}</span>
-                          {isAdmin && !desafio.fechado && (
-                            <button className="btn-icon danger" style={{ marginLeft: "auto" }}
-                              onClick={() => remover(p.id)}>✕</button>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
+                  ? <>
+                      {/* Pódio top 3 */}
+                      <div className="podio">
+                        {ranking.slice(0, 3).map((p, i) => (
+                          <div key={p.id} className={`podio-item pos-${i + 1}`}>
+                            <span className="podio-medalha">{MEDALHAS[i]}</span>
+                            <span className="podio-nome">{p.aluno_nome}</span>
+                            <span className="podio-valor">{p.valor}</span>
+                            {isAdmin && !desafio.fechado && (
+                              <button className="btn-icon danger podio-del"
+                                onClick={() => remover(p.id)}>✕</button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Restante (4º em diante) */}
+                      {ranking.length > 3 && (
+                        <ol className="ranking-list ranking-rest" style={{ padding: "0 12px 12px" }}>
+                          {ranking.slice(3).map((p, i) => (
+                            <li key={p.id} className="ranking-item">
+                              <span className="medalha" style={{ fontSize: 13, color: "var(--text-3)" }}>{i + 4}º</span>
+                              <span className="ranking-nome">{p.aluno_nome}</span>
+                              <span className="ranking-valor">{p.valor}</span>
+                              {isAdmin && !desafio.fechado && (
+                                <button className="btn-icon danger" style={{ marginLeft: "auto" }}
+                                  onClick={() => remover(p.id)}>✕</button>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </>
                   : <p className="estado-hint" style={{ padding: "16px 14px" }}>Nenhuma pontuação lançada ainda.</p>
                 }
 

@@ -65,7 +65,19 @@ class TreinoResumoOut(BaseModel):
     total_blocos: int
     total_exercicios: int
     nomes_blocos: List[str]
+    desafio_nome: Optional[str] = None
     model_config = {"from_attributes": True}
+
+
+class StatusOut(BaseModel):
+    ativo: bool
+    status: str
+    model_config = {"from_attributes": True}
+
+
+class StatusIn(BaseModel):
+    ativo: bool
+    status: str
 
 
 class PontuacaoIn(BaseModel):

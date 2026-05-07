@@ -28,6 +28,7 @@ def get_historico(limite: int = 30, db: Session = Depends(get_db)):
             total_blocos=len(t.blocos),
             total_exercicios=total_ex,
             nomes_blocos=[b.nome for b in t.blocos],
+            desafio_nome=t.desafio.nome if t.desafio else None,
         ))
     return result
 
