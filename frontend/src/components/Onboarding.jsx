@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { cadastrarAluno, loginAluno } from "../api/aluno";
+import QrScanner from "./QrScanner";
 
 /** Lê ?c= da URL e limpa o parâmetro sem recarregar a página. */
 function lerCodigoConvite() {
@@ -16,15 +17,27 @@ function lerCodigoConvite() {
 }
 
 export default function Onboarding({ onConfirm, onAdmin }) {
-  const [passo, setPasso]     = useState(1); // 1 = nome, 2 = pin
-  const [nome, setNome]       = useState("");
-  const [pin, setPin]         = useState(["", "", "", ""]);
-  const [erro, setErro]       = useState("");
+  const [passo, setPasso]       = useState(1); // 1 = nome, 2 = pin
+  const [nome, setNome]         = useState("");
+  const [pin, setPin]           = useState(["", "", "", ""]);
+  const [erro, setErro]         = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [qrAberto, setQrAberto] = useState(false);
+  const [inviteCode, setInviteCode] = useState(() => lerCodigoConvite());
   const inputsRef = useRef([]);
+  const adminTimer = useRef(null);
 
-  const inviteCode    = lerCodigoConvite();
-  const adminTimer    = useRef(null);
+  const handleScan = useCallback((texto) => {
+    setQrAberto(false);
+    try {
+      const url  = new URL(texto);
+      const code = url.searchParams.get("c");
+      if (code) {
+        localStorage.setItem("invite_code", code);
+        setInviteCode(code);
+      }
+    } catch { /* não era URL válida */ }
+  }, []);
 
   // Segurar o logo 1.5s → abre login de admin
   function logoStart(e) {
@@ -98,6 +111,10 @@ export default function Onboarding({ onConfirm, onAdmin }) {
     }
   }
 
+  if (qrAberto) {
+    return <QrScanner onScan={handleScan} onClose={() => setQrAberto(false)} />;
+  }
+
   return (
     <div className="onboarding-overlay">
       <div className="onboarding-inner">
@@ -134,6 +151,14 @@ export default function Onboarding({ onConfirm, onAdmin }) {
                 Continuar →
               </button>
             </form>
+
+            <button
+              type="button"
+              className={`onboarding-qr-btn ${inviteCode ? "tem-codigo" : ""}`}
+              onClick={() => setQrAberto(true)}
+            >
+              {inviteCode ? "✅  QR code escaneado" : "📷  Escanear QR da academia"}
+            </button>
           </div>
         )}
 
