@@ -4,13 +4,18 @@ import { getRankingAnual, getEvolucaoAluno } from "../api/ranking";
 
 const MEDALHAS = ["🥇", "🥈", "🥉"];
 const numVal = v => parseFloat(v) || 0;
+const mesNome = () => new Date().toLocaleString("pt-BR", { month: "long" });
 
 function fmt(data) {
   const [a, m, d] = data.split("-");
   return `${d}/${m}`;
 }
 
-export default function AdminDesafio({ isAdmin }) {
+function euSou(nome, ref) {
+  return ref && nome.trim().toLowerCase() === ref.trim().toLowerCase();
+}
+
+export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
   const [aba, setAba]           = useState("hoje");
   const [desafio, setDesafio]   = useState(null);
   const [estadoHoje, setEstadoHoje] = useState("carregando");
@@ -72,19 +77,28 @@ export default function AdminDesafio({ isAdmin }) {
     carregarHoje();
   }
 
+  // Dados pessoais do aluno no ranking anual
+  const meuIdx  = anual.findIndex(a => euSou(a.nome, nomeAluno));
+  const meuDado = meuIdx >= 0 ? anual[meuIdx] : null;
+
   return (
     <div className="page">
       <header className="app-header">
         <span className="logo">Focus Fitness</span>
-        {isAdmin && <span className="admin-badge">Desafio</span>}
+        {isAdmin
+          ? <span className="admin-badge">Desafio</span>
+          : nomeAluno && <span className="aluno-chip">👤 {nomeAluno}</span>
+        }
       </header>
 
       {/* Abas */}
       <div className="tabs-bar">
-        <button className={`tab-btn ${aba === "hoje" ? "ativo" : ""}`} onClick={() => { setAba("hoje"); setAlunoSelecionado(null); }}>
+        <button className={`tab-btn ${aba === "hoje" ? "ativo" : ""}`}
+          onClick={() => { setAba("hoje"); setAlunoSelecionado(null); }}>
           Hoje
         </button>
-        <button className={`tab-btn ${aba === "anual" ? "ativo" : ""}`} onClick={() => { setAba("anual"); setAlunoSelecionado(null); }}>
+        <button className={`tab-btn ${aba === "anual" ? "ativo" : ""}`}
+          onClick={() => { setAba("anual"); setAlunoSelecionado(null); }}>
           Ranking Anual
         </button>
       </div>
@@ -94,7 +108,12 @@ export default function AdminDesafio({ isAdmin }) {
         {/* ── ABA HOJE ── */}
         {aba === "hoje" && (
           <>
-            {estadoHoje === "carregando" && <div className="estado-vazio"><span className="estado-vazio-icon">⏳</span><p className="estado-vazio-titulo">Carregando...</p></div>}
+            {estadoHoje === "carregando" && (
+              <div className="estado-vazio">
+                <span className="estado-vazio-icon">⏳</span>
+                <p className="estado-vazio-titulo">Carregando...</p>
+              </div>
+            )}
 
             {estadoHoje === "vazio" && (
               <div className="estado-vazio">
@@ -109,7 +128,9 @@ export default function AdminDesafio({ isAdmin }) {
                 <div className="bloco-header" style={{ borderColor: "#2e2600" }}>
                   <div className="bloco-accent" style={{ background: "#e8c847" }} />
                   <span className="bloco-nome">🏆 {desafio.nome}</span>
-                  {desafio.fechado && <span className="status-badge publicado" style={{ marginLeft: "auto" }}>Finalizado</span>}
+                  {desafio.fechado && (
+                    <span className="status-badge publicado" style={{ marginLeft: "auto" }}>Finalizado</span>
+                  )}
                 </div>
 
                 {isAdmin && !desafio.fechado && (
@@ -124,42 +145,47 @@ export default function AdminDesafio({ isAdmin }) {
                   </form>
                 )}
 
-                {ranking.length > 0
-                  ? <>
-                      {/* Pódio top 3 */}
-                      <div className="podio">
-                        {ranking.slice(0, 3).map((p, i) => (
-                          <div key={p.id} className={`podio-item pos-${i + 1}`}>
-                            <span className="podio-medalha">{MEDALHAS[i]}</span>
-                            <span className="podio-nome">{p.aluno_nome}</span>
-                            <span className="podio-valor">{p.valor}</span>
+                {ranking.length > 0 ? (
+                  <>
+                    {/* Pódio top 3 */}
+                    <div className="podio">
+                      {ranking.slice(0, 3).map((p, i) => (
+                        <div key={p.id}
+                          className={`podio-item pos-${i + 1} ${euSou(p.aluno_nome, nomeAluno) ? "meu-podio" : ""}`}>
+                          <span className="podio-medalha">{MEDALHAS[i]}</span>
+                          <span className="podio-nome">{p.aluno_nome}</span>
+                          <span className="podio-valor">{p.valor}</span>
+                          {isAdmin && !desafio.fechado && (
+                            <button className="btn-icon danger podio-del"
+                              onClick={() => remover(p.id)}>✕</button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* 4º em diante */}
+                    {ranking.length > 3 && (
+                      <ol className="ranking-list ranking-rest" style={{ padding: "0 12px 12px" }}>
+                        {ranking.slice(3).map((p, i) => (
+                          <li key={p.id}
+                            className={`ranking-item ${euSou(p.aluno_nome, nomeAluno) ? "minha-linha" : ""}`}>
+                            <span className="medalha" style={{ fontSize: 13, color: "var(--text-3)" }}>{i + 4}º</span>
+                            <span className="ranking-nome">{p.aluno_nome}</span>
+                            <span className="ranking-valor">{p.valor}</span>
                             {isAdmin && !desafio.fechado && (
-                              <button className="btn-icon danger podio-del"
+                              <button className="btn-icon danger" style={{ marginLeft: "auto" }}
                                 onClick={() => remover(p.id)}>✕</button>
                             )}
-                          </div>
+                          </li>
                         ))}
-                      </div>
-
-                      {/* Restante (4º em diante) */}
-                      {ranking.length > 3 && (
-                        <ol className="ranking-list ranking-rest" style={{ padding: "0 12px 12px" }}>
-                          {ranking.slice(3).map((p, i) => (
-                            <li key={p.id} className="ranking-item">
-                              <span className="medalha" style={{ fontSize: 13, color: "var(--text-3)" }}>{i + 4}º</span>
-                              <span className="ranking-nome">{p.aluno_nome}</span>
-                              <span className="ranking-valor">{p.valor}</span>
-                              {isAdmin && !desafio.fechado && (
-                                <button className="btn-icon danger" style={{ marginLeft: "auto" }}
-                                  onClick={() => remover(p.id)}>✕</button>
-                              )}
-                            </li>
-                          ))}
-                        </ol>
-                      )}
-                    </>
-                  : <p className="estado-hint" style={{ padding: "16px 14px" }}>Nenhuma pontuação lançada ainda.</p>
-                }
+                      </ol>
+                    )}
+                  </>
+                ) : (
+                  <p className="estado-hint" style={{ padding: "16px 14px" }}>
+                    Nenhuma pontuação lançada ainda.
+                  </p>
+                )}
 
                 {isAdmin && !desafio.fechado && ranking.length > 0 && (
                   <div style={{ padding: "0 14px 14px" }}>
@@ -176,11 +202,54 @@ export default function AdminDesafio({ isAdmin }) {
         {/* ── ABA ANUAL ── */}
         {aba === "anual" && !alunoSelecionado && (
           <>
+            {/* Card "Meu Desempenho" — só para alunos */}
+            {!isAdmin && nomeAluno && estadoAnual === "ok" && (
+              <div className="meu-desempenho-card">
+                <div className="meu-desempenho-header">
+                  <span className="meu-desempenho-nome">👤 {nomeAluno}</span>
+                  {freqMes > 0 && (
+                    <span className="meu-desempenho-freq">
+                      🗓 {freqMes} {freqMes === 1 ? "dia" : "dias"} em {mesNome()}
+                    </span>
+                  )}
+                </div>
+
+                {meuDado ? (
+                  <div className="meu-stat-grid">
+                    <div className="meu-stat">
+                      <span className="meu-stat-valor">
+                        {meuIdx === 0 ? "🥇" : meuIdx === 1 ? "🥈" : meuIdx === 2 ? "🥉" : `${meuIdx + 1}º`}
+                      </span>
+                      <span className="meu-stat-label">Posição</span>
+                    </div>
+                    <div className="meu-stat">
+                      <span className="meu-stat-valor">{meuDado.participacoes}</span>
+                      <span className="meu-stat-label">Desafios</span>
+                    </div>
+                    <div className="meu-stat">
+                      <span className="meu-stat-valor">{meuDado.melhor.toFixed(0)}</span>
+                      <span className="meu-stat-label">Melhor</span>
+                    </div>
+                    <div className="meu-stat">
+                      <span className="meu-stat-valor">{meuDado.total.toFixed(0)}</span>
+                      <span className="meu-stat-label">Total</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="meu-desempenho-vazio">
+                    Participe dos desafios para aparecer no ranking 💪
+                  </p>
+                )}
+              </div>
+            )}
+
             <p className="data-header" style={{ textAlign: "center", paddingTop: 4 }}>
               Ranking acumulado {new Date().getFullYear()}
             </p>
 
-            {estadoAnual === "carregando" && <div className="estado-vazio"><span className="estado-vazio-icon">⏳</span></div>}
+            {estadoAnual === "carregando" && (
+              <div className="estado-vazio"><span className="estado-vazio-icon">⏳</span></div>
+            )}
 
             {estadoAnual === "ok" && anual.length === 0 && (
               <div className="estado-vazio">
@@ -196,14 +265,18 @@ export default function AdminDesafio({ isAdmin }) {
                   <div className="bloco-accent" style={{ background: "#e8c847" }} />
                   <span className="bloco-nome">🏆 Ranking Anual</span>
                 </div>
-                <ol className="ranking-list" style={{ padding: "12px" }}>
+                <ol className="ranking-list ranking-rest" style={{ padding: "12px", maxHeight: "none" }}>
                   {anual.map((a, i) => (
-                    <li key={a.nome} className={`ranking-item pos-${i + 1}`}
-                      style={{ cursor: "pointer" }} onClick={() => verEvolucao(a.nome)}>
+                    <li key={a.nome}
+                      className={`ranking-item pos-${i + 1} ${euSou(a.nome, nomeAluno) ? "minha-linha" : ""}`}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => verEvolucao(a.nome)}>
                       <span className="medalha">{MEDALHAS[i] ?? `${i + 1}º`}</span>
                       <div style={{ flex: 1 }}>
                         <p className="ranking-nome">{a.nome}</p>
-                        <p style={{ fontSize: 11, color: "var(--text-2)" }}>{a.participacoes} desafio{a.participacoes !== 1 ? "s" : ""}</p>
+                        <p style={{ fontSize: 11, color: "var(--text-2)" }}>
+                          {a.participacoes} desafio{a.participacoes !== 1 ? "s" : ""}
+                        </p>
                       </div>
                       <div style={{ textAlign: "right" }}>
                         <p className="ranking-valor">{a.total.toFixed(0)}</p>

@@ -7,7 +7,7 @@ function fmt(data) {
     .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
 }
 
-export default function Historico() {
+export default function Historico({ nomeAluno, onTrocarNome }) {
   const [lista, setLista]       = useState([]);
   const [estado, setEstado]     = useState("carregando");
   const [expandido, setExpandido] = useState(null);
@@ -36,7 +36,14 @@ export default function Historico() {
     <div className="page">
       <header className="app-header">
         <span className="logo">Focus Fitness</span>
-        <span className="admin-badge">Histórico</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {nomeAluno && <span className="aluno-chip">👤 {nomeAluno}</span>}
+          {onTrocarNome && (
+            <button className="btn-logout" onClick={onTrocarNome} title="Trocar nome">
+              Trocar nome
+            </button>
+          )}
+        </div>
       </header>
 
       <main className="feed">

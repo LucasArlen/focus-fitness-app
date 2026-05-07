@@ -4,6 +4,8 @@ import Admin from "./pages/Admin";
 import AdminDesafio from "./pages/AdminDesafio";
 import Historico from "./pages/Historico";
 import Login from "./pages/Login";
+import Onboarding from "./components/Onboarding";
+import { useAluno } from "./hooks/useAluno";
 
 const IconTreino = () => (
   <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -32,6 +34,9 @@ const IconHistorico = () => (
 export default function App() {
   const [view, setView] = useState("treino");
   const [role, setRole] = useState(() => localStorage.getItem("role") || "guest");
+  const { nome, salvar, limpar, freqMes } = useAluno();
+
+  const isAdmin = role === "admin";
 
   function onLogin(newRole) {
     setRole(newRole);
@@ -45,21 +50,24 @@ export default function App() {
     setView("treino");
   }
 
-  const isAdmin = role === "admin";
+  // Onboarding: só para não-admins sem nome salvo
+  if (!isAdmin && !nome) {
+    return <Onboarding onConfirm={salvar} />;
+  }
 
   const TABS = [
-    { id: "treino",   label: "Treino",   Icon: IconTreino },
-    { id: "admin",    label: isAdmin ? "Admin ✓" : "Admin", Icon: IconAdmin },
-    { id: "desafio",  label: "Desafio",  Icon: IconDesafio },
-    { id: "historico",label: "Histórico",Icon: IconHistorico },
+    { id: "treino",    label: "Treino",    Icon: IconTreino },
+    { id: "admin",     label: isAdmin ? "Admin ✓" : "Admin", Icon: IconAdmin },
+    { id: "desafio",   label: "Desafio",   Icon: IconDesafio },
+    { id: "historico", label: "Histórico", Icon: IconHistorico },
   ];
 
   return (
     <>
-      {view === "treino"    && <Hoje />}
+      {view === "treino"    && <Hoje nomeAluno={nome} />}
       {view === "admin"     && (isAdmin ? <Admin onLogout={onLogout} /> : <Login onLogin={onLogin} />)}
-      {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} />}
-      {view === "historico" && <Historico />}
+      {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} nomeAluno={nome} freqMes={freqMes()} />}
+      {view === "historico" && <Historico nomeAluno={nome} onTrocarNome={limpar} />}
 
       <nav className="bottom-nav">
         {TABS.map(({ id, label, Icon }) => (
