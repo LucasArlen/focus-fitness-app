@@ -5,7 +5,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth import ADMIN_PASSWORD, ADMIN_USERNAME, create_token
+from auth import ADMIN_PASSWORD, ADMIN_USERNAME, create_token, require_admin
 from database import get_db
 from models import Aluno, AppConfig
 from schemas import AdminLoginIn, AlunoIn, Token
