@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Hoje from "./pages/Hoje";
 import Admin from "./pages/Admin";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminDesafio from "./pages/AdminDesafio";
 import Historico from "./pages/Historico";
 import Login from "./pages/Login";
@@ -32,15 +33,17 @@ const IconHistorico = () => (
 );
 
 export default function App() {
-  const [view, setView] = useState("treino");
-  const [role, setRole] = useState(() => localStorage.getItem("role") || "guest");
-  const { nome, salvar, limpar } = useAluno();
+  const [view, setView]           = useState("treino");
+  const [adminView, setAdminView] = useState("dashboard");
+  const [role, setRole]           = useState(() => localStorage.getItem("role") || "guest");
+  const { nome, salvar, limpar }  = useAluno();
 
   const isAdmin = role === "admin";
 
   function onLogin(newRole) {
     setRole(newRole);
     setView("admin");
+    setAdminView("dashboard");
   }
 
   function onLogout() {
@@ -48,6 +51,7 @@ export default function App() {
     localStorage.removeItem("role");
     setRole("guest");
     setView("treino");
+    setAdminView("dashboard");
   }
 
   // Onboarding: só para não-admins sem nome salvo
@@ -65,7 +69,19 @@ export default function App() {
   return (
     <>
       {view === "treino"    && <Hoje nomeAluno={nome} />}
-      {view === "admin"     && (isAdmin ? <Admin onLogout={onLogout} /> : <Login onLogin={onLogin} />)}
+      {view === "admin"     && !isAdmin && <Login onLogin={onLogin} />}
+      {view === "admin"     && isAdmin  && adminView === "dashboard" && (
+        <AdminDashboard
+          onEditarTreino={() => setAdminView("editor")}
+          onLogout={onLogout}
+        />
+      )}
+      {view === "admin"     && isAdmin  && adminView === "editor" && (
+        <Admin
+          onLogout={onLogout}
+          onVoltar={() => setAdminView("dashboard")}
+        />
+      )}
       {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} nomeAluno={nome} freqMes={freqMes()} />}
       {view === "historico" && <Historico nomeAluno={nome} onTrocarNome={limpar} />}
 

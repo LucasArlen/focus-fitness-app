@@ -27,7 +27,7 @@ function apiParaEstado(treino) {
   };
 }
 
-export default function Admin({ onLogout }) {
+export default function Admin({ onLogout, onVoltar }) {
   const [blocos, setBlocos]           = useState([novoBloco()]);
   const [desafioNome, setDesafioNome] = useState("");
   const [banco, setBanco]             = useState([]);
@@ -119,7 +119,9 @@ export default function Admin({ onLogout }) {
       <header className="app-header">
         <span className="logo">Focus Fitness</span>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span className="admin-badge">Admin</span>
+          {onVoltar && (
+            <button className="btn-logout" onClick={onVoltar}>← Voltar</button>
+          )}
           <button className="btn-logout" onClick={onLogout}>Sair</button>
         </div>
       </header>
