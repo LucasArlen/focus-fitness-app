@@ -24,6 +24,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
   const [regenerando, setRegenerando] = useState(false);
   const [qrExpandido, setQrExpandido] = useState(false);
   const [confirmarRegen, setConfirmarRegen] = useState(false);
+  const [linkCopiado, setLinkCopiado] = useState(false);
   const [toggling, setToggling] = useState(new Set()); // nomes sendo salvos
 
   function carregar() {
@@ -77,9 +78,21 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
     ? `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=${encodeURIComponent(inviteUrl)}`
     : "";
 
+  async function compartilharLink() {
+    try {
+      await navigator.share({ title: "Focus Fitness", url: inviteUrl });
+    } catch {
+      // Fallback: copia pro clipboard
+      try {
+        await navigator.clipboard.writeText(inviteUrl);
+        setLinkCopiado(true);
+        setTimeout(() => setLinkCopiado(false), 2500);
+      } catch { /* silencioso */ }
+    }
+  }
+
   async function compartilharQR() {
     try {
-      // Tenta compartilhar a imagem do QR (funciona no Android/iOS)
       const resp = await fetch(qrImageUrl);
       const blob = await resp.blob();
       const file = new File([blob], "qr-academia.png", { type: "image/png" });
@@ -92,15 +105,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
         return;
       }
     } catch { /* segue pro fallback */ }
-
-    // Fallback: compartilha só o link
-    try {
-      await navigator.share({ title: "Focus Fitness", url: inviteUrl });
-    } catch {
-      // Último recurso: copia o link
-      await navigator.clipboard.writeText(inviteUrl);
-      alert("Link copiado!");
-    }
+    await compartilharLink();
   }
 
   async function atualizarStatus(novoAtivo, novoVal) {
@@ -281,25 +286,35 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
           )}
         </div>
 
-        {/* ── QR CODE DE CONVITE ── */}
+        {/* ── CONVITE ── */}
         {inviteCode && (
           <div className="dash-card">
-            <div className="dash-card-header" style={{ cursor: "pointer" }}
-              onClick={() => setQrExpandido(v => !v)}>
+            <div className="dash-card-header">
               <span className="dash-card-icon">🔗</span>
               <span className="dash-card-titulo">Acesso de novos alunos</span>
-              <span className="dash-badge ok">Ativo</span>
-              <span style={{ color: "var(--text-3)", fontSize: 13, marginLeft: 4 }}>
-                {qrExpandido ? "▴" : "▾"}
-              </span>
+              <span className="dash-badge ok" style={{ marginLeft: "auto" }}>Ativo</span>
             </div>
 
-            {qrExpandido && (
-              <div className="dash-invite-body">
-                <p className="dash-invite-hint">
-                  Coloque o QR code na parede da academia. Só quem escanear consegue se cadastrar.
-                </p>
+            <p className="dash-invite-hint">
+              Mande o link para o grupo da academia. Só quem receber consegue se cadastrar.
+            </p>
 
+            {/* ação principal: compartilhar link */}
+            <button className="dash-qr-share" onClick={compartilharLink}>
+              {linkCopiado ? "✅  Link copiado!" : "📤  Compartilhar link de convite"}
+            </button>
+
+            {/* seção colapsável: QR para imprimir */}
+            <button
+              className="dash-invite-regen"
+              style={{ marginTop: 8 }}
+              onClick={() => setQrExpandido(v => !v)}
+            >
+              {qrExpandido ? "▴  Ocultar QR code" : "🖨️  Mostrar QR para imprimir"}
+            </button>
+
+            {qrExpandido && (
+              <div className="dash-invite-body" style={{ marginTop: 12 }}>
                 <div className="dash-qr-wrap">
                   <img
                     className="dash-qr-img"
@@ -309,13 +324,8 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                 </div>
 
                 <button className="dash-qr-share" onClick={compartilharQR}>
-                  ⬆️  Compartilhar QR code
+                  ⬆️  Salvar / compartilhar imagem
                 </button>
-
-                <div className="dash-invite-code">
-                  <span className="dash-invite-label">Código manual</span>
-                  <code className="dash-invite-valor">{inviteCode}</code>
-                </div>
 
                 {!confirmarRegen ? (
                   <button
@@ -327,8 +337,8 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                 ) : (
                   <div className="dash-regen-confirm">
                     <p className="dash-regen-aviso-strong">
-                      ⚠️ O QR atual vai parar de funcionar.<br />
-                      Você precisará imprimir um novo.
+                      ⚠️ O link e o QR atuais vão parar de funcionar.<br />
+                      Quem ainda não se cadastrou precisará do novo link.
                     </p>
                     <div className="dash-regen-btns">
                       <button
@@ -349,7 +359,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                   </div>
                 )}
                 <p className="dash-invite-aviso">
-                  Alunos já cadastrados continuam normalmente — só novos cadastros precisam do QR.
+                  Alunos já cadastrados continuam normalmente.
                 </p>
               </div>
             )}
