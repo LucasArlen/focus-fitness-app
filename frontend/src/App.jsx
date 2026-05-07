@@ -3,6 +3,7 @@ import Hoje from "./pages/Hoje";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminDesafio from "./pages/AdminDesafio";
+import AdminAlunos from "./pages/AdminAlunos";
 import Historico from "./pages/Historico";
 import Login from "./pages/Login";
 import Onboarding from "./components/Onboarding";
@@ -92,12 +93,18 @@ export default function App() {
       {view === "admin"     && isAdmin  && adminView === "dashboard" && (
         <AdminDashboard
           onEditarTreino={() => setAdminView("editor")}
+          onVerAlunos={() => setAdminView("alunos")}
           onLogout={onLogout}
         />
       )}
       {view === "admin"     && isAdmin  && adminView === "editor" && (
         <Admin
           onLogout={onLogout}
+          onVoltar={() => setAdminView("dashboard")}
+        />
+      )}
+      {view === "admin"     && isAdmin  && adminView === "alunos" && (
+        <AdminAlunos
           onVoltar={() => setAdminView("dashboard")}
         />
       )}

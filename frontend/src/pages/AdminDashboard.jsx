@@ -14,7 +14,7 @@ const STATUS_OPCOES = [
   { val: "fechado",   label: "Fechado",   emoji: "🔒" },
 ];
 
-export default function AdminDashboard({ onEditarTreino, onLogout }) {
+export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }) {
   const [treino,        setTreino]        = useState(null);
   const [desafio,       setDesafio]       = useState(null);
   const [chamada,       setChamada]       = useState([]);
@@ -200,13 +200,18 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
           </div>
 
           {chamada.length > 0 && (
-            <input
-              className="chamada-busca"
-              placeholder="Buscar aluno..."
-              value={busca}
-              onChange={e => setBusca(e.target.value)}
-              autoComplete="off"
-            />
+            <div className="chamada-topo">
+              <input
+                className="chamada-busca"
+                placeholder="Buscar aluno..."
+                value={busca}
+                onChange={e => setBusca(e.target.value)}
+                autoComplete="off"
+              />
+              <button className="chamada-ver-todos" onClick={onVerAlunos}>
+                Ver todos
+              </button>
+            </div>
           )}
 
           {chamada.length === 0 ? (

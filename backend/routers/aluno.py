@@ -51,6 +51,26 @@ def cadastrar_aluno(body: AlunoIn, db: Session = Depends(get_db)):
     )
 
 
+@router.get("/alunos")
+def listar_alunos(page: int = 1, db: Session = Depends(get_db), _=Depends(require_admin)):
+    """Admin: lista paginada de todos os alunos."""
+    per_page = 20
+    total = db.query(Aluno).count()
+    alunos = (
+        db.query(Aluno)
+        .order_by(Aluno.nome)
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+        .all()
+    )
+    return {
+        "alunos": [{"nome": a.nome, "criado_em": a.criado_em.strftime("%d/%m/%Y")} for a in alunos],
+        "total": total,
+        "page": page,
+        "pages": max(1, -(-total // per_page)),  # ceil division
+    }
+
+
 @router.post("/admin/seed")
 def seed_alunos(db: Session = Depends(get_db), _=Depends(require_admin)):
     """Cria alunos fictícios para testes (idempotente)."""

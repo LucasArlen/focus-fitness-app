@@ -647,6 +647,77 @@ body {
 
 .btn-logout:hover { color: var(--danger); border-color: var(--danger); }
 
+.btn-voltar {
+  background: none;
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-xs);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.btn-voltar:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── Página de alunos ── */
+.alunos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.aluno-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.aluno-num {
+  font-size: 12px;
+  color: var(--text-3);
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.aluno-nome {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+.aluno-data {
+  font-size: 12px;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.alunos-paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 8px;
+}
+.pag-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-hi);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.pag-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
+.pag-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.pag-info {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
 /* ─────────────────────────────────────────────────────────────
    Estados vazios
 ───────────────────────────────────────────────────────────── */
@@ -1295,6 +1366,29 @@ body {
 /* ─────────────────────────────────────────────────────────────
    Chamada (admin) — lista de alunos com toggle de presença
 ───────────────────────────────────────────────────────────── */
+.chamada-topo {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+.chamada-topo .chamada-busca { flex: 1; }
+
+.chamada-ver-todos {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-hi);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.chamada-ver-todos:hover { color: var(--accent); border-color: var(--accent); }
+
 .chamada-busca {
   width: 100%;
   padding: 10px 14px;
