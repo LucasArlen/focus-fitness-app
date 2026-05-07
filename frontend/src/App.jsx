@@ -64,9 +64,15 @@ export default function App() {
     clearTimeout(pressTimer.current);
   }
 
-  // Onboarding: só para não-admins sem nome salvo
-  if (!isAdmin && !nome) {
-    return <Onboarding onConfirm={(n, token) => salvar(n, token)} />;
+  // Onboarding: só para não-admins sem nome salvo e sem intenção de acessar o admin
+  // onAdmin: gesto de segurar logo → muda view para "admin" e sai do onboarding
+  if (!isAdmin && !nome && view !== "admin") {
+    return (
+      <Onboarding
+        onConfirm={(n, token) => salvar(n, token)}
+        onAdmin={() => setView("admin")}
+      />
+    );
   }
 
   // Abas: admin só aparece na nav se já estiver logado como admin

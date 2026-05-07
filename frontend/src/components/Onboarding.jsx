@@ -15,7 +15,7 @@ function lerCodigoConvite() {
   return code || localStorage.getItem("invite_code") || "";
 }
 
-export default function Onboarding({ onConfirm }) {
+export default function Onboarding({ onConfirm, onAdmin }) {
   const [passo, setPasso]     = useState(1); // 1 = nome, 2 = pin
   const [nome, setNome]       = useState("");
   const [pin, setPin]         = useState(["", "", "", ""]);
@@ -23,7 +23,17 @@ export default function Onboarding({ onConfirm }) {
   const [salvando, setSalvando] = useState(false);
   const inputsRef = useRef([]);
 
-  const inviteCode = lerCodigoConvite();
+  const inviteCode    = lerCodigoConvite();
+  const adminTimer    = useRef(null);
+
+  // Segurar o logo 1.5s → abre login de admin
+  function logoStart(e) {
+    e.preventDefault();
+    adminTimer.current = setTimeout(() => onAdmin?.(), 1500);
+  }
+  function logoEnd() {
+    clearTimeout(adminTimer.current);
+  }
 
   /* ── Passo 1: confirma nome ── */
   function handleNome(e) {
@@ -91,7 +101,15 @@ export default function Onboarding({ onConfirm }) {
   return (
     <div className="onboarding-overlay">
       <div className="onboarding-inner">
-        <div className="onboarding-logo">Focus Fitness</div>
+        <div
+          className="onboarding-logo"
+          onMouseDown={logoStart}
+          onMouseUp={logoEnd}
+          onMouseLeave={logoEnd}
+          onTouchStart={logoStart}
+          onTouchEnd={logoEnd}
+          style={{ userSelect: "none" }}
+        >Focus Fitness</div>
 
         {/* ── PASSO 1: NOME ── */}
         {passo === 1 && (
