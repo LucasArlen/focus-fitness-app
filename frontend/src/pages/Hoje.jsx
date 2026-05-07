@@ -90,7 +90,7 @@ function VouHoje({ treinoId }) {
   );
 }
 
-export default function Hoje({ nomeAluno }) {
+export default function Hoje({ nomeAluno, onLogoPress, onLogoRelease }) {
   const [treino, setTreino] = useState(null);
   const [estado, setEstado] = useState("carregando");
   const [statusAcad, setStatusAcad] = useState(null);
@@ -109,7 +109,16 @@ export default function Hoje({ nomeAluno }) {
   return (
     <div className="page">
       <header className="app-header">
-        <span className="logo">Focus Fitness</span>
+        <span
+          className="logo"
+          onMouseDown={onLogoPress}
+          onMouseUp={onLogoRelease}
+          onMouseLeave={onLogoRelease}
+          onTouchStart={onLogoPress}
+          onTouchEnd={onLogoRelease}
+          onTouchCancel={onLogoRelease}
+          style={{ userSelect: "none", WebkitUserSelect: "none" }}
+        >Focus Fitness</span>
         {treino && <span className="data-header">{formatarData(treino.data)}</span>}
       </header>
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Hoje from "./pages/Hoje";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -37,6 +37,7 @@ export default function App() {
   const [adminView, setAdminView] = useState("dashboard");
   const [role, setRole]           = useState(() => localStorage.getItem("role") || "guest");
   const { nome, salvar, limpar }  = useAluno();
+  const longPressTimer            = useRef(null);
 
   const isAdmin = role === "admin";
 
@@ -54,21 +55,36 @@ export default function App() {
     setAdminView("dashboard");
   }
 
+  // Long press no logo → abre login admin (1.5s)
+  function logoPress() {
+    longPressTimer.current = setTimeout(() => setView("admin"), 1500);
+  }
+  function logoRelease() {
+    clearTimeout(longPressTimer.current);
+  }
+
   // Onboarding: só para não-admins sem nome salvo
   if (!isAdmin && !nome) {
     return <Onboarding onConfirm={(n, token) => salvar(n, token)} />;
   }
 
+  // Abas: admin só aparece na nav se já estiver logado como admin
   const TABS = [
     { id: "treino",    label: "Treino",    Icon: IconTreino },
-    { id: "admin",     label: isAdmin ? "Admin ✓" : "Admin", Icon: IconAdmin },
     { id: "desafio",   label: "Desafio",   Icon: IconDesafio },
     { id: "historico", label: "Histórico", Icon: IconHistorico },
+    ...(isAdmin ? [{ id: "admin", label: "Admin ✓", Icon: IconAdmin }] : []),
   ];
 
   return (
     <>
-      {view === "treino"    && <Hoje nomeAluno={nome} />}
+      {view === "treino"    && (
+        <Hoje
+          nomeAluno={nome}
+          onLogoPress={logoPress}
+          onLogoRelease={logoRelease}
+        />
+      )}
       {view === "admin"     && !isAdmin && <Login onLogin={onLogin} />}
       {view === "admin"     && isAdmin  && adminView === "dashboard" && (
         <AdminDashboard
