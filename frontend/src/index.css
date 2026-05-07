@@ -892,6 +892,101 @@ body {
   outline-offset: -2px;
 }
 
+/* ─────────── Vou Hoje ─────────── */
+
+.vou-hoje-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.vou-hoje-card.confirmado {
+  border-color: rgba(76,217,100,0.4);
+  background: rgba(76,217,100,0.04);
+}
+
+.vou-hoje-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 12px;
+}
+
+.vou-hoje-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vou-hoje-titulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.vou-hoje-count {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.vou-hoje-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #000;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 10px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.vou-hoje-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.vou-hoje-btn.cancelar {
+  background: var(--surface3);
+  color: var(--text-3);
+  border: 1px solid var(--border-hi);
+}
+
+.vou-hoje-nomes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.vou-nome-pill {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+}
+
+.vou-nome-mais {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  background: none;
+  border: 1px dashed var(--border-hi);
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.vou-nome-mais:hover { color: var(--text-2); }
+
 /* ─────────── Status da Academia (banner aluno) ─────────── */
 
 .status-banner {

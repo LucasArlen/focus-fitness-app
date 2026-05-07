@@ -78,6 +78,14 @@ class ExercicioBanco(Base):
     nome = Column(Text, unique=True, index=True)
 
 
+class Presenca(Base):
+    __tablename__ = "presencas"
+    id         = Column(Integer, primary_key=True, index=True)
+    treino_id  = Column(Integer, ForeignKey("treinos.id"))
+    aluno_nome = Column(Text)
+    criado_em  = Column(DateTime, default=datetime.datetime.utcnow)
+
+
 class AcademiaStatus(Base):
     __tablename__ = "academia_status"
     id      = Column(Integer, primary_key=True, default=1)
