@@ -75,7 +75,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
     : "";
 
   const qrImageUrl = inviteUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=${encodeURIComponent(inviteUrl)}`
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&color=e8ff47&bgcolor=141414&data=${encodeURIComponent(inviteUrl)}`
     : "";
 
   async function compartilharLink() {
@@ -323,7 +323,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                   />
                 </div>
 
-                <button className="dash-qr-share" onClick={compartilharQR}>
+                <button className="dash-invite-regen" onClick={compartilharQR}>
                   ⬆️  Salvar / compartilhar imagem
                 </button>
 
