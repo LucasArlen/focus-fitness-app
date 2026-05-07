@@ -1,4 +1,4 @@
-import apiFetch from './client';
+import { apiFetch } from './client';
 
 export async function getVapidKey() {
   const data = await apiFetch('/push/vapid-key');
