@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 
-const FREQ_KEY = "aluno_freq";
+const FREQ_KEY  = "aluno_freq";
+const NOME_KEY  = "aluno_nome";
+const TOKEN_KEY = "aluno_token";
 
 function registrarVisita() {
   const hoje = new Date().toISOString().split("T")[0];
@@ -11,30 +13,31 @@ function registrarVisita() {
   }
 }
 
-function freqMes() {
+export function freqMes() {
   const freq = JSON.parse(localStorage.getItem(FREQ_KEY) || "[]");
-  const mes = new Date().toISOString().slice(0, 7); // "2026-05"
+  const mes = new Date().toISOString().slice(0, 7);
   return freq.filter(d => d.startsWith(mes)).length;
 }
 
 export function useAluno() {
-  const [nome, setNome] = useState(() => localStorage.getItem("aluno_nome") || "");
+  const [nome, setNome] = useState(() => localStorage.getItem(NOME_KEY) || "");
 
   useEffect(() => {
     if (nome) registrarVisita();
   }, [nome]);
 
-  function salvar(n) {
-    const limpo = n.trim();
-    localStorage.setItem("aluno_nome", limpo);
-    setNome(limpo);
+  function salvar(novoNome, token) {
+    localStorage.setItem(NOME_KEY, novoNome);
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    setNome(novoNome);
     registrarVisita();
   }
 
   function limpar() {
-    localStorage.removeItem("aluno_nome");
+    localStorage.removeItem(NOME_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     setNome("");
   }
 
-  return { nome, salvar, limpar, freqMes };
+  return { nome, salvar, limpar };
 }

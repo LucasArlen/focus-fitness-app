@@ -5,7 +5,7 @@ import AdminDesafio from "./pages/AdminDesafio";
 import Historico from "./pages/Historico";
 import Login from "./pages/Login";
 import Onboarding from "./components/Onboarding";
-import { useAluno } from "./hooks/useAluno";
+import { useAluno, freqMes } from "./hooks/useAluno";
 
 const IconTreino = () => (
   <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -34,7 +34,7 @@ const IconHistorico = () => (
 export default function App() {
   const [view, setView] = useState("treino");
   const [role, setRole] = useState(() => localStorage.getItem("role") || "guest");
-  const { nome, salvar, limpar, freqMes } = useAluno();
+  const { nome, salvar, limpar } = useAluno();
 
   const isAdmin = role === "admin";
 
@@ -52,7 +52,7 @@ export default function App() {
 
   // Onboarding: só para não-admins sem nome salvo
   if (!isAdmin && !nome) {
-    return <Onboarding onConfirm={salvar} />;
+    return <Onboarding onConfirm={(n, token) => salvar(n, token)} />;
   }
 
   const TABS = [

@@ -740,6 +740,56 @@ body {
   margin-top: 4px;
 }
 
+.onboarding-erro {
+  font-size: 13px;
+  color: var(--danger);
+  text-align: center;
+  background: rgba(255,82,82,0.08);
+  border: 1px solid rgba(255,82,82,0.2);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+}
+
+.onboarding-voltar {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: center;
+  transition: color 0.15s;
+}
+
+.onboarding-voltar:hover { color: var(--text-2); }
+
+/* ── PIN grid ── */
+
+.pin-grid {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 8px 0 4px;
+}
+
+.pin-box {
+  width: 60px;
+  height: 68px;
+  background: var(--surface2);
+  border: 2px solid var(--border-hi);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 28px;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+  caret-color: transparent;
+}
+
+.pin-box:focus  { border-color: var(--accent); }
+.pin-box.preenchido { border-color: rgba(232,255,71,0.5); }
+
 /* ─────────── Chip do aluno (header) ─────────── */
 
 .aluno-chip {
