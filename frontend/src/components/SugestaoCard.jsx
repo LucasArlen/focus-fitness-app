@@ -1,5 +1,4 @@
 import { useState } from "react";
-import ReactionBar from "./ReactionBar";
 
 export default function SugestaoCard({ bloco }) {
   const [aberto, setAberto] = useState(false);
@@ -7,23 +6,27 @@ export default function SugestaoCard({ bloco }) {
   return (
     <div className="bloco-card sugestao-card">
       <button className="sugestao-toggle" onClick={() => setAberto(p => !p)}>
-        <span className="bloco-nome">{bloco.nome}</span>
-        <span className="sugestao-chevron">{aberto ? "▲" : "▼"}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="bloco-accent" />
+          <span className="bloco-nome">{bloco.nome}</span>
+        </div>
+        <span className={`sugestao-chevron ${aberto ? "aberto" : ""}`}>▼</span>
       </button>
 
       {aberto && (
-        <>
-          <ul className="linha-list">
-            {bloco.linhas.map(linha => (
-              <li key={linha.id} className="linha-item">
+        <ul className="linha-list" style={{ borderTop: "1px solid var(--border)" }}>
+          {bloco.linhas.map(linha => (
+            <li key={linha.id} className="linha-item" style={{ cursor: "default" }}>
+              <div className="linha-row">
                 <span className="exercicio">{linha.exercicio}</span>
-                <span className="serie">{linha.serie}</span>
-                {linha.dropset && <span className="dropset-badge">DS</span>}
-              </li>
-            ))}
-          </ul>
-          <ReactionBar blocoId={bloco.id} />
-        </>
+                <div className="linha-right">
+                  {linha.dropset && <span className="dropset-tag">Drop Set</span>}
+                  <span className="serie">{linha.serie}</span>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

@@ -1,19 +1,96 @@
-import ReactionBar from "./ReactionBar";
+import { useState } from "react";
+
+const EMOJIS = ["🔥", "💀", "❤️", "😅", "💪"];
 
 export default function BlocoCard({ bloco }) {
+  const [expandida, setExpandida] = useState(null); // id da linha com picker aberto
+  const [reacoes, setReacoes] = useState({});        // { linhaId: { emoji: count, _meu: emoji } }
+
+  function togglePicker(linhaId) {
+    setExpandida(prev => prev === linhaId ? null : linhaId);
+  }
+
+  function reagir(linhaId, emoji) {
+    setReacoes(prev => {
+      const atual = prev[linhaId] || {};
+      const meu = atual._meu;
+      const novo = { ...atual };
+
+      // remove reação anterior
+      if (meu) {
+        novo[meu] = Math.max(0, (novo[meu] || 1) - 1);
+        if (novo[meu] === 0) delete novo[meu];
+        delete novo._meu;
+      }
+
+      // adiciona nova (ou só remove se era a mesma)
+      if (meu !== emoji) {
+        novo[emoji] = (novo[emoji] || 0) + 1;
+        novo._meu = emoji;
+      }
+
+      return { ...prev, [linhaId]: novo };
+    });
+    setExpandida(null);
+  }
+
   return (
     <div className="bloco-card">
-      <h2 className="bloco-nome">{bloco.nome}</h2>
+      <div className="bloco-header">
+        <div className="bloco-accent" />
+        <span className="bloco-nome">{bloco.nome}</span>
+      </div>
+
       <ul className="linha-list">
-        {bloco.linhas.map(linha => (
-          <li key={linha.id} className="linha-item">
-            <span className="exercicio">{linha.exercicio}</span>
-            <span className="serie">{linha.serie}</span>
-            {linha.dropset && <span className="dropset-badge">DS</span>}
-          </li>
-        ))}
+        {bloco.linhas.map(linha => {
+          const r = reacoes[linha.id] || {};
+          const pills = Object.entries(r)
+            .filter(([k]) => k !== "_meu")
+            .sort(([, a], [, b]) => b - a);
+          const aberta = expandida === linha.id;
+
+          return (
+            <li key={linha.id} className="linha-item" onClick={() => togglePicker(linha.id)}>
+              <div className="linha-row">
+                <span className="exercicio">{linha.exercicio}</span>
+                <div className="linha-right">
+                  {linha.dropset && <span className="dropset-tag">Drop Set</span>}
+                  <span className="serie">{linha.serie}</span>
+                </div>
+              </div>
+
+              {pills.length > 0 && (
+                <div className="reacoes-display" onClick={e => e.stopPropagation()}>
+                  {pills.map(([emoji, count]) => (
+                    <span
+                      key={emoji}
+                      className={`reacao-pill ${r._meu === emoji ? "minha" : ""}`}
+                      onClick={() => reagir(linha.id, emoji)}
+                    >
+                      <span className="emoji-val">{emoji}</span>
+                      <span className="emoji-count">{count}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {aberta && (
+                <div className="emoji-picker" onClick={e => e.stopPropagation()}>
+                  {EMOJIS.map(emoji => (
+                    <button
+                      key={emoji}
+                      className={`emoji-btn ${r._meu === emoji ? "ativo" : ""}`}
+                      onClick={() => reagir(linha.id, emoji)}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
-      <ReactionBar blocoId={bloco.id} />
     </div>
   );
 }

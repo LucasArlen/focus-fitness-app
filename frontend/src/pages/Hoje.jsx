@@ -6,12 +6,14 @@ import DesafioRanking from "../components/DesafioRanking";
 
 function formatarData(dataStr) {
   const [ano, mes, dia] = dataStr.split("-");
-  return `${dia}/${mes}/${ano}`;
+  return new Date(ano, mes - 1, dia).toLocaleDateString("pt-BR", {
+    weekday: "short", day: "numeric", month: "short"
+  });
 }
 
 export default function Hoje() {
   const [treino, setTreino] = useState(null);
-  const [estado, setEstado] = useState("carregando"); // carregando | ok | vazio | erro
+  const [estado, setEstado] = useState("carregando");
 
   useEffect(() => {
     getTreinoHoje()
@@ -27,17 +29,30 @@ export default function Hoje() {
       </header>
 
       <main className="feed">
-        {estado === "carregando" && <p className="estado-msg">Carregando treino...</p>}
+        {estado === "carregando" && (
+          <div className="estado-vazio">
+            <span className="estado-vazio-icon">⏳</span>
+            <p className="estado-vazio-titulo">Carregando treino...</p>
+          </div>
+        )}
 
         {estado === "vazio" && (
           <div className="estado-vazio">
-            <p>Nenhum treino publicado hoje.</p>
-            <p className="estado-hint">O treinador ainda não montou o treino de hoje.</p>
+            <span className="estado-vazio-icon">🏋️</span>
+            <p className="estado-vazio-titulo">Nenhum treino hoje</p>
+            <p className="estado-vazio-sub">O treinador ainda não publicou o treino de hoje. Volta em breve!</p>
           </div>
         )}
 
         {estado === "erro" && (
-          <p className="estado-msg erro">Erro ao carregar treino. Tente novamente.</p>
+          <div className="estado-vazio">
+            <span className="estado-vazio-icon">📡</span>
+            <p className="estado-vazio-titulo">Sem conexão</p>
+            <p className="estado-vazio-sub">Verifique sua internet e tente novamente.</p>
+            <button className="btn-publicar" style={{ marginTop: 16 }} onClick={() => { setEstado("carregando"); getTreinoHoje().then(t => { setTreino(t); setEstado("ok"); }).catch(() => setEstado("erro")); }}>
+              Tentar novamente
+            </button>
+          </div>
         )}
 
         {estado === "ok" && treino && (
