@@ -1190,11 +1190,15 @@ body {
 .dash-qr-wrap {
   background: #141414;
   border-radius: var(--radius);
-  padding: 8px;
+  padding: 12px;
   border: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
-.dash-qr-img { display: block; width: 200px; height: 200px; border-radius: 8px; }
+.dash-qr-img { display: block; width: 220px; height: 220px; border-radius: 8px; }
 
 .dash-invite-code {
   display: flex;
@@ -1258,7 +1262,7 @@ body {
   font-size: 12px;
   cursor: pointer;
   padding: 4px 0;
-  align-self: flex-start;
+  align-self: center;
 }
 .invite-toggle-qr:hover { color: var(--text-2); }
 
