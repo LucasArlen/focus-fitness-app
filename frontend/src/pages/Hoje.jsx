@@ -5,14 +5,81 @@ import { getPresencas, postPresenca, deletePresenca } from "../api/presenca";
 import BlocoCard from "../components/BlocoCard";
 import SugestaoCard from "../components/SugestaoCard";
 import DesafioRanking from "../components/DesafioRanking";
+import { getVapidKey, subscribePush, urlBase64ToUint8Array } from "../api/push";
 
 const STATUS_CFG = {
-  fechado:   { label: "Academia fechada", emoji: "🔒", cor: "#ff5252",  bg: "rgba(255,82,82,0.08)",   borda: "rgba(255,82,82,0.25)" },
-  vazio:     { label: "Bem vazio",        emoji: "😌", cor: "#64b5f6",  bg: "rgba(100,181,246,0.08)", borda: "rgba(100,181,246,0.25)" },
-  tranquilo: { label: "Tranquilo",        emoji: "👌", cor: "#4cd964",  bg: "rgba(76,217,100,0.08)",  borda: "rgba(76,217,100,0.25)" },
-  cheio:     { label: "Cheio",            emoji: "🔥", cor: "#ff9800",  bg: "rgba(255,152,0,0.08)",   borda: "rgba(255,152,0,0.25)" },
-  lotado:    { label: "Lotado",           emoji: "🚨", cor: "#ff5252",  bg: "rgba(255,82,82,0.08)",   borda: "rgba(255,82,82,0.25)" },
+  fechado:   { label: "Academia fechada", emoji: "🔒", cor: "#DC2626",  bg: "rgba(220,38,38,0.07)",    borda: "rgba(220,38,38,0.2)" },
+  vazio:     { label: "Bem vazio",        emoji: "😌", cor: "#2563EB",  bg: "rgba(37,99,235,0.06)",    borda: "rgba(37,99,235,0.18)" },
+  tranquilo: { label: "Tranquilo",        emoji: "👌", cor: "#16A34A",  bg: "rgba(22,163,74,0.07)",    borda: "rgba(22,163,74,0.2)" },
+  cheio:     { label: "Cheio",            emoji: "🔥", cor: "#D97706",  bg: "rgba(217,119,6,0.07)",    borda: "rgba(217,119,6,0.22)" },
+  lotado:    { label: "Lotado",           emoji: "🚨", cor: "#DC2626",  bg: "rgba(220,38,38,0.07)",    borda: "rgba(220,38,38,0.2)" },
 };
+
+// ── Notificações ────────────────────────────────────────────────────────────
+
+const NOTIF_SUPPORTED =
+  typeof window !== "undefined" &&
+  "Notification" in window &&
+  "serviceWorker" in navigator &&
+  "PushManager" in window;
+
+function useNotifEstado() {
+  const [estado, setEstado] = useState(() => {
+    if (!NOTIF_SUPPORTED) return "unsupported";
+    if (Notification.permission === "granted") return "granted";
+    if (Notification.permission === "denied")  return "denied";
+    if (localStorage.getItem("notif_dismissed")) return "dismissed";
+    return "pending";
+  });
+  return [estado, setEstado];
+}
+
+function NotifBanner() {
+  const [estado, setEstado] = useNotifEstado();
+  const [carregando, setCarregando] = useState(false);
+
+  async function ativar() {
+    setCarregando(true);
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") { setEstado("denied"); return; }
+
+      const reg      = await navigator.serviceWorker.ready;
+      const vapidKey = await getVapidKey();
+      const sub      = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+      });
+      const { endpoint, keys } = sub.toJSON();
+      await subscribePush({ endpoint, keys });
+      setEstado("granted");
+    } catch {
+      setEstado("dismissed");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  function dispensar() {
+    localStorage.setItem("notif_dismissed", "1");
+    setEstado("dismissed");
+  }
+
+  if (estado !== "pending") return null;
+
+  return (
+    <div className="notif-banner">
+      <span className="notif-banner-icon">🔔</span>
+      <span className="notif-banner-texto">Aviso quando o treino for publicado</span>
+      <button className="notif-banner-btn" onClick={ativar} disabled={carregando}>
+        {carregando ? "..." : "Ativar"}
+      </button>
+      <button className="notif-banner-fechar" onClick={dispensar} aria-label="Fechar">✕</button>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 function formatarData(dataStr) {
   const [ano, mes, dia] = dataStr.split("-");
@@ -166,6 +233,7 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd }) {
 
         {estado === "ok" && treino && (
           <>
+            <NotifBanner />
             <VouHoje treinoId={treino.id} />
 
             {treino.blocos.map(bloco =>

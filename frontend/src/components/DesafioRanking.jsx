@@ -6,8 +6,8 @@ export default function DesafioRanking({ desafio }) {
 
   return (
     <div className="bloco-card desafio-card">
-      <div className="bloco-header" style={{ borderColor: "#2e2600" }}>
-        <div className="bloco-accent" style={{ background: "#e8c847" }} />
+      <div className="bloco-header">
+        <div className="bloco-accent" />
         <span className="bloco-nome">🏆 Desafio do Dia</span>
       </div>
       <p className="desafio-nome" style={{ paddingTop: 14 }}>{desafio.nome}</p>

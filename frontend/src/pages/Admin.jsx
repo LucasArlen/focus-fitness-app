@@ -188,8 +188,8 @@ export default function Admin({ onLogout, onVoltar }) {
 
         {/* ── Status da Academia ── */}
         <div className="bloco-card admin-status-card">
-          <div className="bloco-header" style={{ borderColor: statusAtivo ? "rgba(232,255,71,0.3)" : undefined }}>
-            <div className="bloco-accent" style={{ background: statusAtivo ? "var(--accent)" : "var(--surface3)" }} />
+          <div className="bloco-header" style={{ borderColor: statusAtivo ? "rgba(200,148,0,0.3)" : undefined }}>
+            <div className="bloco-accent" style={{ background: statusAtivo ? "var(--accent-fill)" : "var(--surface3)" }} />
             <span className="bloco-nome">📍 Status da Academia</span>
             <label className="status-toggle-wrap" style={{ marginLeft: "auto" }}>
               <input
@@ -230,7 +230,7 @@ export default function Admin({ onLogout, onVoltar }) {
 
         <div className="bloco-card admin-desafio">
           <div className="bloco-header">
-            <div className="bloco-accent" style={{ background: "#e8c847" }} />
+            <div className="bloco-accent" />
             <span className="bloco-nome">🏆 Desafio do Dia</span>
           </div>
           <div style={{ padding: "12px 14px" }}>

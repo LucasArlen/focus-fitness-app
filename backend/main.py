@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from database import Base, engine, SessionLocal
-from routers import academia, aluno, banco, desafio, presenca, ranking, reacao, treino
+from routers import academia, aluno, banco, desafio, presenca, push, ranking, reacao, treino
 
 Base.metadata.create_all(bind=engine)
 
@@ -211,6 +211,7 @@ api.include_router(reacao.router)
 api.include_router(banco.router)
 api.include_router(ranking.router)
 api.include_router(presenca.router)
+api.include_router(push.router)
 app.include_router(api)
 
 STATIC = "static"

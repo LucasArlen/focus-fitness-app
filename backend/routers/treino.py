@@ -78,4 +78,16 @@ def create_treino(body: TreinoIn, db: Session = Depends(get_db), _=Depends(requi
 
     db.commit()
     db.refresh(treino)
+
+    # Push notification to all subscribers
+    try:
+        from routers.push import send_push_to_all
+        send_push_to_all(
+            db,
+            title="Treino publicado! 💪",
+            body="O treino de hoje está disponível. Bora treinar!",
+        )
+    except Exception:
+        pass
+
     return treino

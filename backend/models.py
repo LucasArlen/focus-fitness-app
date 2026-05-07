@@ -91,3 +91,19 @@ class AcademiaStatus(Base):
     id      = Column(Integer, primary_key=True, default=1)
     ativo   = Column(Boolean, default=False)
     status  = Column(Text, default="fechado")  # fechado | vazio | tranquilo | cheio | lotado
+
+
+class PushSubscription(Base):
+    __tablename__ = "push_subscriptions"
+    id        = Column(Integer, primary_key=True, index=True)
+    endpoint  = Column(Text, unique=True, index=True)
+    p256dh    = Column(Text)
+    auth      = Column(Text)
+    criado_em = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class AppConfig(Base):
+    __tablename__ = "app_config"
+    id    = Column(Integer, primary_key=True, index=True)
+    key   = Column(Text, unique=True, index=True)
+    value = Column(Text)

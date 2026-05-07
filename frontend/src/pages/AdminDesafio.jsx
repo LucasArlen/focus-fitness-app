@@ -125,8 +125,8 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
 
             {estadoHoje === "ok" && desafio && (
               <div className="bloco-card desafio-card">
-                <div className="bloco-header" style={{ borderColor: "#2e2600" }}>
-                  <div className="bloco-accent" style={{ background: "#e8c847" }} />
+                <div className="bloco-header">
+                  <div className="bloco-accent" />
                   <span className="bloco-nome">🏆 {desafio.nome}</span>
                   {desafio.fechado && (
                     <span className="status-badge publicado" style={{ marginLeft: "auto" }}>Finalizado</span>
@@ -261,8 +261,8 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
 
             {estadoAnual === "ok" && anual.length > 0 && (
               <div className="bloco-card desafio-card">
-                <div className="bloco-header" style={{ borderColor: "#2e2600" }}>
-                  <div className="bloco-accent" style={{ background: "#e8c847" }} />
+                <div className="bloco-header">
+                  <div className="bloco-accent" />
                   <span className="bloco-nome">🏆 Ranking Anual</span>
                 </div>
                 <ol className="ranking-list ranking-rest" style={{ padding: "12px", maxHeight: "none" }}>
