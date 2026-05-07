@@ -27,6 +27,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
   const [confirmarRegen,setConfirmarRegen]= useState(false);
   const [linkCopiado,   setLinkCopiado]   = useState(false);
   const [toggling,      setToggling]      = useState(new Set());
+  const [seeding,       setSeeding]       = useState(false);
 
   function carregar() {
     setCarregando(true);
@@ -90,6 +91,15 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
       }
     } catch { /* silencioso */ }
     await compartilharLink();
+  }
+
+  async function seed() {
+    setSeeding(true);
+    try {
+      await apiFetch("/admin/seed", { method: "POST" });
+      await getChamada().then(setChamada);
+    } catch { /* silencioso */ }
+    finally { setSeeding(false); }
   }
 
   async function atualizarStatus(novoAtivo, novoVal) {
@@ -185,7 +195,12 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
           </div>
 
           {chamada.length === 0 ? (
-            <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda.</p>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "4px 0 8px" }}>
+              <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda.</p>
+              <button className="dash-invite-regen" onClick={seed} disabled={seeding}>
+                {seeding ? "Criando..." : "🧪  Adicionar alunos de teste"}
+              </button>
+            </div>
           ) : (
             <div className="chamada-lista">
               {chamadaOrdenada.map(({ nome, presente, ordem_chegada }) => (
