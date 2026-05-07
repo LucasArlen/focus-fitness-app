@@ -37,7 +37,8 @@ export default function App() {
   const [adminView, setAdminView] = useState("dashboard");
   const [role, setRole]           = useState(() => localStorage.getItem("role") || "guest");
   const { nome, salvar, limpar }  = useAluno();
-  const longPressTimer            = useRef(null);
+  const tapCount                  = useRef(0);
+  const tapTimer                  = useRef(null);
 
   const isAdmin = role === "admin";
 
@@ -55,12 +56,15 @@ export default function App() {
     setAdminView("dashboard");
   }
 
-  // Long press no logo → abre login admin (1.5s)
-  function logoPress() {
-    longPressTimer.current = setTimeout(() => setView("admin"), 1500);
-  }
-  function logoRelease() {
-    clearTimeout(longPressTimer.current);
+  // 5 toques rápidos no logo → abre login admin
+  function logoTap() {
+    tapCount.current += 1;
+    clearTimeout(tapTimer.current);
+    tapTimer.current = setTimeout(() => { tapCount.current = 0; }, 1500);
+    if (tapCount.current >= 5) {
+      tapCount.current = 0;
+      setView("admin");
+    }
   }
 
   // Onboarding: só para não-admins sem nome salvo
@@ -79,11 +83,7 @@ export default function App() {
   return (
     <>
       {view === "treino"    && (
-        <Hoje
-          nomeAluno={nome}
-          onLogoPress={logoPress}
-          onLogoRelease={logoRelease}
-        />
+        <Hoje nomeAluno={nome} onLogoTap={logoTap} />
       )}
       {view === "admin"     && !isAdmin && <Login onLogin={onLogin} />}
       {view === "admin"     && isAdmin  && adminView === "dashboard" && (
