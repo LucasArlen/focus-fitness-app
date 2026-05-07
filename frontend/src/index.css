@@ -1142,19 +1142,86 @@ body {
   font-family: monospace;
 }
 
-.dash-qr-share {
+/* link row no card de convite */
+.invite-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
   width: 100%;
-  padding: 13px;
-  border-radius: 12px;
+}
+.invite-link-texto {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-2);
+  font-family: monospace;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.invite-share-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   border: none;
   background: var(--accent);
   color: #000;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: opacity .15s;
 }
-.dash-qr-share:hover { opacity: 0.88; }
+.invite-share-btn:hover  { opacity: 0.85; }
+.invite-share-btn.copiado { background: #4cd964; }
+
+.invite-toggle-qr {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 0;
+  align-self: flex-start;
+}
+.invite-toggle-qr:hover { color: var(--text-2); }
+
+.invite-qr-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.invite-qr-btn {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 10px;
+  border: 1px solid var(--border-hi);
+  background: var(--surface2);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.invite-qr-btn:hover         { color: var(--accent); border-color: var(--accent); }
+.invite-qr-btn.danger        { color: var(--danger); border-color: rgba(255,82,82,0.3); }
+.invite-qr-btn.danger:hover  { border-color: var(--danger); }
+.invite-qr-btn:disabled      { opacity: 0.4; cursor: not-allowed; }
+
+.invite-cancelar {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
 
 .dash-invite-regen {
   background: var(--surface2);

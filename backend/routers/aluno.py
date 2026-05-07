@@ -51,6 +51,23 @@ def cadastrar_aluno(body: AlunoIn, db: Session = Depends(get_db)):
     )
 
 
+@router.post("/admin/seed")
+def seed_alunos(db: Session = Depends(get_db), _=Depends(require_admin)):
+    """Cria alunos fictícios para testes (idempotente)."""
+    nomes = [
+        "Ana Silva", "Bruno Costa", "Carla Santos", "Diego Mendes",
+        "Eva Rodrigues", "Felipe Lima", "Gabriela Rocha", "Henrique Alves",
+        "Isabela Ferreira", "João Pereira",
+    ]
+    criados = []
+    for nome in nomes:
+        if not db.query(Aluno).filter(Aluno.nome == nome).first():
+            db.add(Aluno(nome=nome, pin_hash=_hash_pin("1234")))
+            criados.append(nome)
+    db.commit()
+    return {"criados": len(criados), "nomes": criados}
+
+
 @router.post("/aluno/login", response_model=Token)
 def login_aluno(body: AlunoIn, db: Session = Depends(get_db)):
     aluno = db.query(Aluno).filter(Aluno.nome == body.nome).first()
