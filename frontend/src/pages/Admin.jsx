@@ -85,7 +85,7 @@ export default function Admin({ onLogout }) {
     return (
       <div className="page">
         <header className="app-header">
-          <span className="logo">Quadro.</span>
+          <span className="logo">Focus Fitness</span>
           <button className="btn-logout" onClick={onLogout}>Sair</button>
         </header>
         <main className="feed">

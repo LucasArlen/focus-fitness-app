@@ -26,7 +26,7 @@ export default function Login({ onLogin }) {
   return (
     <div className="page">
       <header className="app-header">
-        <span className="logo">Quadro.</span>
+        <span className="logo">Focus Fitness</span>
       </header>
 
       <main className="feed">

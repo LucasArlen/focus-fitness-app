@@ -46,10 +46,11 @@ body {
 }
 
 .logo {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--accent);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
+  text-transform: uppercase;
 }
 
 .data-header {

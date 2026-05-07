@@ -54,7 +54,7 @@ export default function AdminDesafio({ isAdmin }) {
   return (
     <div className="page">
       <header className="app-header">
-        <span className="logo">Quadro.</span>
+        <span className="logo">Focus Fitness</span>
         {isAdmin && <span className="admin-badge">Desafio</span>}
       </header>
 
