@@ -267,58 +267,44 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
               <span className="dash-badge ok" style={{ marginLeft: "auto" }}>Ativo</span>
             </div>
 
-            {/* link + botão de compartilhar numa linha */}
-            <div className="invite-link-row">
-              <span className="invite-link-texto">
-                {inviteUrl.replace("https://", "").slice(0, 32)}…
-              </span>
-              <button
-                className={`invite-share-btn ${linkCopiado ? "copiado" : ""}`}
-                onClick={compartilharLink}
-              >
-                {linkCopiado ? "✓" : "📤"}
+            {/* QR sempre visível */}
+            <div className="dash-qr-wrap">
+              <img className="dash-qr-img" src={qrImageUrl} alt="QR Code de convite" />
+            </div>
+
+            {/* código manual */}
+            <div className="dash-invite-code">
+              <span className="dash-invite-label">Código</span>
+              <code className="dash-invite-valor">{inviteCode}</code>
+            </div>
+
+            {/* ações discretas */}
+            <div className="invite-qr-actions">
+              <button className="invite-qr-btn" onClick={compartilharLink}>
+                {linkCopiado ? "✓ Copiado" : "📤 Compartilhar link"}
+              </button>
+              <button className="invite-qr-btn" onClick={compartilharQR}>
+                ⬆️ Salvar QR
               </button>
             </div>
 
-            {/* QR colapsável */}
-            <button className="invite-toggle-qr" onClick={() => setQrExpandido(v => !v)}>
-              {qrExpandido ? "▴ ocultar QR" : "▾ QR para imprimir"}
-            </button>
-
-            {qrExpandido && (
-              <div className="dash-invite-body">
-                <div className="dash-qr-wrap">
-                  <img className="dash-qr-img" src={qrImageUrl} alt="QR Code" />
-                </div>
-
-                <div className="invite-qr-actions">
-                  <button className="invite-qr-btn" onClick={compartilharQR}>
-                    ⬆️ Salvar imagem
-                  </button>
-
-                  {!confirmarRegen ? (
-                    <button className="invite-qr-btn danger" onClick={() => setConfirmarRegen(true)}>
-                      ↺ Novo código
-                    </button>
-                  ) : (
-                    <button className="invite-qr-btn danger" onClick={handleRegenar} disabled={regenerando}>
-                      {regenerando ? "..." : "⚠️ Confirmar"}
-                    </button>
-                  )}
-                </div>
-
-                {confirmarRegen && (
-                  <p className="dash-invite-aviso" style={{ color: "var(--danger)" }}>
-                    O link atual vai parar de funcionar.{" "}
-                    <button className="invite-cancelar" onClick={() => setConfirmarRegen(false)}>
-                      Cancelar
-                    </button>
-                  </p>
-                )}
-
-                <p className="dash-invite-aviso">
-                  Alunos já cadastrados não são afetados.
-                </p>
+            {/* regenerar — discreto no rodapé */}
+            {!confirmarRegen ? (
+              <button className="invite-toggle-qr" onClick={() => setConfirmarRegen(true)}>
+                ↺ Gerar novo código
+              </button>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
+                <span style={{ fontSize: 12, color: "var(--danger)", flex: 1 }}>
+                  ⚠️ O link atual vai parar de funcionar.
+                </span>
+                <button className="invite-qr-btn danger" onClick={handleRegenar} disabled={regenerando}
+                  style={{ flex: "none", padding: "7px 12px" }}>
+                  {regenerando ? "..." : "Confirmar"}
+                </button>
+                <button className="invite-cancelar" onClick={() => setConfirmarRegen(false)}>
+                  Cancelar
+                </button>
               </div>
             )}
           </div>
