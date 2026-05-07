@@ -28,6 +28,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
   const [linkCopiado,   setLinkCopiado]   = useState(false);
   const [toggling,      setToggling]      = useState(new Set());
   const [seeding,       setSeeding]       = useState(false);
+  const [busca,         setBusca]         = useState("");
 
   function carregar() {
     setCarregando(true);
@@ -117,7 +118,11 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
   const totalExercicios = treino?.blocos.reduce((a, b) => a + b.linhas.length, 0) ?? 0;
   const pontuacoes      = desafio?.pontuacoes?.length ?? 0;
 
-  const chamadaOrdenada = [...chamada].sort((a, b) => {
+  const buscaNorm = busca.trim().toLowerCase();
+  const chamadaFiltrada = chamada.filter(a =>
+    !buscaNorm || a.nome.toLowerCase().includes(buscaNorm)
+  );
+  const chamadaOrdenada = [...chamadaFiltrada].sort((a, b) => {
     if (a.presente && b.presente) return a.ordem_chegada - b.ordem_chegada;
     if (a.presente !== b.presente) return a.presente ? -1 : 1;
     return a.nome.localeCompare(b.nome, "pt-BR");
@@ -194,6 +199,16 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
             </span>
           </div>
 
+          {chamada.length > 0 && (
+            <input
+              className="chamada-busca"
+              placeholder="Buscar aluno..."
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+              autoComplete="off"
+            />
+          )}
+
           {chamada.length === 0 ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "4px 0 8px" }}>
               <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda.</p>
@@ -201,6 +216,8 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                 {seeding ? "Criando..." : "🧪  Adicionar alunos de teste"}
               </button>
             </div>
+          ) : chamadaOrdenada.length === 0 ? (
+            <p className="dash-vazio-hint">Nenhum resultado para "{busca}".</p>
           ) : (
             <div className="chamada-lista">
               {chamadaOrdenada.map(({ nome, presente, ordem_chegada }) => (

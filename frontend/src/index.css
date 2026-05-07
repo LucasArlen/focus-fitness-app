@@ -1295,6 +1295,20 @@ body {
 /* ─────────────────────────────────────────────────────────────
    Chamada (admin) — lista de alunos com toggle de presença
 ───────────────────────────────────────────────────────────── */
+.chamada-busca {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  transition: border-color .15s;
+}
+.chamada-busca:focus { border-color: var(--accent); }
+.chamada-busca::placeholder { color: var(--text-3); }
+
 .chamada-lista {
   display: flex;
   flex-direction: column;
