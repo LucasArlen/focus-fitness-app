@@ -73,6 +73,36 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
     ? `${window.location.origin}/?c=${inviteCode}`
     : "";
 
+  const qrImageUrl = inviteUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=${encodeURIComponent(inviteUrl)}`
+    : "";
+
+  async function compartilharQR() {
+    try {
+      // Tenta compartilhar a imagem do QR (funciona no Android/iOS)
+      const resp = await fetch(qrImageUrl);
+      const blob = await resp.blob();
+      const file = new File([blob], "qr-academia.png", { type: "image/png" });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: "QR Code — Focus Fitness",
+          text: "Escaneie para acessar o app da academia",
+          files: [file],
+        });
+        return;
+      }
+    } catch { /* segue pro fallback */ }
+
+    // Fallback: compartilha só o link
+    try {
+      await navigator.share({ title: "Focus Fitness", url: inviteUrl });
+    } catch {
+      // Último recurso: copia o link
+      await navigator.clipboard.writeText(inviteUrl);
+      alert("Link copiado!");
+    }
+  }
+
   async function atualizarStatus(novoAtivo, novoVal) {
     setSalvandoStatus(true);
     try {
@@ -273,10 +303,14 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                 <div className="dash-qr-wrap">
                   <img
                     className="dash-qr-img"
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${encodeURIComponent(inviteUrl)}`}
+                    src={qrImageUrl}
                     alt="QR Code de convite"
                   />
                 </div>
+
+                <button className="dash-qr-share" onClick={compartilharQR}>
+                  ⬆️  Compartilhar QR code
+                </button>
 
                 <div className="dash-invite-code">
                   <span className="dash-invite-label">Código manual</span>
