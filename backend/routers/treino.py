@@ -4,10 +4,32 @@ from sqlalchemy.orm import Session
 
 from auth import require_admin
 from database import get_db
-from models import Bloco, Desafio, Linha, Treino
-from schemas import TreinoIn, TreinoOut
+from models import Bloco, Desafio, ExercicioBanco, Linha, Treino
+from schemas import TreinoIn, TreinoOut, TreinoResumoOut
 
 router = APIRouter()
+
+
+@router.get("/treino/historico", response_model=list[TreinoResumoOut])
+def get_historico(limite: int = 30, db: Session = Depends(get_db)):
+    treinos = (
+        db.query(Treino)
+        .filter(Treino.publicado == True)
+        .order_by(Treino.data.desc())
+        .limit(limite)
+        .all()
+    )
+    result = []
+    for t in treinos:
+        total_ex = sum(len(b.linhas) for b in t.blocos)
+        result.append(TreinoResumoOut(
+            id=t.id,
+            data=t.data,
+            total_blocos=len(t.blocos),
+            total_exercicios=total_ex,
+            nomes_blocos=[b.nome for b in t.blocos],
+        ))
+    return result
 
 
 @router.get("/treino/hoje", response_model=TreinoOut)
@@ -15,6 +37,14 @@ def get_treino_hoje(db: Session = Depends(get_db)):
     treino = db.query(Treino).filter(Treino.data == datetime.date.today()).first()
     if not treino:
         raise HTTPException(404, "Nenhum treino para hoje")
+    return treino
+
+
+@router.get("/treino/{treino_id}", response_model=TreinoOut)
+def get_treino(treino_id: int, db: Session = Depends(get_db)):
+    treino = db.get(Treino, treino_id)
+    if not treino:
+        raise HTTPException(404, "Treino não encontrado")
     return treino
 
 
@@ -37,6 +67,10 @@ def create_treino(body: TreinoIn, db: Session = Depends(get_db), _=Depends(requi
         db.flush()
         for l in b.linhas:
             db.add(Linha(bloco_id=bloco.id, exercicio=l.exercicio, serie=l.serie, dropset=l.dropset))
+            # Auto-populate banco de exercícios
+            nome = l.exercicio.strip()
+            if nome and not db.query(ExercicioBanco).filter(ExercicioBanco.nome == nome).first():
+                db.add(ExercicioBanco(nome=nome))
 
     if body.desafio_nome:
         db.add(Desafio(treino_id=treino.id, nome=body.desafio_nome, fechado=False))

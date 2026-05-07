@@ -1,0 +1,107 @@
+import { useEffect, useState } from "react";
+import { getHistorico, getTreino } from "../api/ranking";
+
+function fmt(data) {
+  const [a, m, d] = data.split("-");
+  return new Date(Number(a), Number(m) - 1, Number(d))
+    .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
+}
+
+export default function Historico() {
+  const [lista, setLista]       = useState([]);
+  const [estado, setEstado]     = useState("carregando");
+  const [expandido, setExpandido] = useState(null);
+  const [treinoCache, setTreinoCache] = useState({});
+  const [carregandoId, setCarregandoId] = useState(null);
+
+  useEffect(() => {
+    getHistorico()
+      .then(h => { setLista(h); setEstado("ok"); })
+      .catch(() => setEstado("erro"));
+  }, []);
+
+  async function toggle(id) {
+    if (expandido === id) { setExpandido(null); return; }
+    setExpandido(id);
+    if (treinoCache[id]) return;
+    setCarregandoId(id);
+    try {
+      const t = await getTreino(id);
+      setTreinoCache(prev => ({ ...prev, [id]: t }));
+    } catch { /* ignora */ }
+    finally { setCarregandoId(null); }
+  }
+
+  return (
+    <div className="page">
+      <header className="app-header">
+        <span className="logo">Focus Fitness</span>
+        <span className="admin-badge">Histórico</span>
+      </header>
+
+      <main className="feed">
+        {estado === "carregando" && (
+          <div className="estado-vazio">
+            <span className="estado-vazio-icon">⏳</span>
+            <p className="estado-vazio-titulo">Carregando...</p>
+          </div>
+        )}
+
+        {estado === "erro" && (
+          <div className="estado-vazio">
+            <span className="estado-vazio-icon">📡</span>
+            <p className="estado-vazio-titulo">Sem conexão</p>
+            <p className="estado-vazio-sub">Verifique sua internet e tente novamente.</p>
+          </div>
+        )}
+
+        {estado === "ok" && lista.length === 0 && (
+          <div className="estado-vazio">
+            <span className="estado-vazio-icon">📅</span>
+            <p className="estado-vazio-titulo">Nenhum treino ainda</p>
+            <p className="estado-vazio-sub">Os treinos publicados vão aparecer aqui.</p>
+          </div>
+        )}
+
+        {estado === "ok" && lista.map(item => {
+          const aberto = expandido === item.id;
+          const treino = treinoCache[item.id];
+          const carregando = carregandoId === item.id;
+
+          return (
+            <div key={item.id} className="bloco-card hist-card" onClick={() => toggle(item.id)}>
+              <div className="hist-row">
+                <div className="hist-info">
+                  <p className="hist-data">{fmt(item.data)}</p>
+                  <p className="hist-blocos">{item.qtd_blocos} bloco{item.qtd_blocos !== 1 ? "s" : ""}</p>
+                </div>
+                {item.desafio_nome && (
+                  <span className="hist-desafio">🏆 {item.desafio_nome}</span>
+                )}
+                <span className="hist-chevron" style={{ transform: aberto ? "rotate(180deg)" : "" }}>▾</span>
+              </div>
+
+              {aberto && (
+                <div className="hist-detalhe" onClick={e => e.stopPropagation()}>
+                  {carregando && <p className="estado-hint" style={{ padding: "14px 16px" }}>Carregando...</p>}
+                  {!carregando && treino && treino.blocos.map(b => (
+                    <div key={b.id} className="hist-bloco">
+                      <p className="hist-bloco-nome">{b.nome}</p>
+                      {b.linhas.map(l => (
+                        <div key={l.id} className="hist-linha">
+                          <span className="hist-exercicio">{l.exercicio}</span>
+                          <span className="hist-serie">{l.serie}</span>
+                          {l.dropset && <span className="dropset-tag">DS</span>}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </main>
+    </div>
+  );
+}

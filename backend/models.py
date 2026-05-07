@@ -9,12 +9,8 @@ class Treino(Base):
     id = Column(Integer, primary_key=True, index=True)
     data = Column(Date, unique=True, index=True)
     publicado = Column(Boolean, default=False)
-    blocos = relationship(
-        "Bloco", back_populates="treino", cascade="all, delete-orphan", order_by="Bloco.ordem"
-    )
-    desafio = relationship(
-        "Desafio", back_populates="treino", uselist=False, cascade="all, delete-orphan"
-    )
+    blocos = relationship("Bloco", back_populates="treino", cascade="all, delete-orphan", order_by="Bloco.ordem")
+    desafio = relationship("Desafio", back_populates="treino", uselist=False, cascade="all, delete-orphan")
 
 
 class Bloco(Base):
@@ -45,9 +41,7 @@ class Desafio(Base):
     nome = Column(Text)
     fechado = Column(Boolean, default=False)
     treino = relationship("Treino", back_populates="desafio")
-    pontuacoes = relationship(
-        "Pontuacao", back_populates="desafio", cascade="all, delete-orphan", order_by="Pontuacao.ordem"
-    )
+    pontuacoes = relationship("Pontuacao", back_populates="desafio", cascade="all, delete-orphan", order_by="Pontuacao.ordem")
 
 
 class Pontuacao(Base):
@@ -76,3 +70,9 @@ class Reacao(Base):
     bloco_id = Column(Integer, ForeignKey("blocos.id"))
     emoji = Column(Text)
     aluno = relationship("Aluno", back_populates="reacoes")
+
+
+class ExercicioBanco(Base):
+    __tablename__ = "exercicios_banco"
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(Text, unique=True, index=True)

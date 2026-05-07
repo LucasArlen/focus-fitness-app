@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from database import Base, engine
-from routers import aluno, desafio, reacao, treino
+from routers import aluno, banco, desafio, ranking, reacao, treino
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,15 +19,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Todas as rotas da API sob /api
 api = APIRouter(prefix="/api")
 api.include_router(treino.router)
 api.include_router(desafio.router)
 api.include_router(aluno.router)
 api.include_router(reacao.router)
+api.include_router(banco.router)
+api.include_router(ranking.router)
 app.include_router(api)
 
-# Servir o frontend em produção (após npm run build)
 STATIC = "static"
 if os.path.exists(STATIC):
     app.mount("/assets", StaticFiles(directory=f"{STATIC}/assets"), name="assets")

@@ -2,6 +2,7 @@ import { useState } from "react";
 import Hoje from "./pages/Hoje";
 import Admin from "./pages/Admin";
 import AdminDesafio from "./pages/AdminDesafio";
+import Historico from "./pages/Historico";
 import Login from "./pages/Login";
 
 const IconTreino = () => (
@@ -19,6 +20,12 @@ const IconAdmin = () => (
 const IconDesafio = () => (
   <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
     <path d="M19 5h-2V3H7v2H5C3.9 5 3 5.9 3 7v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 16.9V19H7v2h10v-2h-4v-2.1a5.01 5.01 0 003.61-2.96C19.08 13.63 21 11.55 21 9V7c0-1.1-.9-2-2-2zm-2 4a3 3 0 01-3 3V7h3v2zM5 9V7h3v3a3 3 0 01-3-3z"/>
+  </svg>
+);
+
+const IconHistorico = () => (
+  <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 117 7c-1.93 0-3.68-.79-4.94-2.06L6.64 18.36A8.955 8.955 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
   </svg>
 );
 
@@ -41,16 +48,18 @@ export default function App() {
   const isAdmin = role === "admin";
 
   const TABS = [
-    { id: "treino",  label: "Treino",  Icon: IconTreino },
-    { id: "admin",   label: isAdmin ? "Admin ✓" : "Admin", Icon: IconAdmin },
-    { id: "desafio", label: "Desafio", Icon: IconDesafio },
+    { id: "treino",   label: "Treino",   Icon: IconTreino },
+    { id: "admin",    label: isAdmin ? "Admin ✓" : "Admin", Icon: IconAdmin },
+    { id: "desafio",  label: "Desafio",  Icon: IconDesafio },
+    { id: "historico",label: "Histórico",Icon: IconHistorico },
   ];
 
   return (
     <>
-      {view === "treino"  && <Hoje />}
-      {view === "admin"   && (isAdmin ? <Admin onLogout={onLogout} /> : <Login onLogin={onLogin} />)}
-      {view === "desafio" && <AdminDesafio isAdmin={isAdmin} />}
+      {view === "treino"    && <Hoje />}
+      {view === "admin"     && (isAdmin ? <Admin onLogout={onLogout} /> : <Login onLogin={onLogin} />)}
+      {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} />}
+      {view === "historico" && <Historico />}
 
       <nav className="bottom-nav">
         {TABS.map(({ id, label, Icon }) => (

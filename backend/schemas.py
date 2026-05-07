@@ -59,6 +59,15 @@ class TreinoOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class TreinoResumoOut(BaseModel):
+    id: int
+    data: datetime.date
+    total_blocos: int
+    total_exercicios: int
+    nomes_blocos: List[str]
+    model_config = {"from_attributes": True}
+
+
 class PontuacaoIn(BaseModel):
     aluno_nome: str
     valor: str
@@ -78,3 +87,22 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
     role: str
+
+
+class ExercicioOut(BaseModel):
+    id: int
+    nome: str
+    model_config = {"from_attributes": True}
+
+
+class RankingAnualItem(BaseModel):
+    nome: str
+    participacoes: int
+    total: float
+    melhor: float
+
+
+class EvolucaoItem(BaseModel):
+    data: str
+    desafio: str
+    valor: str

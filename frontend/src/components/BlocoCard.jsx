@@ -2,9 +2,18 @@ import { useState } from "react";
 
 const EMOJIS = ["🔥", "💀", "❤️", "😅", "💪"];
 
+function carregarReacoes(blocoId) {
+  try { return JSON.parse(localStorage.getItem(`r_${blocoId}`)) || {}; }
+  catch { return {}; }
+}
+
+function salvarReacoes(blocoId, data) {
+  localStorage.setItem(`r_${blocoId}`, JSON.stringify(data));
+}
+
 export default function BlocoCard({ bloco }) {
-  const [expandida, setExpandida] = useState(null); // id da linha com picker aberto
-  const [reacoes, setReacoes] = useState({});        // { linhaId: { emoji: count, _meu: emoji } }
+  const [expandida, setExpandida] = useState(null);
+  const [reacoes, setReacoes] = useState(() => carregarReacoes(bloco.id));
 
   function togglePicker(linhaId) {
     setExpandida(prev => prev === linhaId ? null : linhaId);
@@ -16,20 +25,19 @@ export default function BlocoCard({ bloco }) {
       const meu = atual._meu;
       const novo = { ...atual };
 
-      // remove reação anterior
       if (meu) {
         novo[meu] = Math.max(0, (novo[meu] || 1) - 1);
         if (novo[meu] === 0) delete novo[meu];
         delete novo._meu;
       }
-
-      // adiciona nova (ou só remove se era a mesma)
       if (meu !== emoji) {
         novo[emoji] = (novo[emoji] || 0) + 1;
         novo._meu = emoji;
       }
 
-      return { ...prev, [linhaId]: novo };
+      const prox = { ...prev, [linhaId]: novo };
+      salvarReacoes(bloco.id, prox);
+      return prox;
     });
     setExpandida(null);
   }
@@ -44,9 +52,7 @@ export default function BlocoCard({ bloco }) {
       <ul className="linha-list">
         {bloco.linhas.map(linha => {
           const r = reacoes[linha.id] || {};
-          const pills = Object.entries(r)
-            .filter(([k]) => k !== "_meu")
-            .sort(([, a], [, b]) => b - a);
+          const pills = Object.entries(r).filter(([k]) => k !== "_meu").sort(([, a], [, b]) => b - a);
           const aberta = expandida === linha.id;
 
           return (
@@ -62,11 +68,8 @@ export default function BlocoCard({ bloco }) {
               {pills.length > 0 && (
                 <div className="reacoes-display" onClick={e => e.stopPropagation()}>
                   {pills.map(([emoji, count]) => (
-                    <span
-                      key={emoji}
-                      className={`reacao-pill ${r._meu === emoji ? "minha" : ""}`}
-                      onClick={() => reagir(linha.id, emoji)}
-                    >
+                    <span key={emoji} className={`reacao-pill ${r._meu === emoji ? "minha" : ""}`}
+                      onClick={() => reagir(linha.id, emoji)}>
                       <span className="emoji-val">{emoji}</span>
                       <span className="emoji-count">{count}</span>
                     </span>
@@ -77,13 +80,8 @@ export default function BlocoCard({ bloco }) {
               {aberta && (
                 <div className="emoji-picker" onClick={e => e.stopPropagation()}>
                   {EMOJIS.map(emoji => (
-                    <button
-                      key={emoji}
-                      className={`emoji-btn ${r._meu === emoji ? "ativo" : ""}`}
-                      onClick={() => reagir(linha.id, emoji)}
-                    >
-                      {emoji}
-                    </button>
+                    <button key={emoji} className={`emoji-btn ${r._meu === emoji ? "ativo" : ""}`}
+                      onClick={() => reagir(linha.id, emoji)}>{emoji}</button>
                   ))}
                 </div>
               )}
