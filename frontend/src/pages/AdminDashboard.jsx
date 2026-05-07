@@ -92,8 +92,9 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
 
   const pontuacoes = desafio?.pontuacoes?.length ?? 0;
 
-  // Ordenação: presentes primeiro, depois alfabético
+  // Ordenação: presentes por ordem de chegada, ausentes alfabético depois
   const chamadaOrdenada = [...chamada].sort((a, b) => {
+    if (a.presente && b.presente) return a.ordem_chegada - b.ordem_chegada;
     if (a.presente !== b.presente) return a.presente ? -1 : 1;
     return a.nome.localeCompare(b.nome, "pt-BR");
   });
@@ -174,7 +175,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
             <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda.</p>
           ) : (
             <div className="chamada-lista">
-              {chamadaOrdenada.map(({ nome, presente }) => (
+              {chamadaOrdenada.map(({ nome, presente, ordem_chegada }) => (
                 <button
                   key={nome}
                   className={`chamada-item ${presente ? "presente" : ""}`}
@@ -185,6 +186,9 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                     {toggling.has(nome) ? "⏳" : presente ? "✓" : ""}
                   </span>
                   <span className="chamada-nome">{nome}</span>
+                  {presente && (
+                    <span className="chamada-ordem">{ordem_chegada}º</span>
+                  )}
                 </button>
               ))}
             </div>

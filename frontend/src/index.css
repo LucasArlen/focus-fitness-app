@@ -1182,6 +1182,14 @@ body {
   color: #4cd964;
 }
 
+.chamada-ordem {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(76,217,100,0.6);
+  letter-spacing: 0.02em;
+}
+
 /* ─────────────────────────────────────────────────────────────
    "Vou Hoje" strip
 ───────────────────────────────────────────────────────────── */

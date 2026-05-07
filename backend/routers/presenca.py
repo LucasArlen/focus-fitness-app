@@ -30,17 +30,25 @@ def get_presencas(db: Session = Depends(get_db)):
 
 @router.get("/treino/hoje/chamada")
 def get_chamada(db: Session = Depends(get_db), _=Depends(require_admin)):
-    """Admin: retorna todos os alunos com flag de presença."""
+    """Admin: retorna todos os alunos com flag de presença e ordem de chegada."""
     alunos = db.query(Aluno).order_by(Aluno.nome).all()
-    presentes = set()
+    # ordem_chegada: {nome: posição 1-based} ordenado por criado_em
+    ordem_chegada = {}
     try:
         treino = _treino_hoje(db)
-        ps = db.query(Presenca).filter(Presenca.treino_id == treino.id).all()
-        presentes = {p.aluno_nome for p in ps}
+        ps = (db.query(Presenca)
+              .filter(Presenca.treino_id == treino.id)
+              .order_by(Presenca.criado_em)
+              .all())
+        ordem_chegada = {p.aluno_nome: i + 1 for i, p in enumerate(ps)}
     except HTTPException:
         pass
     return [
-        {"nome": a.nome, "presente": a.nome in presentes}
+        {
+            "nome": a.nome,
+            "presente": a.nome in ordem_chegada,
+            "ordem_chegada": ordem_chegada.get(a.nome),  # None se ausente
+        }
         for a in alunos
     ]
 
