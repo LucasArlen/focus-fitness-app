@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getTreinoHoje } from "../api/treino";
 import { getDesafioHoje } from "../api/desafio";
-import { getChamada, marcarPresenca, desmarcarPresenca } from "../api/presenca";
+import { getChamada } from "../api/presenca";
 import { getStatus, putStatus } from "../api/academia";
 import { getInvite, regenerarConvite } from "../api/invite";
 import { apiFetch } from "../api/client";
@@ -26,9 +26,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
   const [qrExpandido,   setQrExpandido]   = useState(false);
   const [confirmarRegen,setConfirmarRegen]= useState(false);
   const [linkCopiado,   setLinkCopiado]   = useState(false);
-  const [toggling,      setToggling]      = useState(new Set());
   const [seeding,       setSeeding]       = useState(false);
-  const [busca,         setBusca]         = useState("");
 
   function carregar() {
     setCarregando(true);
@@ -42,19 +40,6 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
   }
 
   useEffect(() => { carregar(); }, []);
-
-  async function togglePresenca(nome, presente) {
-    setToggling(prev => new Set(prev).add(nome));
-    try {
-      presente ? await desmarcarPresenca(nome) : await marcarPresenca(nome);
-      setChamada(prev => prev.map(a =>
-        a.nome === nome ? { ...a, presente: !presente } : a
-      ));
-    } catch { /* silencioso */ }
-    finally {
-      setToggling(prev => { const s = new Set(prev); s.delete(nome); return s; });
-    }
-  }
 
   async function handleRegenar() {
     setRegenerando(true);
@@ -118,15 +103,6 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
   const totalExercicios = treino?.blocos.reduce((a, b) => a + b.linhas.length, 0) ?? 0;
   const pontuacoes      = desafio?.pontuacoes?.length ?? 0;
 
-  const buscaNorm = busca.trim().toLowerCase();
-  const chamadaFiltrada = chamada.filter(a =>
-    !buscaNorm || a.nome.toLowerCase().includes(buscaNorm)
-  );
-  const chamadaOrdenada = [...chamadaFiltrada].sort((a, b) => {
-    if (a.presente && b.presente) return a.ordem_chegada - b.ordem_chegada;
-    if (a.presente !== b.presente) return a.presente ? -1 : 1;
-    return a.nome.localeCompare(b.nome, "pt-BR");
-  });
   const totalPresentes = chamada.filter(a => a.presente).length;
 
   return (
@@ -199,21 +175,6 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
             </span>
           </div>
 
-          {chamada.length > 0 && (
-            <div className="chamada-topo">
-              <input
-                className="chamada-busca"
-                placeholder="Buscar aluno..."
-                value={busca}
-                onChange={e => setBusca(e.target.value)}
-                autoComplete="off"
-              />
-              <button className="chamada-ver-todos" onClick={onVerAlunos}>
-                Ver todos
-              </button>
-            </div>
-          )}
-
           {chamada.length === 0 ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "4px 0 8px" }}>
               <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda.</p>
@@ -221,25 +182,26 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
                 {seeding ? "Criando..." : "🧪  Adicionar alunos de teste"}
               </button>
             </div>
-          ) : chamadaOrdenada.length === 0 ? (
-            <p className="dash-vazio-hint">Nenhum resultado para "{busca}".</p>
           ) : (
-            <div className="chamada-lista">
-              {chamadaOrdenada.map(({ nome, presente, ordem_chegada }) => (
-                <button
-                  key={nome}
-                  className={`chamada-item ${presente ? "presente" : ""}`}
-                  disabled={toggling.has(nome)}
-                  onClick={() => togglePresenca(nome, presente)}
-                >
-                  <span className="chamada-check">
-                    {toggling.has(nome) ? "⏳" : presente ? "✓" : ""}
-                  </span>
-                  <span className="chamada-nome">{nome}</span>
-                  {presente && <span className="chamada-ordem">{ordem_chegada}º</span>}
-                </button>
-              ))}
-            </div>
+            <>
+              {/* pills dos presentes */}
+              {totalPresentes > 0 && (
+                <div className="chamada-pills">
+                  {chamada
+                    .filter(a => a.presente)
+                    .sort((a, b) => a.ordem_chegada - b.ordem_chegada)
+                    .map(a => (
+                      <span key={a.nome} className="chamada-pill">{a.nome.split(" ")[0]}</span>
+                    ))}
+                </div>
+              )}
+              {totalPresentes === 0 && (
+                <p className="dash-vazio-hint">Ninguém marcado ainda.</p>
+              )}
+              <button className="dash-action-btn" onClick={onVerAlunos}>
+                👥  Abrir chamada
+              </button>
+            </>
           )}
         </div>
 

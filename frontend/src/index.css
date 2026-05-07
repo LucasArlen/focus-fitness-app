@@ -1366,28 +1366,21 @@ body {
 /* ─────────────────────────────────────────────────────────────
    Chamada (admin) — lista de alunos com toggle de presença
 ───────────────────────────────────────────────────────────── */
-.chamada-topo {
+.chamada-pills {
   display: flex;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0 4px;
 }
-.chamada-topo .chamada-busca { flex: 1; }
-
-.chamada-ver-todos {
-  flex-shrink: 0;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1.5px solid var(--border-hi);
-  background: transparent;
-  color: var(--text-2);
+.chamada-pill {
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(76,217,100,0.1);
+  border: 1px solid rgba(76,217,100,0.25);
+  color: #4cd964;
   font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color .15s, border-color .15s;
+  font-weight: 500;
 }
-.chamada-ver-todos:hover { color: var(--accent); border-color: var(--accent); }
 
 .chamada-busca {
   width: 100%;
