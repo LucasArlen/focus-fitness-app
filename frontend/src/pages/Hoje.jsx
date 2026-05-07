@@ -8,11 +8,11 @@ import DesafioRanking from "../components/DesafioRanking";
 import { getVapidKey, subscribePush, urlBase64ToUint8Array } from "../api/push";
 
 const STATUS_CFG = {
-  fechado:   { label: "Academia fechada", emoji: "🔒", cor: "#DC2626",  bg: "rgba(220,38,38,0.07)",    borda: "rgba(220,38,38,0.2)" },
-  vazio:     { label: "Bem vazio",        emoji: "😌", cor: "#2563EB",  bg: "rgba(37,99,235,0.06)",    borda: "rgba(37,99,235,0.18)" },
-  tranquilo: { label: "Tranquilo",        emoji: "👌", cor: "#16A34A",  bg: "rgba(22,163,74,0.07)",    borda: "rgba(22,163,74,0.2)" },
-  cheio:     { label: "Cheio",            emoji: "🔥", cor: "#D97706",  bg: "rgba(217,119,6,0.07)",    borda: "rgba(217,119,6,0.22)" },
-  lotado:    { label: "Lotado",           emoji: "🚨", cor: "#DC2626",  bg: "rgba(220,38,38,0.07)",    borda: "rgba(220,38,38,0.2)" },
+  fechado:   { label: "Academia fechada", emoji: "🔒", cor: "#ff5252",  bg: "rgba(255,82,82,0.07)",    borda: "rgba(255,82,82,0.22)" },
+  vazio:     { label: "Bem vazio",        emoji: "😌", cor: "#64b5f6",  bg: "rgba(100,181,246,0.07)",  borda: "rgba(100,181,246,0.22)" },
+  tranquilo: { label: "Tranquilo",        emoji: "👌", cor: "#4cd964",  bg: "rgba(76,217,100,0.07)",   borda: "rgba(76,217,100,0.22)" },
+  cheio:     { label: "Cheio",            emoji: "🔥", cor: "#ff9800",  bg: "rgba(255,152,0,0.07)",    borda: "rgba(255,152,0,0.22)" },
+  lotado:    { label: "Lotado",           emoji: "🚨", cor: "#ff5252",  bg: "rgba(255,82,82,0.07)",    borda: "rgba(255,82,82,0.22)" },
 };
 
 // ── Notificações ────────────────────────────────────────────────────────────

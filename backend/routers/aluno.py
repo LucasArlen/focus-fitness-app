@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from auth import ADMIN_PASSWORD, ADMIN_USERNAME, create_token
 from database import get_db
-from models import Aluno
+from models import Aluno, AppConfig
 from schemas import AdminLoginIn, AlunoIn, Token
 
 router = APIRouter()
@@ -34,6 +34,11 @@ def admin_login(body: AdminLoginIn):
 
 @router.post("/aluno/cadastro", response_model=Token)
 def cadastrar_aluno(body: AlunoIn, db: Session = Depends(get_db)):
+    # Valida código de convite (só para novos cadastros)
+    cfg = db.query(AppConfig).filter(AppConfig.key == "invite_code").first()
+    if cfg and body.invite_code != cfg.value:
+        raise HTTPException(403, "Código de convite inválido. Escaneie o QR code da academia.")
+
     if db.query(Aluno).filter(Aluno.nome == body.nome).first():
         raise HTTPException(400, "Nome já cadastrado")
     aluno = Aluno(nome=body.nome, pin_hash=_hash_pin(body.pin))

@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from database import Base, engine, SessionLocal
-from routers import academia, aluno, banco, desafio, presenca, push, ranking, reacao, treino
+from routers import academia, aluno, banco, desafio, invite, presenca, push, ranking, reacao, treino
 
 Base.metadata.create_all(bind=engine)
 
@@ -190,6 +190,22 @@ def _run_seed():
 
 _run_seed()
 
+
+def _ensure_invite_code():
+    """Gera código de convite na primeira vez que o servidor sobe."""
+    import secrets
+    db = SessionLocal()
+    try:
+        from models import AppConfig
+        if not db.query(AppConfig).filter(AppConfig.key == "invite_code").first():
+            db.add(AppConfig(key="invite_code", value=secrets.token_urlsafe(6)))
+            db.commit()
+    finally:
+        db.close()
+
+
+_ensure_invite_code()
+
 # ──────────────────────────────────────────────────────────────────────────────
 
 app = FastAPI(title="Quadro API")
@@ -212,6 +228,7 @@ api.include_router(banco.router)
 api.include_router(ranking.router)
 api.include_router(presenca.router)
 api.include_router(push.router)
+api.include_router(invite.router)
 app.include_router(api)
 
 STATIC = "static"

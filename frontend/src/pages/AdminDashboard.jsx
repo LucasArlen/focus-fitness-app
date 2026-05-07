@@ -3,6 +3,7 @@ import { getTreinoHoje } from "../api/treino";
 import { getDesafioHoje } from "../api/desafio";
 import { getPresencas } from "../api/presenca";
 import { getStatus, putStatus } from "../api/academia";
+import { getInvite, regenerarConvite } from "../api/invite";
 
 const STATUS_OPCOES = [
   { val: "vazio",     label: "Vago",      emoji: "😌" },
@@ -27,6 +28,9 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
   const [status,   setStatus]   = useState({ ativo: false, status: "tranquilo" });
   const [salvandoStatus, setSalvandoStatus] = useState(false);
   const [carregando, setCarregando] = useState(true);
+  const [inviteCode, setInviteCode] = useState("");
+  const [regenerando, setRegenerando] = useState(false);
+  const [qrExpandido, setQrExpandido] = useState(false);
 
   function carregar() {
     setCarregando(true);
@@ -35,10 +39,24 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
       getDesafioHoje().then(setDesafio).catch(() => setDesafio(null)),
       getPresencas().then(setPresenca).catch(() => {}),
       getStatus().then(setStatus).catch(() => {}),
+      getInvite().then(r => setInviteCode(r.code)).catch(() => {}),
     ]).finally(() => setCarregando(false));
   }
 
   useEffect(() => { carregar(); }, []);
+
+  async function handleRegenar() {
+    setRegenerando(true);
+    try {
+      const r = await regenerarConvite();
+      setInviteCode(r.code);
+    } catch { /* silencioso */ }
+    finally { setRegenerando(false); }
+  }
+
+  const inviteUrl = inviteCode
+    ? `${window.location.origin}/?c=${inviteCode}`
+    : "";
 
   async function atualizarStatus(novoAtivo, novoVal) {
     setSalvandoStatus(true);
@@ -200,6 +218,54 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
             </p>
           )}
         </div>
+
+        {/* ── QR CODE DE CONVITE ── */}
+        {inviteCode && (
+          <div className="dash-card">
+            <div className="dash-card-header" style={{ cursor: "pointer" }}
+              onClick={() => setQrExpandido(v => !v)}>
+              <span className="dash-card-icon">🔗</span>
+              <span className="dash-card-titulo">Acesso de novos alunos</span>
+              <span className="dash-badge ok">Ativo</span>
+              <span style={{ color: "var(--text-3)", fontSize: 13, marginLeft: 4 }}>
+                {qrExpandido ? "▴" : "▾"}
+              </span>
+            </div>
+
+            {qrExpandido && (
+              <div className="dash-invite-body">
+                <p className="dash-invite-hint">
+                  Coloque o QR code na parede da academia. Só quem escanear consegue se cadastrar.
+                </p>
+
+                {/* QR gerado via API pública — sem dependência npm */}
+                <div className="dash-qr-wrap">
+                  <img
+                    className="dash-qr-img"
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${encodeURIComponent(inviteUrl)}`}
+                    alt="QR Code de convite"
+                  />
+                </div>
+
+                <div className="dash-invite-code">
+                  <span className="dash-invite-label">Código manual</span>
+                  <code className="dash-invite-valor">{inviteCode}</code>
+                </div>
+
+                <button
+                  className="dash-invite-regen"
+                  onClick={handleRegenar}
+                  disabled={regenerando}
+                >
+                  {regenerando ? "Gerando..." : "↺  Gerar novo código"}
+                </button>
+                <p className="dash-invite-aviso">
+                  Gerar novo código invalida o QR atual — alunos já cadastrados continuam normalmente.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── ATUALIZAR ── */}
         <button className="dash-refresh-btn" onClick={carregar} disabled={carregando}>

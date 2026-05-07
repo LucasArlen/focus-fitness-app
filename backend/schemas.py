@@ -88,6 +88,7 @@ class PontuacaoIn(BaseModel):
 class AlunoIn(BaseModel):
     nome: str
     pin: str
+    invite_code: Optional[str] = None
 
 
 class AdminLoginIn(BaseModel):

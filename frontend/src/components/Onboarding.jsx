@@ -1,6 +1,20 @@
 import { useRef, useState } from "react";
 import { cadastrarAluno, loginAluno } from "../api/aluno";
 
+/** Lê ?c= da URL e limpa o parâmetro sem recarregar a página. */
+function lerCodigoConvite() {
+  const params = new URLSearchParams(window.location.search);
+  const code   = params.get("c") || "";
+  if (code) {
+    // Remove da URL sem reload
+    params.delete("c");
+    const nova = window.location.pathname + (params.toString() ? "?" + params : "");
+    window.history.replaceState({}, "", nova);
+    localStorage.setItem("invite_code", code);
+  }
+  return code || localStorage.getItem("invite_code") || "";
+}
+
 export default function Onboarding({ onConfirm }) {
   const [passo, setPasso]     = useState(1); // 1 = nome, 2 = pin
   const [nome, setNome]       = useState("");
@@ -8,6 +22,8 @@ export default function Onboarding({ onConfirm }) {
   const [erro, setErro]       = useState("");
   const [salvando, setSalvando] = useState(false);
   const inputsRef = useRef([]);
+
+  const inviteCode = lerCodigoConvite();
 
   /* ── Passo 1: confirma nome ── */
   function handleNome(e) {
@@ -41,22 +57,30 @@ export default function Onboarding({ onConfirm }) {
     setSalvando(true);
     setErro("");
     try {
-      // Tenta cadastrar primeiro; se nome já existe, faz login
       let res;
       try {
-        res = await cadastrarAluno(nome.trim(), codigo);
+        // Tenta cadastrar (envia invite_code — ignorado se já existe)
+        res = await cadastrarAluno(nome.trim(), codigo, inviteCode);
       } catch (err) {
         if (err.message.includes("já cadastrado")) {
+          // Aluno existente: login não precisa de código
           res = await loginAluno(nome.trim(), codigo);
         } else {
           throw err;
         }
       }
+      // Persiste o código para futuros acessos neste device
+      if (inviteCode) localStorage.setItem("invite_code", inviteCode);
       onConfirm(nome.trim(), res.access_token);
     } catch (err) {
-      setErro(err.message.includes("PIN") || err.message.includes("inválido")
-        ? "PIN incorreto. Tenta de novo."
-        : err.message);
+      const msg = err.message;
+      if (msg.includes("convite") || msg.includes("QR")) {
+        setErro("Escaneie o QR code da academia para criar sua conta.");
+      } else if (msg.includes("PIN") || msg.includes("inválido")) {
+        setErro("PIN incorreto. Tenta de novo.");
+      } else {
+        setErro(msg);
+      }
       setPin(["", "", "", ""]);
       setTimeout(() => inputsRef.current[0]?.focus(), 80);
     } finally {
