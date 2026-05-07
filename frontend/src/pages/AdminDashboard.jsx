@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getTreinoHoje } from "../api/treino";
 import { getDesafioHoje } from "../api/desafio";
-import { getPresencas } from "../api/presenca";
+import { getChamada, marcarPresenca, desmarcarPresenca } from "../api/presenca";
 import { getStatus, putStatus } from "../api/academia";
 import { getInvite, regenerarConvite } from "../api/invite";
 
@@ -13,18 +13,10 @@ const STATUS_OPCOES = [
   { val: "fechado",   label: "Fechado",   emoji: "🔒" },
 ];
 
-const STATUS_COR = {
-  vazio:     "#64b5f6",
-  tranquilo: "#4cd964",
-  cheio:     "#ff9800",
-  lotado:    "#ff5252",
-  fechado:   "#ff5252",
-};
-
 export default function AdminDashboard({ onEditarTreino, onLogout }) {
   const [treino,   setTreino]   = useState(null);
   const [desafio,  setDesafio]  = useState(null);
-  const [presenca, setPresenca] = useState({ nomes: [], total: 0 });
+  const [chamada,  setChamada]  = useState([]);   // [{nome, presente}]
   const [status,   setStatus]   = useState({ ativo: false, status: "tranquilo" });
   const [salvandoStatus, setSalvandoStatus] = useState(false);
   const [carregando, setCarregando] = useState(true);
@@ -32,19 +24,38 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
   const [regenerando, setRegenerando] = useState(false);
   const [qrExpandido, setQrExpandido] = useState(false);
   const [confirmarRegen, setConfirmarRegen] = useState(false);
+  const [toggling, setToggling] = useState(new Set()); // nomes sendo salvos
 
   function carregar() {
     setCarregando(true);
     Promise.allSettled([
       getTreinoHoje().then(setTreino).catch(() => setTreino(null)),
       getDesafioHoje().then(setDesafio).catch(() => setDesafio(null)),
-      getPresencas().then(setPresenca).catch(() => {}),
+      getChamada().then(setChamada).catch(() => setChamada([])),
       getStatus().then(setStatus).catch(() => {}),
       getInvite().then(r => setInviteCode(r.code)).catch(() => {}),
     ]).finally(() => setCarregando(false));
   }
 
   useEffect(() => { carregar(); }, []);
+
+  async function togglePresenca(nome, presente) {
+    setToggling(prev => new Set(prev).add(nome));
+    try {
+      if (presente) {
+        await desmarcarPresenca(nome);
+      } else {
+        await marcarPresenca(nome);
+      }
+      // Atualiza localmente sem recarregar tudo
+      setChamada(prev =>
+        prev.map(a => a.nome === nome ? { ...a, presente: !presente } : a)
+      );
+    } catch { /* silencioso */ }
+    finally {
+      setToggling(prev => { const s = new Set(prev); s.delete(nome); return s; });
+    }
+  }
 
   async function handleRegenar() {
     setRegenerando(true);
@@ -79,8 +90,15 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
     ? treino.blocos.reduce((acc, b) => acc + b.linhas.length, 0)
     : 0;
 
-  const cfgStatus = STATUS_OPCOES.find(o => o.val === status.status);
   const pontuacoes = desafio?.pontuacoes?.length ?? 0;
+
+  // Ordenação: presentes primeiro, depois alfabético
+  const chamadaOrdenada = [...chamada].sort((a, b) => {
+    if (a.presente !== b.presente) return a.presente ? -1 : 1;
+    return a.nome.localeCompare(b.nome, "pt-BR");
+  });
+
+  const totalPresentes = chamada.filter(a => a.presente).length;
 
   return (
     <div className="page">
@@ -142,51 +160,57 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
           </button>
         </div>
 
-        {/* ── CONFIRMADOS + DESAFIO ── */}
-        <div className="dash-row">
-
-          {/* Confirmados */}
-          <div className="dash-card dash-half">
-            <div className="dash-card-header">
-              <span className="dash-card-icon">👥</span>
-              <span className="dash-card-titulo">Confirmados</span>
-            </div>
-            <p className="dash-numero">{presenca.total}</p>
-            {presenca.nomes.length > 0 ? (
-              <div className="dash-nomes-list">
-                {presenca.nomes.slice(0, 6).map(n => (
-                  <span key={n} className="dash-nome-pill">{n.split(" ")[0]}</span>
-                ))}
-                {presenca.total > 6 && (
-                  <span className="dash-nome-pill mais">+{presenca.total - 6}</span>
-                )}
-              </div>
-            ) : (
-              <p className="dash-vazio-hint">Ninguém ainda.</p>
-            )}
+        {/* ── CHAMADA ── */}
+        <div className="dash-card">
+          <div className="dash-card-header">
+            <span className="dash-card-icon">👥</span>
+            <span className="dash-card-titulo">Chamada</span>
+            <span className="dash-badge ok" style={{ marginLeft: "auto" }}>
+              {totalPresentes}/{chamada.length}
+            </span>
           </div>
 
-          {/* Desafio */}
-          <div className="dash-card dash-half">
-            <div className="dash-card-header">
-              <span className="dash-card-icon">🏆</span>
-              <span className="dash-card-titulo">Desafio</span>
+          {chamada.length === 0 ? (
+            <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda.</p>
+          ) : (
+            <div className="chamada-lista">
+              {chamadaOrdenada.map(({ nome, presente }) => (
+                <button
+                  key={nome}
+                  className={`chamada-item ${presente ? "presente" : ""}`}
+                  disabled={toggling.has(nome)}
+                  onClick={() => togglePresenca(nome, presente)}
+                >
+                  <span className="chamada-check">
+                    {toggling.has(nome) ? "⏳" : presente ? "✓" : ""}
+                  </span>
+                  <span className="chamada-nome">{nome}</span>
+                </button>
+              ))}
             </div>
-            {desafio ? (
-              <>
-                <p className="dash-numero">{pontuacoes}</p>
-                <p className="dash-desafio-nome">{desafio.nome}</p>
-                <span className={`dash-badge ${desafio.fechado ? "ok" : "aberto"}`}>
+          )}
+        </div>
+
+        {/* ── DESAFIO ── */}
+        <div className="dash-card">
+          <div className="dash-card-header">
+            <span className="dash-card-icon">🏆</span>
+            <span className="dash-card-titulo">Desafio de Hoje</span>
+          </div>
+          {desafio ? (
+            <>
+              <p className="dash-desafio-nome" style={{ marginBottom: 6 }}>{desafio.nome}</p>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <p className="dash-numero" style={{ fontSize: 28 }}>{pontuacoes}</p>
+                <span className="dash-mini-label">participantes</span>
+                <span className={`dash-badge ${desafio.fechado ? "ok" : "aberto"}`} style={{ marginLeft: "auto" }}>
                   {desafio.fechado ? "Finalizado" : "Aberto"}
                 </span>
-              </>
-            ) : (
-              <>
-                <p className="dash-numero" style={{ color: "var(--text-3)" }}>—</p>
-                <p className="dash-vazio-hint">Sem desafio hoje.</p>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          ) : (
+            <p className="dash-vazio-hint">Sem desafio hoje.</p>
+          )}
         </div>
 
         {/* ── STATUS DA ACADEMIA ── */}
@@ -242,7 +266,6 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                   Coloque o QR code na parede da academia. Só quem escanear consegue se cadastrar.
                 </p>
 
-                {/* QR gerado via API pública — sem dependência npm */}
                 <div className="dash-qr-wrap">
                   <img
                     className="dash-qr-img"

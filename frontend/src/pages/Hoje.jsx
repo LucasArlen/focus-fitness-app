@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getTreinoHoje } from "../api/treino";
 import { getStatus } from "../api/academia";
-import { getPresencas, postPresenca, deletePresenca } from "../api/presenca";
+import { getPresencas } from "../api/presenca";
 import BlocoCard from "../components/BlocoCard";
 import SugestaoCard from "../components/SugestaoCard";
 import DesafioRanking from "../components/DesafioRanking";
@@ -88,65 +88,26 @@ function formatarData(dataStr) {
   });
 }
 
-function VouHoje({ treinoId }) {
-  const storageKey = `presenca_${treinoId}`;
-  const [confirmado, setConfirmado] = useState(() => !!localStorage.getItem(storageKey));
-  const [presencas, setPresencas]   = useState({ nomes: [], total: 0 });
-  const [salvando, setSalvando]     = useState(false);
-  const [expandido, setExpandido]   = useState(false);
+function PresencasHoje() {
+  const [presencas, setPresencas] = useState({ nomes: [], total: 0 });
+  const [expandido, setExpandido] = useState(false);
 
   useEffect(() => {
     getPresencas().then(setPresencas).catch(() => {});
   }, []);
 
-  async function toggle() {
-    setSalvando(true);
-    try {
-      if (confirmado) {
-        await deletePresenca();
-        localStorage.removeItem(storageKey);
-        setConfirmado(false);
-      } else {
-        await postPresenca();
-        localStorage.setItem(storageKey, "1");
-        setConfirmado(true);
-      }
-      const dados = await getPresencas();
-      setPresencas(dados);
-    } catch { /* silencioso */ }
-    finally { setSalvando(false); }
-  }
-
   const total = presencas.total;
+  if (total === 0) return null;
 
   return (
-    <div className={`vou-strip ${confirmado ? "confirmado" : ""}`}>
-      <div className="vou-strip-main" onClick={() => total > 0 && setExpandido(e => !e)}>
+    <div className="vou-strip" onClick={() => setExpandido(e => !e)} style={{ cursor: "pointer" }}>
+      <div className="vou-strip-main">
         <span className="vou-strip-texto">
-          {confirmado
-            ? `✅ Você vai hoje · ${total} ${total === 1 ? "pessoa" : "pessoas"}`
-            : `💪 ${total > 0 ? `${total} vão hoje` : "Vai treinar hoje?"}`}
+          💪 {total} {total === 1 ? "pessoa está" : "pessoas estão"} treinando hoje
         </span>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          {total > 0 && (
-            <span className="vou-strip-chevron">{expandido ? "▴" : "▾"}</span>
-          )}
-          {!confirmado && (
-            <button className="vou-strip-btn" disabled={salvando}
-              onClick={e => { e.stopPropagation(); toggle(); }}>
-              {salvando ? "..." : "Vou!"}
-            </button>
-          )}
-          {confirmado && (
-            <button className="vou-strip-cancelar" disabled={salvando}
-              onClick={e => { e.stopPropagation(); toggle(); }}>
-              {salvando ? "..." : "Cancelar"}
-            </button>
-          )}
-        </div>
+        <span className="vou-strip-chevron">{expandido ? "▴" : "▾"}</span>
       </div>
-
-      {expandido && total > 0 && (
+      {expandido && (
         <div className="vou-strip-nomes">
           {presencas.nomes.map(n => (
             <span key={n} className="vou-nome-pill">{n.split(" ")[0]}</span>
@@ -234,7 +195,7 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd }) {
         {estado === "ok" && treino && (
           <>
             <NotifBanner />
-            <VouHoje treinoId={treino.id} />
+            <PresencasHoje />
 
             {treino.blocos.map(bloco =>
               bloco.sugestao

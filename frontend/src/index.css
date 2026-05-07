@@ -1116,6 +1116,73 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Chamada (admin) — lista de alunos com toggle de presença
+───────────────────────────────────────────────────────────── */
+.chamada-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.chamada-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s, border-color .12s;
+}
+
+.chamada-item.presente {
+  background: rgba(76,217,100,0.07);
+  border-color: rgba(76,217,100,0.3);
+}
+
+.chamada-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chamada-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border-hi);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-3);
+  flex-shrink: 0;
+  background: var(--surface3);
+  transition: background .12s, border-color .12s, color .12s;
+}
+
+.chamada-item.presente .chamada-check {
+  background: #4cd964;
+  border-color: #4cd964;
+  color: #000;
+}
+
+.chamada-nome {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.chamada-item.presente .chamada-nome {
+  color: #4cd964;
+}
+
+/* ─────────────────────────────────────────────────────────────
    "Vou Hoje" strip
 ───────────────────────────────────────────────────────────── */
 
