@@ -50,44 +50,40 @@ function VouHoje({ treinoId }) {
     finally { setSalvando(false); }
   }
 
-  const outros = presencas.nomes.filter(n => n !== presencas._self);
-  const visiveis = expandido ? presencas.nomes : presencas.nomes.slice(0, 4);
-  const extras   = presencas.nomes.length - 4;
+  const total = presencas.total;
 
   return (
-    <div className={`vou-hoje-card ${confirmado ? "confirmado" : ""}`}>
-      <div className="vou-hoje-topo">
-        <div className="vou-hoje-info">
-          <span className="vou-hoje-titulo">
-            {confirmado ? "✅ Você vai hoje!" : "💪 Vai treinar hoje?"}
-          </span>
-          {presencas.total > 0 && (
-            <span className="vou-hoje-count">
-              {presencas.total} {presencas.total === 1 ? "pessoa confirmada" : "pessoas confirmadas"}
-            </span>
+    <div className={`vou-strip ${confirmado ? "confirmado" : ""}`}>
+      <div className="vou-strip-main" onClick={() => total > 0 && setExpandido(e => !e)}>
+        <span className="vou-strip-texto">
+          {confirmado
+            ? `✅ Você vai hoje · ${total} ${total === 1 ? "pessoa" : "pessoas"}`
+            : `💪 ${total > 0 ? `${total} vão hoje` : "Vai treinar hoje?"}`}
+        </span>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {total > 0 && (
+            <span className="vou-strip-chevron">{expandido ? "▴" : "▾"}</span>
           )}
-        </div>
-        <button
-          className={`vou-hoje-btn ${confirmado ? "cancelar" : ""}`}
-          onClick={toggle}
-          disabled={salvando}
-        >
-          {salvando ? "..." : confirmado ? "Cancelar" : "Vou!"}
-        </button>
-      </div>
-
-      {presencas.nomes.length > 0 && (
-        <div className="vou-hoje-nomes">
-          {visiveis.map(n => (
-            <span key={n} className={`vou-nome-pill ${confirmado && n === presencas.nomes.find(x => x === n) ? "" : ""}`}>
-              {n.split(" ")[0]}
-            </span>
-          ))}
-          {!expandido && extras > 0 && (
-            <button className="vou-nome-mais" onClick={() => setExpandido(true)}>
-              +{extras} mais
+          {!confirmado && (
+            <button className="vou-strip-btn" disabled={salvando}
+              onClick={e => { e.stopPropagation(); toggle(); }}>
+              {salvando ? "..." : "Vou!"}
             </button>
           )}
+          {confirmado && (
+            <button className="vou-strip-cancelar" disabled={salvando}
+              onClick={e => { e.stopPropagation(); toggle(); }}>
+              {salvando ? "..." : "Cancelar"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {expandido && total > 0 && (
+        <div className="vou-strip-nomes">
+          {presencas.nomes.map(n => (
+            <span key={n} className="vou-nome-pill">{n.split(" ")[0]}</span>
+          ))}
         </div>
       )}
     </div>
