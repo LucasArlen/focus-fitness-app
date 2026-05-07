@@ -294,17 +294,16 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
                 ↺ Gerar novo código
               </button>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
-                <span style={{ fontSize: 12, color: "var(--danger)", flex: 1 }}>
-                  ⚠️ O link atual vai parar de funcionar.
-                </span>
-                <button className="invite-qr-btn danger" onClick={handleRegenar} disabled={regenerando}
-                  style={{ flex: "none", padding: "7px 12px" }}>
-                  {regenerando ? "..." : "Confirmar"}
-                </button>
-                <button className="invite-cancelar" onClick={() => setConfirmarRegen(false)}>
-                  Cancelar
-                </button>
+              <div className="invite-regen-confirm">
+                <span className="invite-regen-aviso">⚠️ O link atual vai parar de funcionar.</span>
+                <div className="invite-regen-acoes">
+                  <button className="invite-qr-btn danger" onClick={handleRegenar} disabled={regenerando}>
+                    {regenerando ? "..." : "Confirmar"}
+                  </button>
+                  <button className="invite-cancelar" onClick={() => setConfirmarRegen(false)}>
+                    Cancelar
+                  </button>
+                </div>
               </div>
             )}
           </div>
