@@ -31,6 +31,7 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
   const [inviteCode, setInviteCode] = useState("");
   const [regenerando, setRegenerando] = useState(false);
   const [qrExpandido, setQrExpandido] = useState(false);
+  const [confirmarRegen, setConfirmarRegen] = useState(false);
 
   function carregar() {
     setCarregando(true);
@@ -51,7 +52,10 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
       const r = await regenerarConvite();
       setInviteCode(r.code);
     } catch { /* silencioso */ }
-    finally { setRegenerando(false); }
+    finally {
+      setRegenerando(false);
+      setConfirmarRegen(false);
+    }
   }
 
   const inviteUrl = inviteCode
@@ -252,15 +256,39 @@ export default function AdminDashboard({ onEditarTreino, onLogout }) {
                   <code className="dash-invite-valor">{inviteCode}</code>
                 </div>
 
-                <button
-                  className="dash-invite-regen"
-                  onClick={handleRegenar}
-                  disabled={regenerando}
-                >
-                  {regenerando ? "Gerando..." : "↺  Gerar novo código"}
-                </button>
+                {!confirmarRegen ? (
+                  <button
+                    className="dash-invite-regen"
+                    onClick={() => setConfirmarRegen(true)}
+                  >
+                    ↺  Gerar novo código
+                  </button>
+                ) : (
+                  <div className="dash-regen-confirm">
+                    <p className="dash-regen-aviso-strong">
+                      ⚠️ O QR atual vai parar de funcionar.<br />
+                      Você precisará imprimir um novo.
+                    </p>
+                    <div className="dash-regen-btns">
+                      <button
+                        className="dash-regen-btn-cancelar"
+                        onClick={() => setConfirmarRegen(false)}
+                        disabled={regenerando}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        className="dash-regen-btn-ok"
+                        onClick={handleRegenar}
+                        disabled={regenerando}
+                      >
+                        {regenerando ? "Gerando..." : "Sim, gerar novo"}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <p className="dash-invite-aviso">
-                  Gerar novo código invalida o QR atual — alunos já cadastrados continuam normalmente.
+                  Alunos já cadastrados continuam normalmente — só novos cadastros precisam do QR.
                 </p>
               </div>
             )}
