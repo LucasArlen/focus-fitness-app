@@ -2156,6 +2156,25 @@ body {
 }
 .dash-action-btn-destaque:hover { background: #d4eb3a; }
 
+.dash-action-btn-secundario {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 12px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+  letter-spacing: .02em;
+}
+.dash-action-btn-secundario:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .dash-chegada-mais {
   font-size: 12px;
   color: var(--text-3);

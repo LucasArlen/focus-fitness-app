@@ -225,14 +225,12 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
                 <p className="dash-vazio-hint">Ninguém chegou ainda.</p>
               )}
 
-              <div style={{ display: "flex", gap: 8 }}>
-                <button className="dash-action-btn dash-action-btn-destaque" onClick={onModoAula} style={{ flex: 1 }}>
-                  🎯  Abrir Modo Aula
-                </button>
-                <button className="dash-action-btn" onClick={onVerAlunos} style={{ flex: "0 0 auto", padding: "0 14px" }}>
-                  📋
-                </button>
-              </div>
+              <button className="dash-action-btn dash-action-btn-destaque" onClick={onModoAula} style={{ width: "100%" }}>
+                🎯  Abrir Modo Aula
+              </button>
+              <button className="dash-action-btn-secundario" onClick={onVerAlunos}>
+                📋  Ver lista de alunos
+              </button>
             </>
           )}
         </div>
