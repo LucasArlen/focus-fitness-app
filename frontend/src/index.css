@@ -1886,6 +1886,151 @@ body {
 .hist-exercicio         { flex: 1; font-size: 14px; color: var(--text); }
 .hist-serie             { font-size: 13px; font-weight: 800; color: var(--accent); white-space: nowrap; }
 
+/* Resultado do aluno no histórico */
+.hist-meu-resultado {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--success);
+  background: var(--success-dim);
+  border: 1px solid rgba(76,217,100,0.25);
+  border-radius: 5px;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+
+.hist-desafio-detalhe {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hist-desafio-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.hist-desafio-resultado {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.hist-resultado-label {
+  font-size: 12px;
+  color: var(--text-3);
+  flex: 1;
+}
+.hist-resultado-valor {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--accent);
+}
+.hist-resultado-pos {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.hist-desafio-sem-resultado {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   AdminDesafio — quick-select de alunos presentes
+───────────────────────────────────────────────────────────── */
+.desafio-admin-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.desafio-presentes-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.desafio-presentes-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.desafio-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border-hi);
+  border-radius: 20px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.desafio-chip:hover  { border-color: var(--accent); color: var(--accent); }
+.desafio-chip.ativo  {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.desafio-todos-ok {
+  font-size: 13px;
+  color: var(--success);
+  margin: 0;
+  padding: 4px 0;
+}
+
+.btn-fechar-desafio {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.btn-fechar-desafio:hover { border-color: var(--accent); color: var(--accent); }
+
+.desafio-confirm-fechar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface2);
+  border: 1px solid rgba(255,82,82,0.25);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.desafio-confirm-acoes {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.btn-cancelar-sm {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+.btn-cancelar-sm:hover { color: var(--text-2); }
+
 /* ─────────────────────────────────────────────────────────────
    Banner de notificações
 ───────────────────────────────────────────────────────────── */

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { deletePontuacao, fecharDesafio, getDesafioHoje, postPontuacao } from "../api/desafio";
 import { getRankingAnual, getEvolucaoAluno } from "../api/ranking";
+import { getChamada } from "../api/presenca";
 
 const MEDALHAS = ["🥇", "🥈", "🥉"];
 const numVal = v => parseFloat(v) || 0;
@@ -16,17 +17,20 @@ function euSou(nome, ref) {
 }
 
 export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
-  const [aba, setAba]           = useState("hoje");
-  const [desafio, setDesafio]   = useState(null);
+  const [aba, setAba]               = useState("hoje");
+  const [desafio, setDesafio]       = useState(null);
   const [estadoHoje, setEstadoHoje] = useState("carregando");
-  const [anual, setAnual]       = useState([]);
+  const [anual, setAnual]           = useState([]);
   const [estadoAnual, setEstadoAnual] = useState("carregando");
-  const [novoNome, setNovoNome] = useState("");
-  const [novoValor, setNovoValor] = useState("");
-  const [salvando, setSalvando] = useState(false);
+  const [novoNome, setNovoNome]     = useState("");
+  const [novoValor, setNovoValor]   = useState("");
+  const [salvando, setSalvando]     = useState(false);
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
-  const [evolucao, setEvolucao] = useState([]);
-  const nomeRef = useRef(null);
+  const [evolucao, setEvolucao]     = useState([]);
+  const [chamada, setChamada]       = useState([]);
+  const [confirmandoFechar, setConfirmandoFechar] = useState(false);
+  const nomeRef  = useRef(null);
+  const valorRef = useRef(null);
 
   function carregarHoje() {
     getDesafioHoje()
@@ -40,7 +44,11 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
       .catch(() => setEstadoAnual("erro"));
   }
 
-  useEffect(() => { carregarHoje(); carregarAnual(); }, []);
+  useEffect(() => {
+    carregarHoje();
+    carregarAnual();
+    if (isAdmin) getChamada().then(setChamada).catch(() => {});
+  }, [isAdmin]);
 
   async function verEvolucao(nome) {
     setAlunoSelecionado(nome);
@@ -53,6 +61,19 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
   const ranking = desafio
     ? [...desafio.pontuacoes].sort((a, b) => numVal(b.valor) - numVal(a.valor))
     : [];
+
+  // Alunos presentes divididos entre: já pontuados / ainda não pontuados
+  const nomesJaScorados = new Set(
+    (desafio?.pontuacoes ?? []).map(p => p.aluno_nome.trim().toLowerCase())
+  );
+  const presentesSemScore = chamada
+    .filter(a => a.presente && !nomesJaScorados.has(a.nome.trim().toLowerCase()))
+    .sort((a, b) => a.ordem_chegada - b.ordem_chegada);
+
+  function selecionarAluno(nome) {
+    setNovoNome(nome);
+    setTimeout(() => valorRef.current?.focus(), 50);
+  }
 
   async function adicionar(e) {
     e.preventDefault();
@@ -74,6 +95,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
 
   async function fechar() {
     await fecharDesafio(desafio.id).catch(err => alert(err.message));
+    setConfirmandoFechar(false);
     carregarHoje();
   }
 
@@ -133,27 +155,67 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
                   )}
                 </div>
 
+                {/* ── ADMIN: marcar pontuações ── */}
                 {isAdmin && !desafio.fechado && (
-                  <form className="pontuacao-form" style={{ padding: "12px 14px 0" }} onSubmit={adicionar}>
-                    <input ref={nomeRef} className="input-exercicio" placeholder="Nome do aluno"
-                      value={novoNome} onChange={e => setNovoNome(e.target.value)} />
-                    <input className="input-pontuacao" placeholder="Pont."
-                      value={novoValor} onChange={e => setNovoValor(e.target.value)} />
-                    <button className="btn-publicar" type="submit" disabled={salvando}>
-                      {salvando ? "..." : "OK"}
-                    </button>
-                  </form>
+                  <div className="desafio-admin-wrap">
+
+                    {/* Chips de alunos presentes sem score */}
+                    {presentesSemScore.length > 0 && (
+                      <div className="desafio-presentes">
+                        <p className="desafio-presentes-label">
+                          Presentes sem pontuação ({presentesSemScore.length})
+                        </p>
+                        <div className="desafio-presentes-chips">
+                          {presentesSemScore.map(a => (
+                            <button
+                              key={a.nome}
+                              className={`desafio-chip ${novoNome === a.nome ? "ativo" : ""}`}
+                              onClick={() => selecionarAluno(a.nome)}
+                            >
+                              {a.nome.split(" ")[0]}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {presentesSemScore.length === 0 && chamada.filter(a => a.presente).length > 0 && (
+                      <p className="desafio-todos-ok">✅ Todos os presentes foram pontuados</p>
+                    )}
+
+                    {/* Formulário */}
+                    <form className="pontuacao-form" onSubmit={adicionar}>
+                      <input
+                        ref={nomeRef}
+                        className="input-exercicio"
+                        placeholder="Nome do aluno"
+                        value={novoNome}
+                        onChange={e => setNovoNome(e.target.value)}
+                      />
+                      <input
+                        ref={valorRef}
+                        className="input-pontuacao"
+                        placeholder="Reps"
+                        value={novoValor}
+                        onChange={e => setNovoValor(e.target.value)}
+                        inputMode="numeric"
+                      />
+                      <button className="btn-publicar" type="submit" disabled={salvando}>
+                        {salvando ? "..." : "OK"}
+                      </button>
+                    </form>
+                  </div>
                 )}
 
+                {/* Ranking */}
                 {ranking.length > 0 ? (
                   <>
-                    {/* Pódio top 3 */}
                     <div className="podio">
                       {ranking.slice(0, 3).map((p, i) => (
                         <div key={p.id}
                           className={`podio-item pos-${i + 1} ${euSou(p.aluno_nome, nomeAluno) ? "meu-podio" : ""}`}>
                           <span className="podio-medalha">{MEDALHAS[i]}</span>
-                          <span className="podio-nome">{p.aluno_nome}</span>
+                          <span className="podio-nome">{p.aluno_nome.split(" ")[0]}</span>
                           <span className="podio-valor">{p.valor}</span>
                           {isAdmin && !desafio.fechado && (
                             <button className="btn-icon danger podio-del"
@@ -163,7 +225,6 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
                       ))}
                     </div>
 
-                    {/* 4º em diante */}
                     {ranking.length > 3 && (
                       <ol className="ranking-list ranking-rest" style={{ padding: "0 12px 12px" }}>
                         {ranking.slice(3).map((p, i) => (
@@ -187,11 +248,22 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
                   </p>
                 )}
 
+                {/* Encerrar desafio */}
                 {isAdmin && !desafio.fechado && ranking.length > 0 && (
                   <div style={{ padding: "0 14px 14px" }}>
-                    <button className="btn-publicar" style={{ width: "100%" }} onClick={fechar}>
-                      Publicar ranking final
-                    </button>
+                    {!confirmandoFechar ? (
+                      <button className="btn-fechar-desafio" onClick={() => setConfirmandoFechar(true)}>
+                        🏁 Encerrar e publicar ranking
+                      </button>
+                    ) : (
+                      <div className="desafio-confirm-fechar">
+                        <span>Encerrar definitivamente? Não dá pra adicionar mais pontuações.</span>
+                        <div className="desafio-confirm-acoes">
+                          <button className="btn-publicar" onClick={fechar}>Confirmar</button>
+                          <button className="btn-cancelar-sm" onClick={() => setConfirmandoFechar(false)}>Cancelar</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

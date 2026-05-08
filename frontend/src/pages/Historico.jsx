@@ -8,9 +8,9 @@ function fmt(data) {
 }
 
 export default function Historico({ nomeAluno, onTrocarNome }) {
-  const [lista, setLista]       = useState([]);
-  const [estado, setEstado]     = useState("carregando");
-  const [expandido, setExpandido] = useState(null);
+  const [lista, setLista]           = useState([]);
+  const [estado, setEstado]         = useState("carregando");
+  const [expandido, setExpandido]   = useState(null);
   const [treinoCache, setTreinoCache] = useState({});
   const [carregandoId, setCarregandoId] = useState(null);
 
@@ -71,38 +71,84 @@ export default function Historico({ nomeAluno, onTrocarNome }) {
         )}
 
         {estado === "ok" && lista.map(item => {
-          const aberto = expandido === item.id;
-          const treino = treinoCache[item.id];
+          const aberto     = expandido === item.id;
+          const treino     = treinoCache[item.id];
           const carregando = carregandoId === item.id;
+
+          // Resultado do aluno nesse desafio (se existir)
+          const meuResultado = treino?.desafio?.pontuacoes?.find(
+            p => p.aluno_nome.trim().toLowerCase() === (nomeAluno ?? "").trim().toLowerCase()
+          );
 
           return (
             <div key={item.id} className="bloco-card hist-card" onClick={() => toggle(item.id)}>
               <div className="hist-row">
                 <div className="hist-info">
                   <p className="hist-data">{fmt(item.data)}</p>
-                  <p className="hist-blocos">{item.total_blocos} bloco{item.total_blocos !== 1 ? "s" : ""} · {item.total_exercicios} exercício{item.total_exercicios !== 1 ? "s" : ""}</p>
+                  <p className="hist-blocos">
+                    {item.total_blocos} bloco{item.total_blocos !== 1 ? "s" : ""} · {item.total_exercicios} exercício{item.total_exercicios !== 1 ? "s" : ""}
+                  </p>
                 </div>
-                {item.desafio_nome && (
-                  <span className="hist-desafio">🏆 {item.desafio_nome}</span>
-                )}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                  {item.desafio_nome && (
+                    <span className="hist-desafio">🏆 {item.desafio_nome}</span>
+                  )}
+                  {meuResultado && (
+                    <span className="hist-meu-resultado">{meuResultado.valor} reps</span>
+                  )}
+                </div>
                 <span className="hist-chevron" style={{ transform: aberto ? "rotate(180deg)" : "" }}>▾</span>
               </div>
 
               {aberto && (
                 <div className="hist-detalhe" onClick={e => e.stopPropagation()}>
                   {carregando && <p className="estado-hint" style={{ padding: "14px 16px" }}>Carregando...</p>}
-                  {!carregando && treino && treino.blocos.map(b => (
-                    <div key={b.id} className="hist-bloco">
-                      <p className="hist-bloco-nome">{b.nome}</p>
-                      {b.linhas.map(l => (
-                        <div key={l.id} className="hist-linha">
-                          <span className="hist-exercicio">{l.exercicio}</span>
-                          <span className="hist-serie">{l.serie}</span>
-                          {l.dropset && <span className="dropset-tag">DS</span>}
+
+                  {!carregando && treino && (
+                    <>
+                      {/* Resultado do aluno no desafio */}
+                      {treino.desafio && (
+                        <div className="hist-desafio-detalhe">
+                          <span className="hist-desafio-titulo">🏆 {treino.desafio.nome}</span>
+                          {meuResultado ? (
+                            <div className="hist-desafio-resultado">
+                              <span className="hist-resultado-label">Seu resultado</span>
+                              <span className="hist-resultado-valor">{meuResultado.valor}</span>
+                              {(() => {
+                                const sorted = [...treino.desafio.pontuacoes]
+                                  .sort((a, b) => (parseFloat(b.valor)||0) - (parseFloat(a.valor)||0));
+                                const pos = sorted.findIndex(
+                                  p => p.aluno_nome.trim().toLowerCase() === (nomeAluno ?? "").trim().toLowerCase()
+                                );
+                                const medalha = ["🥇","🥈","🥉"][pos];
+                                return (
+                                  <span className="hist-resultado-pos">
+                                    {medalha ?? `${pos + 1}º`} de {sorted.length}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                          ) : (
+                            <p className="hist-desafio-sem-resultado">Você não participou deste desafio.</p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Blocos e exercícios */}
+                      {treino.blocos.map(b => (
+                        <div key={b.id} className="hist-bloco">
+                          <p className="hist-bloco-nome">{b.nome}</p>
+                          {b.linhas.map(l => (
+                            <div key={l.id} className="hist-linha">
+                              <span className="hist-exercicio">{l.exercicio}</span>
+                              <span className="hist-serie">{l.serie}</span>
+                              {l.dropset && <span className="dropset-tag">DS</span>}
+                            </div>
+                          ))}
                         </div>
                       ))}
-                    </div>
-                  ))}
+                    </>
+                  )}
                 </div>
               )}
             </div>
