@@ -205,7 +205,9 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd, onVerDesafio }
               <button className="desafio-teaser" onClick={onVerDesafio}>
                 <span className="desafio-teaser-icon">🏆</span>
                 <span className="desafio-teaser-nome">{treino.desafio.nome}</span>
-                <span className="desafio-teaser-cta">Ver ranking →</span>
+                <span className="desafio-teaser-cta">
+                  {treino.desafio.pontuacoes?.length > 0 ? "Ver ranking →" : "Ver desafio →"}
+                </span>
               </button>
             )}
           </>

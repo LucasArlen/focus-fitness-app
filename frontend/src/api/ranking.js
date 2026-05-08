@@ -1,6 +1,5 @@
 import { apiFetch } from "./client";
 
-export const getRankingAnual  = ()          => apiFetch("/ranking/anual");
 export const getRankingMensal = (mes = "")  => apiFetch(`/ranking/mensal${mes ? `?mes=${mes}` : ""}`);
 export const getEvolucaoAluno = (nome)      => apiFetch(`/ranking/aluno/${encodeURIComponent(nome)}`);
 export const getHistorico     = (aluno = "") =>
