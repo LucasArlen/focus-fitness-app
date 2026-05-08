@@ -58,7 +58,7 @@ class Aluno(Base):
     __tablename__ = "alunos"
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(Text, unique=True)
-    pin_hash = Column(Text)
+    pin_hash = Column(Text, nullable=True)  # legado — não utilizado
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
     reacoes = relationship("Reacao", back_populates="aluno", cascade="all, delete-orphan")
 

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { cadastrarAluno, loginAluno } from "../api/aluno";
+import { cadastrarAluno } from "../api/aluno";
 import QrScanner from "./QrScanner";
 
 /** Lê ?c= da URL e limpa o parâmetro sem recarregar a página. */
@@ -15,16 +15,6 @@ function lerCodigoConvite() {
   return code || localStorage.getItem("invite_code") || "";
 }
 
-/** PIN automático por device — gerado uma vez e guardado. */
-function obterPinLocal() {
-  let pin = localStorage.getItem("device_pin");
-  if (!pin) {
-    pin = Math.floor(1000 + Math.random() * 9000).toString();
-    localStorage.setItem("device_pin", pin);
-  }
-  return pin;
-}
-
 export default function Onboarding({ onConfirm, onAdmin }) {
   const [nome, setNome]               = useState("");
   const [codigoDigitado, setCodigoDig]= useState("");
@@ -32,10 +22,8 @@ export default function Onboarding({ onConfirm, onAdmin }) {
   const [salvando, setSalvando]       = useState(false);
   const [qrAberto, setQrAberto]       = useState(false);
   const [inviteCode, setInviteCode]   = useState(() => lerCodigoConvite());
-  const [mostrarCodigo, setMostrarCodigo] = useState(false);
   const adminTimer = useRef(null);
 
-  // Código efetivo: QR escaneado / link > digitado manualmente
   const codigoEfetivo = inviteCode || codigoDigitado.trim();
 
   const handleScan = useCallback((texto) => {
@@ -60,36 +48,21 @@ export default function Onboarding({ onConfirm, onAdmin }) {
     e.preventDefault();
     if (nome.trim().length < 2) return;
     if (!codigoEfetivo) {
-      setErro("Escaneie o QR code, use o link ou digite o código da academia.");
+      setErro("Escaneie o QR code, use o link compartilhado ou digite o código.");
       return;
     }
-
-    const pin = obterPinLocal();
     setSalvando(true);
     setErro("");
     try {
-      let res;
-      try {
-        // Tenta cadastrar (se já existe + convite válido → backend reseta PIN)
-        res = await cadastrarAluno(nome.trim(), pin, codigoEfetivo);
-      } catch (err) {
-        if (err.message.includes("já cadastrado")) {
-          // Device já tem o PIN correto, faz login direto
-          res = await loginAluno(nome.trim(), pin);
-        } else {
-          throw err;
-        }
-      }
+      const res = await cadastrarAluno(nome.trim(), codigoEfetivo);
       localStorage.setItem("invite_code", codigoEfetivo);
       onConfirm(nome.trim(), res.access_token);
     } catch (err) {
       const msg = err.message;
       if (msg.includes("convite") || msg.includes("QR") || msg.includes("inválido")) {
         setErro("Código inválido. Peça o link ou código ao instrutor.");
-      } else if (msg.includes("PIN") || msg.includes("Nome ou PIN")) {
-        setErro("Não foi possível entrar. Tente o botão abaixo para limpar e recomeçar.");
       } else {
-        setErro(msg);
+        setErro("Algo deu errado. Tente novamente.");
       }
     } finally {
       setSalvando(false);
@@ -129,41 +102,31 @@ export default function Onboarding({ onConfirm, onAdmin }) {
             />
 
             {/* Código de acesso */}
-            <div className="onboarding-codigo-wrap">
-              {inviteCode ? (
-                <div className="onboarding-codigo-ok">
-                  <span>✅ Código de acesso confirmado</span>
-                  <button type="button" className="onboarding-trocar-codigo"
-                    onClick={() => { setInviteCode(""); localStorage.removeItem("invite_code"); }}>
-                    Trocar
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className="onboarding-qr-btn"
-                    onClick={() => setQrAberto(true)}
-                  >
-                    📷  Escanear QR code
-                  </button>
-
-                  <div className="onboarding-ou">
-                    <span />ou<span />
-                  </div>
-
-                  <input
-                    className="onboarding-input onboarding-codigo-input"
-                    placeholder="Digitar código manualmente"
-                    value={codigoDigitado}
-                    onChange={e => setCodigoDig(e.target.value.trim())}
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                  />
-                </>
-              )}
-            </div>
+            {inviteCode ? (
+              <div className="onboarding-codigo-ok">
+                <span>✅ Código de acesso confirmado</span>
+                <button type="button" className="onboarding-trocar-codigo"
+                  onClick={() => { setInviteCode(""); localStorage.removeItem("invite_code"); }}>
+                  Trocar
+                </button>
+              </div>
+            ) : (
+              <div className="onboarding-codigo-wrap">
+                <button type="button" className="onboarding-qr-btn" onClick={() => setQrAberto(true)}>
+                  📷  Escanear QR code
+                </button>
+                <div className="onboarding-ou"><span />ou<span /></div>
+                <input
+                  className="onboarding-input onboarding-codigo-input"
+                  placeholder="Digitar código manualmente"
+                  value={codigoDigitado}
+                  onChange={e => setCodigoDig(e.target.value.trim())}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                />
+              </div>
+            )}
 
             {erro && <p className="onboarding-erro">{erro}</p>}
 
