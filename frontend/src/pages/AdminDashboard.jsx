@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getTreinoHoje } from "../api/treino";
 import { getDesafioHoje } from "../api/desafio";
-import { getChamada } from "../api/presenca";
+import { getChamada, marcarPresenca } from "../api/presenca";
 import { getStatus, putStatus } from "../api/academia";
 import { getInvite, regenerarConvite } from "../api/invite";
 import { apiFetch } from "../api/client";
@@ -27,6 +27,8 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
   const [confirmarRegen,setConfirmarRegen]= useState(false);
   const [linkCopiado,   setLinkCopiado]   = useState(false);
   const [seeding,       setSeeding]       = useState(false);
+  const [buscaChamada,  setBuscaChamada]  = useState("");
+  const [marcando,      setMarcando]      = useState(null);
 
   function carregar() {
     setCarregando(true);
@@ -88,6 +90,18 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
     finally { setSeeding(false); }
   }
 
+  async function selecionarAluno(nome) {
+    setBuscaChamada("");
+    setMarcando(nome);
+    try {
+      await marcarPresenca(nome);
+      // re-fetch para pegar ordem_chegada correta do servidor
+      const nova = await getChamada();
+      setChamada(nova);
+    } catch { /* silencioso */ }
+    finally { setMarcando(null); }
+  }
+
   async function atualizarStatus(novoAtivo, novoVal) {
     setSalvandoStatus(true);
     try {
@@ -104,6 +118,15 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
   const pontuacoes      = desafio?.pontuacoes?.length ?? 0;
 
   const totalPresentes = chamada.filter(a => a.presente).length;
+
+  const buscaNorm    = buscaChamada.trim().toLowerCase();
+  const sugestoes    = buscaNorm
+    ? chamada.filter(a => !a.presente && a.nome.toLowerCase().includes(buscaNorm))
+    : [];
+  const ultimosChegados = chamada
+    .filter(a => a.presente)
+    .sort((a, b) => b.ordem_chegada - a.ordem_chegada)
+    .slice(0, 5);
 
   return (
     <div className="page">
@@ -176,7 +199,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
           </div>
 
           {chamada.length === 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "4px 0 8px" }}>
+            <div className="dash-chamada-vazio">
               <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda.</p>
               <button className="dash-invite-regen" onClick={seed} disabled={seeding}>
                 {seeding ? "Criando..." : "🧪  Adicionar alunos de teste"}
@@ -184,22 +207,50 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
             </div>
           ) : (
             <>
-              {/* pills dos presentes */}
-              {totalPresentes > 0 && (
-                <div className="chamada-pills">
-                  {chamada
-                    .filter(a => a.presente)
-                    .sort((a, b) => a.ordem_chegada - b.ordem_chegada)
-                    .map(a => (
-                      <span key={a.nome} className="chamada-pill">{a.nome.split(" ")[0]}</span>
+              {/* busca inline */}
+              <div className="dash-chamada-wrap">
+                <input
+                  className="dash-chamada-input"
+                  placeholder="🔍  Buscar aluno..."
+                  value={buscaChamada}
+                  onChange={e => setBuscaChamada(e.target.value)}
+                  autoComplete="off"
+                />
+                {sugestoes.length > 0 && (
+                  <div className="dash-chamada-sugestoes">
+                    {sugestoes.slice(0, 5).map(a => (
+                      <button
+                        key={a.nome}
+                        className="dash-chamada-sug"
+                        disabled={marcando === a.nome}
+                        onClick={() => selecionarAluno(a.nome)}
+                      >
+                        {marcando === a.nome ? "⏳" : "✓"} {a.nome}
+                      </button>
                     ))}
+                  </div>
+                )}
+                {buscaNorm && sugestoes.length === 0 && (
+                  <p className="dash-chamada-sem-result">Nenhum ausente com esse nome.</p>
+                )}
+              </div>
+
+              {/* últimos 5 chegados */}
+              {ultimosChegados.length > 0 ? (
+                <div className="dash-chegadas">
+                  {ultimosChegados.map(a => (
+                    <div key={a.nome} className="dash-chegada-item">
+                      <span className="dash-chegada-ordem">{a.ordem_chegada}º</span>
+                      <span className="dash-chegada-nome">{a.nome}</span>
+                    </div>
+                  ))}
                 </div>
-              )}
-              {totalPresentes === 0 && (
+              ) : (
                 <p className="dash-vazio-hint">Ninguém marcado ainda.</p>
               )}
+
               <button className="dash-action-btn" onClick={onVerAlunos}>
-                👥  Abrir chamada
+                👥  Ver chamada completa
               </button>
             </>
           )}
