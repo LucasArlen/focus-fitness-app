@@ -4,7 +4,6 @@ import { getDesafioHoje } from "../api/desafio";
 import { getChamada, marcarPresenca } from "../api/presenca";
 import { getStatus, putStatus } from "../api/academia";
 import { getInvite, regenerarConvite } from "../api/invite";
-import { apiFetch } from "../api/client";
 
 const STATUS_OPCOES = [
   { val: "vazio",     label: "Vago",      emoji: "😌" },
@@ -27,7 +26,6 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
   const [confirmarRegen,setConfirmarRegen]= useState(false);
   const [qrColapsado,   setQrColapsado]  = useState(true);
   const [linkCopiado,   setLinkCopiado]   = useState(false);
-  const [seeding,       setSeeding]       = useState(false);
   const [buscaChamada,  setBuscaChamada]  = useState("");
   const [credAberto,    setCredAberto]    = useState(false);
   const [credUser,      setCredUser]      = useState("");
@@ -86,14 +84,6 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
     await compartilharLink();
   }
 
-  async function seed() {
-    setSeeding(true);
-    try {
-      await apiFetch("/admin/seed", { method: "POST" });
-      await getChamada().then(setChamada);
-    } catch { /* silencioso */ }
-    finally { setSeeding(false); }
-  }
 
   async function selecionarAluno(nome) {
     setBuscaChamada("");
@@ -205,10 +195,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
 
           {chamada.length === 0 ? (
             <div className="dash-chamada-vazio">
-              <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda.</p>
-              <button className="dash-invite-regen" onClick={seed} disabled={seeding}>
-                {seeding ? "Criando..." : "🧪  Adicionar alunos de teste"}
-              </button>
+              <p className="dash-vazio-hint">Nenhum aluno cadastrado ainda. Compartilhe o convite para os alunos entrarem.</p>
             </div>
           ) : (
             <>
