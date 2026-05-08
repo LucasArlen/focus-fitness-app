@@ -10,29 +10,29 @@ router = APIRouter()
 
 
 class ReacaoIn(BaseModel):
-    bloco_id: int
+    linha_id: int
     emoji: str
 
 
 @router.get("/reacao")
-def get_reacoes(bloco_ids: str, db: Session = Depends(get_db), user=Depends(require_any)):
-    ids = [int(x) for x in bloco_ids.split(",") if x.strip().isdigit()]
+def get_reacoes(linha_ids: str, db: Session = Depends(get_db), user=Depends(require_any)):
+    ids = [int(x) for x in linha_ids.split(",") if x.strip().isdigit()]
     if not ids:
         return {}
 
-    reacoes = db.query(Reacao).filter(Reacao.bloco_id.in_(ids)).all()
+    reacoes = db.query(Reacao).filter(Reacao.linha_id.in_(ids)).all()
     aluno_id = int(user["sub"]) if user.get("role") == "aluno" else None
 
     result = {}
-    for bid in ids:
+    for lid in ids:
         contagens = {}
         meu_emoji = None
         for r in reacoes:
-            if r.bloco_id == bid:
+            if r.linha_id == lid:
                 contagens[r.emoji] = contagens.get(r.emoji, 0) + 1
                 if aluno_id and r.aluno_id == aluno_id:
                     meu_emoji = r.emoji
-        result[str(bid)] = {"contagens": contagens, "meu_emoji": meu_emoji}
+        result[str(lid)] = {"contagens": contagens, "meu_emoji": meu_emoji}
 
     return result
 
@@ -45,7 +45,7 @@ def toggle_reacao(body: ReacaoIn, db: Session = Depends(get_db), user=Depends(re
     aluno_id = int(user["sub"])
     existente = db.query(Reacao).filter(
         Reacao.aluno_id == aluno_id,
-        Reacao.bloco_id == body.bloco_id,
+        Reacao.linha_id == body.linha_id,
         Reacao.emoji == body.emoji,
     ).first()
 
@@ -54,6 +54,6 @@ def toggle_reacao(body: ReacaoIn, db: Session = Depends(get_db), user=Depends(re
         db.commit()
         return {"acao": "removida"}
 
-    db.add(Reacao(aluno_id=aluno_id, bloco_id=body.bloco_id, emoji=body.emoji))
+    db.add(Reacao(aluno_id=aluno_id, linha_id=body.linha_id, emoji=body.emoji))
     db.commit()
     return {"acao": "adicionada"}

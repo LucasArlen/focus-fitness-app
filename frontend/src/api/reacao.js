@@ -1,10 +1,10 @@
 import { apiFetch } from "./client";
 
-export const getReacoes = (blocoIds) =>
-  apiFetch(`/reacao?bloco_ids=${blocoIds.join(",")}`);
+export const getReacoes = (linhaIds) =>
+  apiFetch(`/reacao?linha_ids=${linhaIds.join(",")}`);
 
-export const toggleReacao = (blocoId, emoji) =>
+export const toggleReacao = (linhaId, emoji) =>
   apiFetch("/reacao", {
     method: "POST",
-    body: JSON.stringify({ bloco_id: blocoId, emoji }),
+    body: JSON.stringify({ linha_id: linhaId, emoji }),
   });

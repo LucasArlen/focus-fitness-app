@@ -69,7 +69,7 @@ class Reacao(Base):
     __tablename__ = "reacoes"
     id = Column(Integer, primary_key=True, index=True)
     aluno_id = Column(Integer, ForeignKey("alunos.id"))
-    bloco_id = Column(Integer, ForeignKey("blocos.id"))
+    linha_id = Column(Integer, ForeignKey("linhas.id"), nullable=True)
     emoji = Column(Text)
     aluno = relationship("Aluno", back_populates="reacoes")
 

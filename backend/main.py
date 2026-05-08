@@ -16,11 +16,16 @@ Base.metadata.create_all(bind=engine)
 def _auto_migrate():
     from sqlalchemy import text
     with engine.connect() as conn:
-        cols = [row[1] for row in conn.execute(text("PRAGMA table_info(alunos)")).fetchall()]
-        if "apelido" not in cols:
+        # alunos
+        cols_alunos = [row[1] for row in conn.execute(text("PRAGMA table_info(alunos)")).fetchall()]
+        if "apelido" not in cols_alunos:
             conn.execute(text("ALTER TABLE alunos ADD COLUMN apelido TEXT"))
-        if "foto" not in cols:
+        if "foto" not in cols_alunos:
             conn.execute(text("ALTER TABLE alunos ADD COLUMN foto TEXT"))
+        # reacoes: migra de bloco_id → linha_id
+        cols_reacoes = [row[1] for row in conn.execute(text("PRAGMA table_info(reacoes)")).fetchall()]
+        if "linha_id" not in cols_reacoes:
+            conn.execute(text("ALTER TABLE reacoes ADD COLUMN linha_id INTEGER"))
         conn.commit()
 
 _auto_migrate()

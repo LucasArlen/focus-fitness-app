@@ -44,6 +44,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
   const [carregando,setCarregando]= useState(true);
   const [salvando,  setSalvando]  = useState(false);
   const [dirty,     setDirty]     = useState(false);
+  const [erroSalvar,setErroSalvar]= useState("");
   const [notif,     setNotif]     = useState(getNotifEstado);
   const [notifLoad, setNotifLoad] = useState(false);
   const fileRef = useRef(null);
@@ -68,12 +69,16 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
 
   async function salvar() {
     setSalvando(true);
+    setErroSalvar("");
     try {
-      await updatePerfil({ apelido: apelido_.trim(), foto: foto ?? undefined });
+      await updatePerfil({ apelido: apelido_.trim() || null, foto: foto || null });
       onSalvarApelido(apelido_.trim());
       setDirty(false);
-    } catch { /* silencioso */ }
-    finally { setSalvando(false); }
+    } catch (err) {
+      setErroSalvar(err.message || "Erro ao salvar. Tente novamente.");
+    } finally {
+      setSalvando(false);
+    }
   }
 
   async function ativarNotif() {
@@ -149,6 +154,10 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
             O nome no sistema é o que o instrutor usa para marcar sua presença e pontuação. Não pode ser alterado aqui.
           </div>
         </div>
+
+        {erroSalvar && (
+          <p style={{ color: "var(--danger)", fontSize: 13, padding: "0 4px" }}>{erroSalvar}</p>
+        )}
 
         {dirty && (
           <button className="dash-action-btn dash-action-btn-destaque" onClick={salvar} disabled={salvando}>
