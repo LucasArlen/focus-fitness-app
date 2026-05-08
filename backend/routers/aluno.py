@@ -41,7 +41,7 @@ def alterar_credenciais(body: CredenciaisIn, db: Session = Depends(get_db), _=De
 def cadastrar_aluno(body: AlunoIn, db: Session = Depends(get_db)):
     """Cadastra ou re-entra com código de convite válido. Sem PIN."""
     cfg = db.query(AppConfig).filter(AppConfig.key == "invite_code").first()
-    if cfg and body.invite_code != cfg.value:
+    if cfg and body.invite_code.strip().lower() != cfg.value.strip().lower():
         raise HTTPException(403, "Código de convite inválido. Escaneie o QR code da academia.")
 
     aluno = db.query(Aluno).filter(Aluno.nome == body.nome).first()
