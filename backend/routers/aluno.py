@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from auth import ADMIN_PASSWORD, ADMIN_USERNAME, create_token, require_admin, require_any
 from database import get_db
-from models import Aluno, AppConfig
+from models import Aluno, AppConfig, Bloco, Desafio, Linha, Pontuacao, Presenca, PushSubscription, Reacao, Treino
 from schemas import AdminLoginIn, AlunoIn, Token, PerfilOut, PerfilIn
 
 router = APIRouter()
@@ -81,6 +81,15 @@ def listar_alunos(page: int = 1, db: Session = Depends(get_db), _=Depends(requir
         "page": page,
         "pages": max(1, -(-total // per_page)),
     }
+
+
+@router.post("/admin/reset")
+def reset_dados(db: Session = Depends(get_db), _=Depends(require_admin)):
+    """Admin: apaga todos os dados gerados (treinos, alunos, presenças, push). Mantém config."""
+    for model in [Presenca, PushSubscription, Pontuacao, Desafio, Reacao, Linha, Bloco, Treino, Aluno]:
+        db.query(model).delete(synchronize_session=False)
+    db.commit()
+    return {"ok": True}
 
 
 @router.post("/admin/seed")
