@@ -144,3 +144,30 @@ class PerfilOut(BaseModel):
 class PerfilIn(BaseModel):
     apelido: Optional[str] = None
     foto: Optional[str] = None
+
+
+class AvisoIn(BaseModel):
+    titulo: str
+    corpo: Optional[str] = None
+    foto: Optional[str] = None
+    categoria: str = "aviso"
+    data_evento: Optional[str] = None
+    expira_em: datetime.date
+
+
+class ConfirmacaoOut(BaseModel):
+    aluno_nome: str
+    model_config = {"from_attributes": True}
+
+
+class AvisoOut(BaseModel):
+    id: int
+    titulo: str
+    corpo: Optional[str] = None
+    foto: Optional[str] = None
+    categoria: str
+    data_evento: Optional[str] = None
+    expira_em: datetime.date
+    criado_em: datetime.datetime
+    confirmacoes: List[ConfirmacaoOut]
+    model_config = {"from_attributes": True}

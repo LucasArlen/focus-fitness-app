@@ -109,3 +109,24 @@ class AppConfig(Base):
     id    = Column(Integer, primary_key=True, index=True)
     key   = Column(Text, unique=True, index=True)
     value = Column(Text)
+
+
+class Aviso(Base):
+    __tablename__ = "avisos"
+    id          = Column(Integer, primary_key=True, index=True)
+    titulo      = Column(Text)
+    corpo       = Column(Text, nullable=True)
+    foto        = Column(Text, nullable=True)   # base64
+    categoria   = Column(Text, default="aviso") # aviso | evento | feriado
+    data_evento = Column(Text, nullable=True)   # texto livre, e.g. "Sábado 17/05 às 10h"
+    expira_em   = Column(Date)
+    criado_em   = Column(DateTime, default=datetime.datetime.utcnow)
+    confirmacoes = relationship("Confirmacao", back_populates="aviso", cascade="all, delete-orphan")
+
+
+class Confirmacao(Base):
+    __tablename__ = "confirmacoes"
+    id        = Column(Integer, primary_key=True, index=True)
+    aviso_id  = Column(Integer, ForeignKey("avisos.id"))
+    aluno_nome = Column(Text)
+    aviso     = relationship("Aviso", back_populates="confirmacoes")

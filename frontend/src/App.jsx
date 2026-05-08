@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Onboarding from "./components/Onboarding";
 import InstallBanner from "./components/InstallBanner";
 import Perfil from "./pages/Perfil";
+import Avisos from "./pages/Avisos";
 import { useAluno, freqMes } from "./hooks/useAluno";
 
 const IconTreino = () => (
@@ -33,6 +34,12 @@ const IconDesafio = () => (
 const IconHistorico = () => (
   <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
     <path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 117 7c-1.93 0-3.68-.79-4.94-2.06L6.64 18.36A8.955 8.955 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+  </svg>
+);
+
+const IconAvisos = () => (
+  <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18 17v-6c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v6H4v2h16v-2h-2zm-2 0H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z"/>
   </svg>
 );
 
@@ -88,6 +95,7 @@ export default function App() {
   // Abas: admin só aparece na nav se já estiver logado como admin
   const TABS = [
     { id: "treino",    label: "Treino",    Icon: IconTreino },
+    { id: "avisos",    label: "Avisos",    Icon: IconAvisos },
     { id: "desafio",   label: "Desafio",   Icon: IconDesafio },
     { id: "historico", label: "Histórico", Icon: IconHistorico },
     ...(!isAdmin ? [{ id: "perfil", label: "Perfil", Icon: IconPerfil }] : []),
@@ -125,6 +133,7 @@ export default function App() {
           onVerAlunos={() => setAdminView("alunos")}
         />
       )}
+      {view === "avisos"    && <Avisos isAdmin={isAdmin} nomeAluno={nome} />}
       {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} nomeAluno={nome} freqMes={freqMes()} />}
       {view === "historico" && <Historico nomeAluno={nome} />}
       {view === "perfil" && !isAdmin && (
