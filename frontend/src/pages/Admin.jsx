@@ -2,21 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { postTreino, getTreinoHoje } from "../api/treino";
 import { getHistorico, getTreino } from "../api/ranking";
 import { getBanco } from "../api/banco";
-import { getStatus, putStatus } from "../api/academia";
 
 function fmtData(data) {
   const [a, m, d] = data.split("-");
   return new Date(Number(a), Number(m) - 1, Number(d))
     .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
 }
-
-const STATUS_OPCOES = [
-  { val: "vazio",     label: "Vago",       emoji: "😌" },
-  { val: "tranquilo", label: "Tranquilo",  emoji: "👌" },
-  { val: "cheio",     label: "Cheio",      emoji: "🔥" },
-  { val: "lotado",    label: "Lotado",     emoji: "🚨" },
-  { val: "fechado",   label: "Fechado",    emoji: "🔒" },
-];
 
 let nextId = 1000;
 const uid = () => ++nextId;
@@ -40,9 +31,6 @@ export default function Admin({ onLogout, onVoltar }) {
   const [salvando, setSalvando]       = useState(false);
   const [msg, setMsg]                 = useState(null);
   const [temHoje, setTemHoje]         = useState(false);
-  const [statusAtivo, setStatusAtivo] = useState(false);
-  const [statusVal, setStatusVal]     = useState("tranquilo");
-  const [salvandoStatus, setSalvandoStatus] = useState(false);
   const [pickerAberto,   setPickerAberto]   = useState(false);
   const [pickerItens,    setPickerItens]    = useState([]);
   const [pickerLoad,     setPickerLoad]     = useState(false);
@@ -53,19 +41,7 @@ export default function Admin({ onLogout, onVoltar }) {
     getTreinoHoje()
       .then(t => { const { blocos: b, desafioNome: d } = apiParaEstado(t); setBlocos(b); setDesafioNome(d); setTemHoje(true); })
       .catch(() => setTemHoje(false));
-    getStatus()
-      .then(s => { setStatusAtivo(s.ativo); setStatusVal(s.status); })
-      .catch(() => {});
   }, []);
-
-  async function atualizarStatus(novoAtivo, novoVal) {
-    setSalvandoStatus(true);
-    try {
-      const r = await putStatus({ ativo: novoAtivo, status: novoVal });
-      setStatusAtivo(r.ativo); setStatusVal(r.status);
-    } catch { /* silencioso */ }
-    finally { setSalvandoStatus(false); }
-  }
 
   /* ── Blocos ── */
   const addBloco    = () => setBlocos(p => [...p, novoBloco()]);
@@ -227,48 +203,6 @@ export default function Admin({ onLogout, onVoltar }) {
         ))}
 
         <button className="btn-add-bloco" onClick={addBloco}>+ Novo bloco</button>
-
-        {/* ── Status da Academia ── */}
-        <div className="bloco-card admin-status-card">
-          <div className="bloco-header" style={{ borderColor: statusAtivo ? "rgba(200,148,0,0.3)" : undefined }}>
-            <div className="bloco-accent" style={{ background: statusAtivo ? "var(--accent-fill)" : "var(--surface3)" }} />
-            <span className="bloco-nome">📍 Status da Academia</span>
-            <label className="status-toggle-wrap" style={{ marginLeft: "auto" }}>
-              <input
-                type="checkbox"
-                className="status-toggle-input"
-                checked={statusAtivo}
-                disabled={salvandoStatus}
-                onChange={e => atualizarStatus(e.target.checked, statusVal)}
-              />
-              <span className={`status-toggle-track ${statusAtivo ? "on" : ""}`}>
-                <span className="status-toggle-thumb" />
-              </span>
-            </label>
-          </div>
-
-          {statusAtivo && (
-            <div className="status-opcoes-grid">
-              {STATUS_OPCOES.map(op => (
-                <button
-                  key={op.val}
-                  className={`status-opcao-btn ${statusVal === op.val ? "ativo" : ""}`}
-                  disabled={salvandoStatus}
-                  onClick={() => atualizarStatus(true, op.val)}
-                >
-                  <span className="status-opcao-emoji">{op.emoji}</span>
-                  <span className="status-opcao-label">{op.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {!statusAtivo && (
-            <p className="estado-hint" style={{ padding: "10px 14px 14px" }}>
-              Ative para mostrar o status da academia aos alunos.
-            </p>
-          )}
-        </div>
 
         <div className="bloco-card admin-desafio">
           <div className="bloco-header">

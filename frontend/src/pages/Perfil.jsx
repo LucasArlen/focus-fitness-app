@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { getPerfil, updatePerfil } from "../api/aluno";
 import { freqMes } from "../hooks/useAluno";
 import { getVapidKey, subscribePush, urlBase64ToUint8Array } from "../api/push";
+import { getEvolucaoAluno } from "../api/ranking";
 
 const NOTIF_SUPPORTED =
   typeof window !== "undefined" &&
@@ -47,6 +48,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
   const [erroSalvar,setErroSalvar]= useState("");
   const [notif,     setNotif]     = useState(getNotifEstado);
   const [notifLoad, setNotifLoad] = useState(false);
+  const [evolucao,  setEvolucao]  = useState([]);
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -57,7 +59,10 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
       })
       .catch(() => {})
       .finally(() => setCarregando(false));
-  }, []);
+    if (nome) {
+      getEvolucaoAluno(nome).then(setEvolucao).catch(() => {});
+    }
+  }, [nome]);
 
   async function escolherFoto(e) {
     const file = e.target.files?.[0];
@@ -204,6 +209,26 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
                   {notifLoad ? "..." : "Ativar"}
                 </button>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Evolução nos desafios ── */}
+        {evolucao.length > 0 && (
+          <div className="perfil-section">
+            <p className="perfil-section-titulo">🏆 Meus desafios</p>
+            <div className="perfil-evolucao-lista">
+              {[...evolucao].reverse().slice(0, 10).map((e, i) => {
+                const d = new Date(e.data + "T12:00:00");
+                const label = d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+                return (
+                  <div key={i} className="perfil-evolucao-item">
+                    <span className="perfil-evolucao-data">{label}</span>
+                    <span className="perfil-evolucao-desafio">{e.desafio}</span>
+                    <span className="perfil-evolucao-valor">{e.valor}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

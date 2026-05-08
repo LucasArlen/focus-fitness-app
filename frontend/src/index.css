@@ -2182,6 +2182,19 @@ body {
   margin: 0;
 }
 
+.modoaula-desmarcar {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  font-size: 11px;
+  padding: 0 4px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity .15s, color .15s;
+  flex-shrink: 0;
+}
+.modoaula-desmarcar:hover { opacity: 1; color: var(--danger, #e05); }
+
 .modoaula-busca-wrap {
   position: relative;
 }
@@ -2582,6 +2595,52 @@ body {
   background: var(--accent-dim);
   border-color: rgba(232,255,71,0.3);
   color: var(--accent);
+}
+
+.perfil-section-titulo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+  padding: 0 16px 8px;
+  margin: 0;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.perfil-evolucao-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.perfil-evolucao-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.perfil-evolucao-item:last-child { border-bottom: none; }
+
+.perfil-evolucao-data {
+  font-size: 12px;
+  color: var(--text-3);
+  min-width: 48px;
+  flex-shrink: 0;
+}
+.perfil-evolucao-desafio {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.perfil-evolucao-valor {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
 .perfil-danger-btn {

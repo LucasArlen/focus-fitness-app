@@ -121,6 +121,7 @@ export default function App() {
       {view === "admin"     && isAdmin  && adminView === "modoaula" && (
         <AdminModoAula
           onVoltar={() => setAdminView("dashboard")}
+          onVerAlunos={() => setAdminView("alunos")}
         />
       )}
       {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} nomeAluno={nome} freqMes={freqMes()} />}

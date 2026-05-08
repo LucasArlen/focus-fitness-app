@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { getChamada, marcarPresenca } from "../api/presenca";
+import { getChamada, marcarPresenca, desmarcarPresenca } from "../api/presenca";
 import { getDesafioHoje, postPontuacao, deletePontuacao, fecharDesafio } from "../api/desafio";
 
-export default function AdminModoAula({ onVoltar }) {
+export default function AdminModoAula({ onVoltar, onVerAlunos }) {
   const [chamada,   setChamada]   = useState([]);
   const [desafio,   setDesafio]   = useState(null);
   const [busca,     setBusca]     = useState("");
@@ -44,6 +44,16 @@ export default function AdminModoAula({ onVoltar }) {
       setChamada(nova);
     } catch { /* silencioso */ }
     finally { setMarcando(null); inputRef.current?.focus(); }
+  }
+
+  async function desmarcarAluno(nome) {
+    setMarcando(nome);
+    try {
+      await desmarcarPresenca(nome);
+      const nova = await getChamada();
+      setChamada(nova);
+    } catch { /* silencioso */ }
+    finally { setMarcando(null); }
   }
 
   // ── Score ─────────────────────────────────────────────────────
@@ -93,7 +103,12 @@ export default function AdminModoAula({ onVoltar }) {
       <header className="app-header">
         <button className="btn-voltar" onClick={onVoltar}>← Voltar</button>
         <span className="logo" style={{ fontSize: 16 }}>Modo Aula</span>
-        <span className="dash-badge ok">{presentes.length}/{chamada.length}</span>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <span className="dash-badge ok">{presentes.length}/{chamada.length}</span>
+          {onVerAlunos && (
+            <button className="btn-logout" onClick={onVerAlunos} title="Ver todos os alunos">👥</button>
+          )}
+        </div>
       </header>
 
       <main className="feed">
@@ -152,6 +167,12 @@ export default function AdminModoAula({ onVoltar }) {
 
               return (
                 <div key={a.nome} className={`modoaula-row ${score ? "tem-score" : ""} ${editando_ ? "editando" : ""}`}>
+                  <button
+                    className="modoaula-desmarcar"
+                    disabled={marcando === a.nome}
+                    onClick={() => desmarcarAluno(a.nome)}
+                    title="Desmarcar presença"
+                  >✕</button>
                   <span className="modoaula-ordem">{a.ordem_chegada}º</span>
                   <span className="modoaula-nome">{a.nome}</span>
 
