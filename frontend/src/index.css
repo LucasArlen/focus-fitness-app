@@ -1347,6 +1347,22 @@ body {
 .dash-refresh-btn:hover:not(:disabled) { color: var(--text-2); border-color: var(--border-hi); }
 .dash-refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* ── Credenciais admin ── */
+.cred-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+.cred-input:focus { border-color: var(--accent); }
+.cred-feedback { font-size: 12px; padding: 2px 0; }
+.cred-feedback.ok   { color: #4cd964; }
+.cred-feedback.erro { color: #ff5252; }
+
 /* ── QR Code de convite ── */
 .dash-invite-body {
   display: flex;

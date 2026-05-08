@@ -29,6 +29,10 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
   const [linkCopiado,   setLinkCopiado]   = useState(false);
   const [seeding,       setSeeding]       = useState(false);
   const [buscaChamada,  setBuscaChamada]  = useState("");
+  const [credAberto,    setCredAberto]    = useState(false);
+  const [credUser,      setCredUser]      = useState("");
+  const [credPass,      setCredPass]      = useState("");
+  const [credStatus,    setCredStatus]    = useState(null); // "ok" | "erro" | null
   const [marcando,      setMarcando]      = useState(null);
 
   function carregar() {
@@ -339,6 +343,54 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
             )}
           </div>
         )}
+
+        {/* ── CREDENCIAIS ── */}
+        <div className="dash-card">
+          <div
+            className="dash-card-header dash-card-header-toggle"
+            onClick={() => { setCredAberto(v => !v); setCredStatus(null); }}
+          >
+            <span className="dash-card-icon">🔑</span>
+            <span className="dash-card-titulo">Login do admin</span>
+            <span className="dash-collapse-chevron" style={{ marginLeft: "auto", transform: credAberto ? "rotate(180deg)" : "" }}>▾</span>
+          </div>
+
+          {credAberto && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 4 }}>
+              <input
+                className="cred-input"
+                type="text"
+                placeholder="Novo usuário"
+                value={credUser}
+                onChange={e => setCredUser(e.target.value)}
+                autoComplete="off"
+              />
+              <input
+                className="cred-input"
+                type="password"
+                placeholder="Nova senha"
+                value={credPass}
+                onChange={e => setCredPass(e.target.value)}
+                autoComplete="new-password"
+              />
+              {credStatus === "ok"   && <p className="cred-feedback ok">✓ Salvo! Use as novas credenciais no próximo login.</p>}
+              {credStatus === "erro" && <p className="cred-feedback erro">✗ Erro ao salvar. Tente novamente.</p>}
+              <button
+                className="dash-action-btn"
+                disabled={!credUser.trim() || !credPass.trim()}
+                onClick={async () => {
+                  try {
+                    await apiFetch("/admin/credenciais", { method: "PUT", body: JSON.stringify({ username: credUser, password: credPass }) });
+                    setCredStatus("ok");
+                    setCredUser(""); setCredPass("");
+                  } catch { setCredStatus("erro"); }
+                }}
+              >
+                Salvar credenciais
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* ── ATUALIZAR ── */}
         <button className="dash-refresh-btn" onClick={carregar} disabled={carregando}>

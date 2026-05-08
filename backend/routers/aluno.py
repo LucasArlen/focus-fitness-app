@@ -4,16 +4,37 @@ from sqlalchemy.orm import Session
 from auth import ADMIN_PASSWORD, ADMIN_USERNAME, create_token, require_admin, require_any
 from database import get_db
 from models import Aluno, AppConfig, Bloco, Desafio, Linha, Pontuacao, Presenca, PushSubscription, Reacao, Treino
-from schemas import AdminLoginIn, AlunoIn, Token, PerfilOut, PerfilIn
+from schemas import AdminLoginIn, AlunoIn, CredenciaisIn, Token, PerfilOut, PerfilIn
 
 router = APIRouter()
 
 
+def _get_credenciais(db: Session):
+    u = db.query(AppConfig).filter(AppConfig.key == "admin_username").first()
+    p = db.query(AppConfig).filter(AppConfig.key == "admin_password").first()
+    return (u.value if u else ADMIN_USERNAME), (p.value if p else ADMIN_PASSWORD)
+
+
 @router.post("/admin/login", response_model=Token)
-def admin_login(body: AdminLoginIn):
-    if body.username != ADMIN_USERNAME or body.password != ADMIN_PASSWORD:
+def admin_login(body: AdminLoginIn, db: Session = Depends(get_db)):
+    username, password = _get_credenciais(db)
+    if body.username != username or body.password != password:
         raise HTTPException(401, "Credenciais inválidas")
     return Token(access_token=create_token({"sub": "admin", "role": "admin"}), role="admin")
+
+
+@router.put("/admin/credenciais")
+def alterar_credenciais(body: CredenciaisIn, db: Session = Depends(get_db), _=Depends(require_admin)):
+    if not body.username.strip() or not body.password.strip():
+        raise HTTPException(400, "Usuário e senha não podem ser vazios")
+    for key, val in [("admin_username", body.username.strip()), ("admin_password", body.password.strip())]:
+        cfg = db.query(AppConfig).filter(AppConfig.key == key).first()
+        if cfg:
+            cfg.value = val
+        else:
+            db.add(AppConfig(key=key, value=val))
+    db.commit()
+    return {"ok": True}
 
 
 @router.post("/aluno/cadastro", response_model=Token)
