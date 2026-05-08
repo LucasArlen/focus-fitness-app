@@ -4,6 +4,7 @@ import Admin from "./pages/Admin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminDesafio from "./pages/AdminDesafio";
 import AdminAlunos from "./pages/AdminAlunos";
+import AdminModoAula from "./pages/AdminModoAula";
 import Historico from "./pages/Historico";
 import Login from "./pages/Login";
 import Onboarding from "./components/Onboarding";
@@ -94,6 +95,7 @@ export default function App() {
         <AdminDashboard
           onEditarTreino={() => setAdminView("editor")}
           onVerAlunos={() => setAdminView("alunos")}
+          onModoAula={() => setAdminView("modoaula")}
           onLogout={onLogout}
         />
       )}
@@ -105,6 +107,11 @@ export default function App() {
       )}
       {view === "admin"     && isAdmin  && adminView === "alunos" && (
         <AdminAlunos
+          onVoltar={() => setAdminView("dashboard")}
+        />
+      )}
+      {view === "admin"     && isAdmin  && adminView === "modoaula" && (
+        <AdminModoAula
           onVoltar={() => setAdminView("dashboard")}
         />
       )}

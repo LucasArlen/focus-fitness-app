@@ -14,7 +14,7 @@ const STATUS_OPCOES = [
   { val: "fechado",   label: "Fechado",   emoji: "🔒" },
 ];
 
-export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }) {
+export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula, onLogout }) {
   const [treino,        setTreino]        = useState(null);
   const [desafio,       setDesafio]       = useState(null);
   const [chamada,       setChamada]       = useState([]);
@@ -192,7 +192,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
         <div className="dash-card">
           <div className="dash-card-header">
             <span className="dash-card-icon">👥</span>
-            <span className="dash-card-titulo">Chamada</span>
+            <span className="dash-card-titulo">Aula de hoje</span>
             <span className="dash-badge ok" style={{ marginLeft: "auto" }}>
               {totalPresentes}/{chamada.length}
             </span>
@@ -207,50 +207,25 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onLogout }
             </div>
           ) : (
             <>
-              {/* busca inline */}
-              <div className="dash-chamada-wrap">
-                <input
-                  className="dash-chamada-input"
-                  placeholder="🔍  Buscar aluno..."
-                  value={buscaChamada}
-                  onChange={e => setBuscaChamada(e.target.value)}
-                  autoComplete="off"
-                />
-                {sugestoes.length > 0 && (
-                  <div className="dash-chamada-sugestoes">
-                    {sugestoes.slice(0, 5).map(a => (
-                      <button
-                        key={a.nome}
-                        className="dash-chamada-sug"
-                        disabled={marcando === a.nome}
-                        onClick={() => selecionarAluno(a.nome)}
-                      >
-                        {marcando === a.nome ? "⏳" : "✓"} {a.nome}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {buscaNorm && sugestoes.length === 0 && (
-                  <p className="dash-chamada-sem-result">Nenhum ausente com esse nome.</p>
-                )}
-              </div>
-
-              {/* últimos 5 chegados */}
+              {/* Últimos 3 chegados como preview */}
               {ultimosChegados.length > 0 ? (
                 <div className="dash-chegadas">
-                  {ultimosChegados.map(a => (
+                  {ultimosChegados.slice(0, 3).map(a => (
                     <div key={a.nome} className="dash-chegada-item">
                       <span className="dash-chegada-ordem">{a.ordem_chegada}º</span>
                       <span className="dash-chegada-nome">{a.nome}</span>
                     </div>
                   ))}
+                  {totalPresentes > 3 && (
+                    <p className="dash-chegada-mais">+ {totalPresentes - 3} aluno{totalPresentes - 3 !== 1 ? "s" : ""}</p>
+                  )}
                 </div>
               ) : (
-                <p className="dash-vazio-hint">Ninguém marcado ainda.</p>
+                <p className="dash-vazio-hint">Ninguém chegou ainda.</p>
               )}
 
-              <button className="dash-action-btn" onClick={onVerAlunos}>
-                👥  Ver chamada completa
+              <button className="dash-action-btn dash-action-btn-destaque" onClick={onModoAula}>
+                🎯  Abrir Modo Aula
               </button>
             </>
           )}

@@ -2054,6 +2054,169 @@ body {
 }
 .btn-fechar-desafio:hover { border-color: var(--accent); color: var(--accent); }
 
+/* ─────────────────────────────────────────────────────────────
+   Modo Aula
+───────────────────────────────────────────────────────────── */
+.dash-action-btn-destaque {
+  background: var(--accent);
+  color: #000;
+  font-weight: 800;
+  border-top-color: transparent;
+}
+.dash-action-btn-destaque:hover { background: #d4eb3a; }
+
+.dash-chegada-mais {
+  font-size: 12px;
+  color: var(--text-3);
+  padding: 2px 12px;
+  margin: 0;
+}
+
+.modoaula-busca-wrap {
+  position: relative;
+}
+.modoaula-busca {
+  font-size: 16px;
+  padding: 14px 16px;
+}
+
+.modoaula-desafio-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.modoaula-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modoaula-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: background .12s;
+}
+.modoaula-row.tem-score {
+  background: rgba(76,217,100,0.05);
+  border-color: rgba(76,217,100,0.2);
+}
+.modoaula-row.editando {
+  border-color: var(--accent);
+  background: var(--surface2);
+}
+
+.modoaula-ordem {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  min-width: 24px;
+  text-align: center;
+}
+.modoaula-nome {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+.modoaula-add-score {
+  background: none;
+  border: 1px dashed var(--border-hi);
+  border-radius: 8px;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .12s, color .12s;
+}
+.modoaula-add-score:hover { border-color: var(--accent); color: var(--accent); }
+
+.modoaula-score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.modoaula-score-val {
+  background: rgba(76,217,100,0.12);
+  border: 1px solid rgba(76,217,100,0.3);
+  border-radius: 8px;
+  color: var(--success);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s;
+}
+.modoaula-score-val:hover { background: rgba(76,217,100,0.2); }
+
+.modoaula-score-final {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--success);
+}
+
+.modoaula-del {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color .12s;
+}
+.modoaula-del:hover { color: var(--danger); }
+
+.modoaula-edit-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.modoaula-score-input {
+  width: 70px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--text-1);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 5px 8px;
+  text-align: center;
+  outline: none;
+}
+.modoaula-ok {
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.modoaula-ok:disabled { opacity: 0.4; cursor: not-allowed; }
+.modoaula-cancel {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+}
+
 .desafio-confirm-fechar {
   display: flex;
   flex-direction: column;
