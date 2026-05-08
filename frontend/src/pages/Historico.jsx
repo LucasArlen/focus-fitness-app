@@ -7,10 +7,10 @@ function fmt(data) {
     .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
 }
 
-export default function Historico({ nomeAluno, onTrocarNome }) {
-  const [lista, setLista]           = useState([]);
-  const [estado, setEstado]         = useState("carregando");
-  const [expandido, setExpandido]   = useState(null);
+export default function Historico({ nomeAluno }) {
+  const [lista, setLista]             = useState([]);
+  const [estado, setEstado]           = useState("carregando");
+  const [expandido, setExpandido]     = useState(null);
   const [treinoCache, setTreinoCache] = useState({});
   const [carregandoId, setCarregandoId] = useState(null);
 
@@ -36,14 +36,7 @@ export default function Historico({ nomeAluno, onTrocarNome }) {
     <div className="page">
       <header className="app-header">
         <span className="logo">Focus Fitness</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {nomeAluno && <span className="aluno-chip">👤 {nomeAluno}</span>}
-          {onTrocarNome && (
-            <button className="btn-logout" onClick={onTrocarNome} title="Trocar nome">
-              Trocar nome
-            </button>
-          )}
-        </div>
+        {nomeAluno && <span className="aluno-chip">👤 {nomeAluno}</span>}
       </header>
 
       <main className="feed">
@@ -75,14 +68,21 @@ export default function Historico({ nomeAluno, onTrocarNome }) {
           const treino     = treinoCache[item.id];
           const carregando = carregandoId === item.id;
 
-          // Resultado do aluno nesse desafio (se existir)
           const meuResultado = treino?.desafio?.pontuacoes?.find(
             p => p.aluno_nome.trim().toLowerCase() === (nomeAluno ?? "").trim().toLowerCase()
           );
 
+          // presente: null = sem info (aluno não logado), true/false = presença confirmada
+          const presencaIcon = item.presente === true
+            ? <span className="hist-presenca presente" title="Você treinou">✓</span>
+            : item.presente === false
+            ? <span className="hist-presenca ausente" title="Você não veio">○</span>
+            : null;
+
           return (
             <div key={item.id} className="bloco-card hist-card" onClick={() => toggle(item.id)}>
               <div className="hist-row">
+                {presencaIcon}
                 <div className="hist-info">
                   <p className="hist-data">{fmt(item.data)}</p>
                   <p className="hist-blocos">
@@ -106,14 +106,13 @@ export default function Historico({ nomeAluno, onTrocarNome }) {
 
                   {!carregando && treino && (
                     <>
-                      {/* Resultado do aluno no desafio */}
                       {treino.desafio && (
                         <div className="hist-desafio-detalhe">
                           <span className="hist-desafio-titulo">🏆 {treino.desafio.nome}</span>
                           {meuResultado ? (
                             <div className="hist-desafio-resultado">
                               <span className="hist-resultado-label">Seu resultado</span>
-                              <span className="hist-resultado-valor">{meuResultado.valor}</span>
+                              <span className="hist-resultado-valor">{meuResultado.valor} reps</span>
                               {(() => {
                                 const sorted = [...treino.desafio.pontuacoes]
                                   .sort((a, b) => (parseFloat(b.valor)||0) - (parseFloat(a.valor)||0));
@@ -134,7 +133,6 @@ export default function Historico({ nomeAluno, onTrocarNome }) {
                         </div>
                       )}
 
-                      {/* Blocos e exercícios */}
                       {treino.blocos.map(b => (
                         <div key={b.id} className="hist-bloco">
                           <p className="hist-bloco-nome">{b.nome}</p>

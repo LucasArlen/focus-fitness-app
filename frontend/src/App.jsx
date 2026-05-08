@@ -125,7 +125,7 @@ export default function App() {
         />
       )}
       {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} nomeAluno={nome} freqMes={freqMes()} />}
-      {view === "historico" && <Historico nomeAluno={nome} onTrocarNome={limpar} />}
+      {view === "historico" && <Historico nomeAluno={nome} />}
       {view === "perfil" && !isAdmin && (
         <Perfil
           nome={nome}

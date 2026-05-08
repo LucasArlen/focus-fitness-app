@@ -67,7 +67,15 @@ class TreinoResumoOut(BaseModel):
     nomes_blocos: List[str]
     desafio_nome: Optional[str] = None
     meu_resultado: Optional[str] = None
+    presente: Optional[bool] = None
     model_config = {"from_attributes": True}
+
+
+class RankingMensalItem(BaseModel):
+    nome: str
+    participacoes: int
+    total: float
+    melhor: float
 
 
 class StatusOut(BaseModel):

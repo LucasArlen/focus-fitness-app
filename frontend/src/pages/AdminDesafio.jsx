@@ -1,11 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { deletePontuacao, fecharDesafio, getDesafioHoje, postPontuacao } from "../api/desafio";
-import { getRankingAnual, getEvolucaoAluno } from "../api/ranking";
+import { getRankingMensal, getEvolucaoAluno } from "../api/ranking";
 import { getChamada } from "../api/presenca";
 
 const MEDALHAS = ["🥇", "🥈", "🥉"];
 const numVal = v => parseFloat(v) || 0;
-const mesNome = () => new Date().toLocaleString("pt-BR", { month: "long" });
+
+function calcMeses() {
+  const hoje = new Date();
+  const mesAtual   = hoje.toISOString().slice(0, 7);
+  const dtPassado  = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+  const mesPassado = dtPassado.toISOString().slice(0, 7);
+  const nomeAtual  = hoje.toLocaleString("pt-BR", { month: "long" });
+  const nomePassado = dtPassado.toLocaleString("pt-BR", { month: "long" });
+  return { mesAtual, mesPassado, nomeAtual, nomePassado };
+}
+
+const { mesAtual, mesPassado, nomeAtual, nomePassado } = calcMeses();
 
 function fmt(data) {
   const [a, m, d] = data.split("-");
@@ -22,6 +33,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
   const [estadoHoje, setEstadoHoje] = useState("carregando");
   const [anual, setAnual]           = useState([]);
   const [estadoAnual, setEstadoAnual] = useState("carregando");
+  const [rankingPassado, setRankingPassado] = useState([]);
   const [novoNome, setNovoNome]     = useState("");
   const [novoValor, setNovoValor]   = useState("");
   const [salvando, setSalvando]     = useState(false);
@@ -39,9 +51,12 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
   }
 
   function carregarAnual() {
-    getRankingAnual()
+    getRankingMensal(mesAtual)
       .then(r => { setAnual(r); setEstadoAnual("ok"); })
       .catch(() => setEstadoAnual("erro"));
+    getRankingMensal(mesPassado)
+      .then(setRankingPassado)
+      .catch(() => {});
   }
 
   useEffect(() => {
@@ -121,7 +136,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
         </button>
         <button className={`tab-btn ${aba === "anual" ? "ativo" : ""}`}
           onClick={() => { setAba("anual"); setAlunoSelecionado(null); }}>
-          Ranking Anual
+          Ranking
         </button>
       </div>
 
@@ -281,7 +296,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
                   <span className="meu-desempenho-nome">👤 {nomeAluno}</span>
                   {freqMes > 0 && (
                     <span className="meu-desempenho-freq">
-                      🗓 {freqMes} {freqMes === 1 ? "dia" : "dias"} em {mesNome()}
+                      🗓 {freqMes} {freqMes === 1 ? "dia" : "dias"} em {nomeAtual}
                     </span>
                   )}
                 </div>
@@ -315,8 +330,30 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
               </div>
             )}
 
-            <p className="data-header" style={{ textAlign: "center", paddingTop: 4 }}>
-              Ranking acumulado {new Date().getFullYear()}
+            {/* ── Card mês passado ── */}
+            {rankingPassado.length > 0 && (
+              <div className="bloco-card desafio-card ranking-passado-card">
+                <div className="bloco-header">
+                  <div className="bloco-accent" />
+                  <span className="bloco-nome">🏅 Melhores de {nomePassado}</span>
+                </div>
+                <ol className="ranking-list ranking-rest" style={{ padding: "8px 12px 12px" }}>
+                  {rankingPassado.slice(0, 3).map((a, i) => (
+                    <li key={a.nome} className={`ranking-item pos-${i + 1} ${euSou(a.nome, nomeAluno) ? "minha-linha" : ""}`}>
+                      <span className="medalha">{MEDALHAS[i]}</span>
+                      <span className="ranking-nome">{a.nome}</span>
+                      <div style={{ textAlign: "right" }}>
+                        <p className="ranking-valor">{a.total.toFixed(0)} reps</p>
+                        <p style={{ fontSize: 11, color: "var(--text-2)" }}>{a.participacoes} desafio{a.participacoes !== 1 ? "s" : ""}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            <p className="data-header" style={{ textAlign: "center", paddingTop: 4, textTransform: "capitalize" }}>
+              Ranking de {nomeAtual}
             </p>
 
             {estadoAnual === "carregando" && (
@@ -327,7 +364,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
               <div className="estado-vazio">
                 <span className="estado-vazio-icon">📊</span>
                 <p className="estado-vazio-titulo">Nenhum dado ainda</p>
-                <p className="estado-vazio-sub">Lance pontuações nos desafios do dia para formar o ranking anual.</p>
+                <p className="estado-vazio-sub">Lance pontuações nos desafios do dia para formar o ranking.</p>
               </div>
             )}
 
@@ -335,7 +372,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
               <div className="bloco-card desafio-card">
                 <div className="bloco-header">
                   <div className="bloco-accent" />
-                  <span className="bloco-nome">🏆 Ranking Anual</span>
+                  <span className="bloco-nome" style={{ textTransform: "capitalize" }}>🏆 {nomeAtual}</span>
                 </div>
                 <ol className="ranking-list ranking-rest" style={{ padding: "12px", maxHeight: "none" }}>
                   {anual.map((a, i) => (

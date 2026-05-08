@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from auth import require_admin
 from database import get_db
-from models import Bloco, Desafio, ExercicioBanco, Linha, Treino
+from models import Bloco, Desafio, ExercicioBanco, Linha, Presenca, Treino
 from schemas import TreinoIn, TreinoOut, TreinoResumoOut
 
 router = APIRouter()
@@ -23,14 +23,22 @@ def get_historico(limite: int = 30, aluno: str = "", db: Session = Depends(get_d
     for t in treinos:
         total_ex = sum(len(b.linhas) for b in t.blocos)
         meu_resultado = None
-        if aluno and t.desafio:
-            pontuacao = next(
-                (p for p in t.desafio.pontuacoes
-                 if p.aluno_nome.strip().lower() == aluno.strip().lower()),
-                None
-            )
-            if pontuacao:
-                meu_resultado = pontuacao.valor
+        presente = None
+        if aluno:
+            aluno_norm = aluno.strip().lower()
+            if t.desafio:
+                pontuacao = next(
+                    (p for p in t.desafio.pontuacoes
+                     if p.aluno_nome.strip().lower() == aluno_norm),
+                    None
+                )
+                if pontuacao:
+                    meu_resultado = pontuacao.valor
+            p = db.query(Presenca).filter(
+                Presenca.treino_id == t.id,
+                Presenca.aluno_nome.ilike(aluno)
+            ).first()
+            presente = p is not None
         result.append(TreinoResumoOut(
             id=t.id,
             data=t.data,
@@ -39,6 +47,7 @@ def get_historico(limite: int = 30, aluno: str = "", db: Session = Depends(get_d
             nomes_blocos=[b.nome for b in t.blocos],
             desafio_nome=t.desafio.nome if t.desafio else None,
             meu_resultado=meu_resultado,
+            presente=presente,
         ))
     return result
 
