@@ -8,6 +8,7 @@ import AdminModoAula from "./pages/AdminModoAula";
 import Historico from "./pages/Historico";
 import Login from "./pages/Login";
 import Onboarding from "./components/Onboarding";
+import InstallBanner from "./components/InstallBanner";
 import Perfil from "./pages/Perfil";
 import { useAluno, freqMes } from "./hooks/useAluno";
 
@@ -134,6 +135,8 @@ export default function App() {
           onTrocarNome={limpar}
         />
       )}
+
+      {!isAdmin && <InstallBanner />}
 
       <nav className="bottom-nav">
         {TABS.map(({ id, label, Icon }) => (

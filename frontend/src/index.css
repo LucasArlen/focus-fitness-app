@@ -2492,6 +2492,52 @@ body {
 
 .notif-banner-fechar:hover { color: var(--text-2); }
 
+/* ── Banner de instalação PWA ── */
+.install-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  animation: pop-in 0.2s ease;
+  margin: 0 16px;
+}
+.install-banner-ios { align-items: flex-start; }
+.install-banner-icon { font-size: 20px; flex-shrink: 0; }
+.install-banner-texto { flex: 1; font-size: 13px; color: var(--text-1); }
+.install-banner-ios-texto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--text-1);
+  line-height: 1.4;
+}
+.install-banner-btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.install-banner-fechar {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 /* ─────────────────────────────────────────────────────────────
    Perfil
 ───────────────────────────────────────────────────────────── */
