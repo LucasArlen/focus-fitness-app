@@ -7,7 +7,6 @@ function lerCodigoConvite() {
   const params = new URLSearchParams(window.location.search);
   const code   = params.get("c") || "";
   if (code) {
-    // Remove da URL sem reload
     params.delete("c");
     const nova = window.location.pathname + (params.toString() ? "?" + params : "");
     window.history.replaceState({}, "", nova);
@@ -16,16 +15,28 @@ function lerCodigoConvite() {
   return code || localStorage.getItem("invite_code") || "";
 }
 
+/** PIN automático por device — gerado uma vez e guardado. */
+function obterPinLocal() {
+  let pin = localStorage.getItem("device_pin");
+  if (!pin) {
+    pin = Math.floor(1000 + Math.random() * 9000).toString();
+    localStorage.setItem("device_pin", pin);
+  }
+  return pin;
+}
+
 export default function Onboarding({ onConfirm, onAdmin }) {
-  const [passo, setPasso]       = useState(1); // 1 = nome, 2 = pin
-  const [nome, setNome]         = useState("");
-  const [pin, setPin]           = useState(["", "", "", ""]);
-  const [erro, setErro]         = useState("");
-  const [salvando, setSalvando] = useState(false);
-  const [qrAberto, setQrAberto] = useState(false);
-  const [inviteCode, setInviteCode] = useState(() => lerCodigoConvite());
-  const inputsRef = useRef([]);
+  const [nome, setNome]               = useState("");
+  const [codigoDigitado, setCodigoDig]= useState("");
+  const [erro, setErro]               = useState("");
+  const [salvando, setSalvando]       = useState(false);
+  const [qrAberto, setQrAberto]       = useState(false);
+  const [inviteCode, setInviteCode]   = useState(() => lerCodigoConvite());
+  const [mostrarCodigo, setMostrarCodigo] = useState(false);
   const adminTimer = useRef(null);
+
+  // Código efetivo: QR escaneado / link > digitado manualmente
+  const codigoEfetivo = inviteCode || codigoDigitado.trim();
 
   const handleScan = useCallback((texto) => {
     setQrAberto(false);
@@ -39,73 +50,47 @@ export default function Onboarding({ onConfirm, onAdmin }) {
     } catch { /* não era URL válida */ }
   }, []);
 
-  // Segurar o logo 1.5s → abre login de admin
   function logoStart(e) {
     e.preventDefault();
     adminTimer.current = setTimeout(() => onAdmin?.(), 1500);
   }
-  function logoEnd() {
-    clearTimeout(adminTimer.current);
-  }
+  function logoEnd() { clearTimeout(adminTimer.current); }
 
-  /* ── Passo 1: confirma nome ── */
-  function handleNome(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (nome.trim().length < 2) return;
-    setErro("");
-    setPasso(2);
-    setTimeout(() => inputsRef.current[0]?.focus(), 80);
-  }
-
-  /* ── Passo 2: gerencia os 4 campos do PIN ── */
-  function handleDigit(i, val) {
-    if (!/^\d?$/.test(val)) return;
-    const novo = [...pin];
-    novo[i] = val;
-    setPin(novo);
-    if (val && i < 3) inputsRef.current[i + 1]?.focus();
-  }
-
-  function handleKeyDown(i, e) {
-    if (e.key === "Backspace" && !pin[i] && i > 0) {
-      inputsRef.current[i - 1]?.focus();
+    if (!codigoEfetivo) {
+      setErro("Escaneie o QR code, use o link ou digite o código da academia.");
+      return;
     }
-  }
 
-  /* ── Submete PIN ── */
-  async function handlePin(e) {
-    e.preventDefault();
-    const codigo = pin.join("");
-    if (codigo.length < 4) return;
+    const pin = obterPinLocal();
     setSalvando(true);
     setErro("");
     try {
       let res;
       try {
-        // Tenta cadastrar (envia invite_code — ignorado se já existe)
-        res = await cadastrarAluno(nome.trim(), codigo, inviteCode);
+        // Tenta cadastrar (se já existe + convite válido → backend reseta PIN)
+        res = await cadastrarAluno(nome.trim(), pin, codigoEfetivo);
       } catch (err) {
         if (err.message.includes("já cadastrado")) {
-          // Aluno existente: login não precisa de código
-          res = await loginAluno(nome.trim(), codigo);
+          // Device já tem o PIN correto, faz login direto
+          res = await loginAluno(nome.trim(), pin);
         } else {
           throw err;
         }
       }
-      // Persiste o código para futuros acessos neste device
-      if (inviteCode) localStorage.setItem("invite_code", inviteCode);
+      localStorage.setItem("invite_code", codigoEfetivo);
       onConfirm(nome.trim(), res.access_token);
     } catch (err) {
       const msg = err.message;
-      if (msg.includes("convite") || msg.includes("QR")) {
-        setErro("Escaneie o QR code da academia para criar sua conta.");
-      } else if (msg.includes("PIN") || msg.includes("inválido")) {
-        setErro("PIN incorreto. Tenta de novo.");
+      if (msg.includes("convite") || msg.includes("QR") || msg.includes("inválido")) {
+        setErro("Código inválido. Peça o link ou código ao instrutor.");
+      } else if (msg.includes("PIN") || msg.includes("Nome ou PIN")) {
+        setErro("Não foi possível entrar. Tente o botão abaixo para limpar e recomeçar.");
       } else {
         setErro(msg);
       }
-      setPin(["", "", "", ""]);
-      setTimeout(() => inputsRef.current[0]?.focus(), 80);
     } finally {
       setSalvando(false);
     }
@@ -120,96 +105,79 @@ export default function Onboarding({ onConfirm, onAdmin }) {
       <div className="onboarding-inner">
         <div
           className="onboarding-logo"
-          onMouseDown={logoStart}
-          onMouseUp={logoEnd}
-          onMouseLeave={logoEnd}
-          onTouchStart={logoStart}
-          onTouchEnd={logoEnd}
+          onMouseDown={logoStart} onMouseUp={logoEnd}
+          onMouseLeave={logoEnd} onTouchStart={logoStart} onTouchEnd={logoEnd}
           style={{ userSelect: "none" }}
         >Focus Fitness</div>
 
-        {/* ── PASSO 1: NOME ── */}
-        {passo === 1 && (
-          <div className="onboarding-body">
-            <span className="onboarding-icon">👋</span>
-            <h1 className="onboarding-titulo">Bem-vindo!</h1>
-            <p className="onboarding-sub">Como você quer ser chamado no ranking?</p>
+        <div className="onboarding-body">
+          <span className="onboarding-icon">👋</span>
+          <h1 className="onboarding-titulo">Bem-vindo!</h1>
+          <p className="onboarding-sub">Como você quer ser chamado no ranking?</p>
 
-            <form className="onboarding-form" onSubmit={handleNome}>
-              <input
-                className="onboarding-input"
-                placeholder="Seu nome"
-                value={nome}
-                onChange={e => setNome(e.target.value)}
-                autoFocus
-                maxLength={40}
-                autoComplete="off"
-                autoCapitalize="words"
-              />
-              <button className="btn-publicar onboarding-btn" type="submit"
-                disabled={nome.trim().length < 2}>
-                Continuar →
-              </button>
-            </form>
+          <form className="onboarding-form" onSubmit={handleSubmit}>
+            {/* Nome */}
+            <input
+              className="onboarding-input"
+              placeholder="Seu nome completo"
+              value={nome}
+              onChange={e => setNome(e.target.value)}
+              autoFocus
+              maxLength={40}
+              autoComplete="off"
+              autoCapitalize="words"
+            />
+
+            {/* Código de acesso */}
+            <div className="onboarding-codigo-wrap">
+              {inviteCode ? (
+                <div className="onboarding-codigo-ok">
+                  <span>✅ Código de acesso confirmado</span>
+                  <button type="button" className="onboarding-trocar-codigo"
+                    onClick={() => { setInviteCode(""); localStorage.removeItem("invite_code"); }}>
+                    Trocar
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="onboarding-qr-btn"
+                    onClick={() => setQrAberto(true)}
+                  >
+                    📷  Escanear QR code
+                  </button>
+
+                  <div className="onboarding-ou">
+                    <span />ou<span />
+                  </div>
+
+                  <input
+                    className="onboarding-input onboarding-codigo-input"
+                    placeholder="Digitar código manualmente"
+                    value={codigoDigitado}
+                    onChange={e => setCodigoDig(e.target.value.trim())}
+                    autoComplete="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                  />
+                </>
+              )}
+            </div>
+
+            {erro && <p className="onboarding-erro">{erro}</p>}
 
             <button
-              type="button"
-              className={`onboarding-qr-btn ${inviteCode ? "tem-codigo" : ""}`}
-              onClick={() => setQrAberto(true)}
+              className="btn-publicar onboarding-btn"
+              type="submit"
+              disabled={nome.trim().length < 2 || !codigoEfetivo || salvando}
             >
-              {inviteCode ? "✅  QR code escaneado" : "📷  Escanear QR da academia"}
+              {salvando ? "Entrando..." : "Entrar →"}
             </button>
-          </div>
-        )}
+          </form>
+        </div>
 
-        {/* ── PASSO 2: PIN ── */}
-        {passo === 2 && (
-          <div className="onboarding-body">
-            <span className="onboarding-icon">🔐</span>
-            <h1 className="onboarding-titulo">{nome}</h1>
-            <p className="onboarding-sub">
-              Crie um PIN de 4 dígitos.<br />
-              Ele te identifica em qualquer celular.
-            </p>
-
-            <form className="onboarding-form" onSubmit={handlePin}>
-              <div className="pin-grid">
-                {pin.map((d, i) => (
-                  <input
-                    key={i}
-                    ref={el => inputsRef.current[i] = el}
-                    className={`pin-box ${d ? "preenchido" : ""}`}
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={d}
-                    onChange={e => handleDigit(i, e.target.value)}
-                    onKeyDown={e => handleKeyDown(i, e)}
-                    autoComplete="off"
-                  />
-                ))}
-              </div>
-
-              {erro && <p className="onboarding-erro">{erro}</p>}
-
-              <button className="btn-publicar onboarding-btn" type="submit"
-                disabled={pin.join("").length < 4 || salvando}>
-                {salvando ? "Entrando..." : "Entrar"}
-              </button>
-
-              <button type="button" className="onboarding-voltar"
-                onClick={() => { setPasso(1); setErro(""); setPin(["","","",""]); }}>
-                ← Trocar nome
-              </button>
-            </form>
-          </div>
-        )}
-
-        <p className="onboarding-hint">
-          {passo === 1
-            ? "Seu nome aparece no ranking dos desafios."
-            : "Se já tem conta, use o mesmo PIN de sempre."}
-        </p>
+        <p className="onboarding-hint">Seu nome aparece no ranking dos desafios.</p>
       </div>
     </div>
   );

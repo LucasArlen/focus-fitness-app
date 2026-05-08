@@ -39,7 +39,17 @@ def cadastrar_aluno(body: AlunoIn, db: Session = Depends(get_db)):
     if cfg and body.invite_code != cfg.value:
         raise HTTPException(403, "Código de convite inválido. Escaneie o QR code da academia.")
 
-    if db.query(Aluno).filter(Aluno.nome == body.nome).first():
+    aluno_existente = db.query(Aluno).filter(Aluno.nome == body.nome).first()
+    if aluno_existente:
+        # Se o convite é válido, permite re-entry em device novo (reseta PIN)
+        if cfg and body.invite_code == cfg.value:
+            aluno_existente.pin_hash = _hash_pin(body.pin)
+            db.commit()
+            db.refresh(aluno_existente)
+            return Token(
+                access_token=create_token({"sub": str(aluno_existente.id), "role": "aluno", "nome": aluno_existente.nome}),
+                role="aluno",
+            )
         raise HTTPException(400, "Nome já cadastrado")
     aluno = Aluno(nome=body.nome, pin_hash=_hash_pin(body.pin))
     db.add(aluno)
