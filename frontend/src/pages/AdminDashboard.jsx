@@ -228,9 +228,6 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
               <button className="dash-action-btn dash-action-btn-destaque" onClick={onModoAula} style={{ width: "100%" }}>
                 🎯  Abrir Modo Aula
               </button>
-              <button className="dash-action-btn-secundario" onClick={onVerAlunos}>
-                📋  Ver lista de alunos
-              </button>
             </>
           )}
         </div>
