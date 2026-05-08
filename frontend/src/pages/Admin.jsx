@@ -1,8 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { postTreino, getTreinoHoje } from "../api/treino";
-import { getHistorico } from "../api/ranking";
+import { getHistorico, getTreino } from "../api/ranking";
 import { getBanco } from "../api/banco";
 import { getStatus, putStatus } from "../api/academia";
+
+function fmtData(data) {
+  const [a, m, d] = data.split("-");
+  return new Date(Number(a), Number(m) - 1, Number(d))
+    .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
+}
 
 const STATUS_OPCOES = [
   { val: "vazio",     label: "Vago",       emoji: "😌" },
@@ -37,6 +43,10 @@ export default function Admin({ onLogout, onVoltar }) {
   const [statusAtivo, setStatusAtivo] = useState(false);
   const [statusVal, setStatusVal]     = useState("tranquilo");
   const [salvandoStatus, setSalvandoStatus] = useState(false);
+  const [pickerAberto,   setPickerAberto]   = useState(false);
+  const [pickerItens,    setPickerItens]    = useState([]);
+  const [pickerLoad,     setPickerLoad]     = useState(false);
+  const pickerRef = useRef(null);
 
   useEffect(() => {
     getBanco().then(b => setBanco(b.map(e => e.nome))).catch(() => {});
@@ -74,19 +84,28 @@ export default function Admin({ onLogout, onVoltar }) {
     b.id === bid ? { ...b, linhas: b.linhas.map(l => l.id === lid ? { ...l, [campo]: val } : l) } : b
   ));
 
-  /* ── Copiar anterior ── */
-  async function copiarAnterior() {
+  /* ── Picker de treinos anteriores ── */
+  async function abrirPicker() {
+    if (pickerAberto) { setPickerAberto(false); return; }
+    setPickerAberto(true);
+    if (pickerItens.length > 0) return; // já carregado
+    setPickerLoad(true);
     try {
-      const historico = await getHistorico();
+      const hist = await getHistorico();
       const hoje = new Date().toISOString().split("T")[0];
-      const anterior = historico.find(t => t.data !== hoje);
-      if (!anterior) { setMsg({ tipo: "erro", texto: "Nenhum treino anterior encontrado." }); return; }
-      const { default: apiFetch } = await import("../api/client");
-      const treino = await fetch(`/api/treino/${anterior.id}`).then(r => r.json());
+      setPickerItens(hist.filter(t => t.data !== hoje).slice(0, 5));
+    } catch { /* silencioso */ }
+    finally { setPickerLoad(false); }
+  }
+
+  async function carregarTreino(id) {
+    setPickerAberto(false);
+    try {
+      const treino = await getTreino(id);
       const { blocos: b, desafioNome: d } = apiParaEstado(treino);
       setBlocos(b); setDesafioNome(d);
-      setMsg({ tipo: "ok", texto: "Treino anterior carregado. Edite e publique." });
-    } catch { setMsg({ tipo: "erro", texto: "Erro ao carregar treino anterior." }); }
+      setMsg({ tipo: "ok", texto: "Treino carregado. Edite e publique." });
+    } catch { setMsg({ tipo: "erro", texto: "Erro ao carregar treino." }); }
   }
 
   /* ── Publicar ── */
@@ -130,7 +149,30 @@ export default function Admin({ onLogout, onVoltar }) {
         <div className="admin-toolbar">
           <span className="data-header" style={{ textTransform: "capitalize" }}>{hoje}</span>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn-icon" title="Copiar treino anterior" onClick={copiarAnterior}>⎘</button>
+            <div style={{ position: "relative" }} ref={pickerRef}>
+              <button
+                className={`btn-icon ${pickerAberto ? "ativo" : ""}`}
+                title="Carregar treino anterior"
+                onClick={abrirPicker}
+              >⎘</button>
+              {pickerAberto && (
+                <div className="treino-picker">
+                  {pickerLoad && <p className="treino-picker-vazio">Carregando...</p>}
+                  {!pickerLoad && pickerItens.length === 0 && (
+                    <p className="treino-picker-vazio">Nenhum treino anterior.</p>
+                  )}
+                  {pickerItens.map(t => (
+                    <button key={t.id} className="treino-picker-item" onClick={() => carregarTreino(t.id)}>
+                      <span className="treino-picker-data">{fmtData(t.data)}</span>
+                      <span className="treino-picker-info">
+                        {t.total_blocos} blocos · {t.total_exercicios} ex.
+                        {t.desafio_nome ? ` · 🏆` : ""}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button className="btn-publicar" onClick={publicar} disabled={salvando}>
               {salvando ? "Salvando..." : temHoje ? "Atualizar" : "Publicar"}
             </button>

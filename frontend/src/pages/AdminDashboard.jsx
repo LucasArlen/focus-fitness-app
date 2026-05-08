@@ -25,6 +25,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
   const [regenerando,   setRegenerando]   = useState(false);
   const [qrExpandido,   setQrExpandido]   = useState(false);
   const [confirmarRegen,setConfirmarRegen]= useState(false);
+  const [qrColapsado,   setQrColapsado]  = useState(true);
   const [linkCopiado,   setLinkCopiado]   = useState(false);
   const [seeding,       setSeeding]       = useState(false);
   const [buscaChamada,  setBuscaChamada]  = useState("");
@@ -224,9 +225,14 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
                 <p className="dash-vazio-hint">Ninguém chegou ainda.</p>
               )}
 
-              <button className="dash-action-btn dash-action-btn-destaque" onClick={onModoAula}>
-                🎯  Abrir Modo Aula
-              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button className="dash-action-btn dash-action-btn-destaque" onClick={onModoAula} style={{ flex: 1 }}>
+                  🎯  Abrir Modo Aula
+                </button>
+                <button className="dash-action-btn" onClick={onVerAlunos} style={{ flex: "0 0 auto", padding: "0 14px" }}>
+                  📋
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -287,50 +293,54 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
         {/* ── CONVITE ── */}
         {inviteCode && (
           <div className="dash-card">
-            <div className="dash-card-header">
+            <div
+              className="dash-card-header dash-card-header-toggle"
+              onClick={() => setQrColapsado(v => !v)}
+            >
               <span className="dash-card-icon">🔗</span>
               <span className="dash-card-titulo">Acesso de novos alunos</span>
               <span className="dash-badge ok" style={{ marginLeft: "auto" }}>Ativo</span>
+              <span className="dash-collapse-chevron" style={{ transform: qrColapsado ? "" : "rotate(180deg)" }}>▾</span>
             </div>
 
-            {/* QR sempre visível */}
-            <div className="dash-qr-wrap">
-              <img className="dash-qr-img" src={qrImageUrl} alt="QR Code de convite" />
-            </div>
+            {!qrColapsado && (
+              <>
+                <div className="dash-qr-wrap">
+                  <img className="dash-qr-img" src={qrImageUrl} alt="QR Code de convite" />
+                </div>
 
-            {/* código manual */}
-            <div className="dash-invite-code">
-              <span className="dash-invite-label">Código</span>
-              <code className="dash-invite-valor">{inviteCode}</code>
-            </div>
+                <div className="dash-invite-code">
+                  <span className="dash-invite-label">Código</span>
+                  <code className="dash-invite-valor">{inviteCode}</code>
+                </div>
 
-            {/* ações discretas */}
-            <div className="invite-qr-actions">
-              <button className="invite-qr-btn" onClick={compartilharLink}>
-                {linkCopiado ? "✓ Copiado" : "📤 Compartilhar link"}
-              </button>
-              <button className="invite-qr-btn" onClick={compartilharQR}>
-                ⬆️ Salvar QR
-              </button>
-            </div>
-
-            {/* regenerar — discreto no rodapé */}
-            {!confirmarRegen ? (
-              <button className="invite-toggle-qr" onClick={() => setConfirmarRegen(true)}>
-                ↺ Gerar novo código
-              </button>
-            ) : (
-              <div className="invite-regen-confirm">
-                <span className="invite-regen-aviso">⚠️ O link atual vai parar de funcionar.</span>
-                <div className="invite-regen-acoes">
-                  <button className="invite-qr-btn danger" onClick={handleRegenar} disabled={regenerando}>
-                    {regenerando ? "..." : "Confirmar"}
+                <div className="invite-qr-actions">
+                  <button className="invite-qr-btn" onClick={compartilharLink}>
+                    {linkCopiado ? "✓ Copiado" : "📤 Compartilhar link"}
                   </button>
-                  <button className="invite-cancelar" onClick={() => setConfirmarRegen(false)}>
-                    Cancelar
+                  <button className="invite-qr-btn" onClick={compartilharQR}>
+                    ⬆️ Salvar QR
                   </button>
                 </div>
-              </div>
+
+                {!confirmarRegen ? (
+                  <button className="invite-toggle-qr" onClick={() => setConfirmarRegen(true)}>
+                    ↺ Gerar novo código
+                  </button>
+                ) : (
+                  <div className="invite-regen-confirm">
+                    <span className="invite-regen-aviso">⚠️ O link atual vai parar de funcionar.</span>
+                    <div className="invite-regen-acoes">
+                      <button className="invite-qr-btn danger" onClick={handleRegenar} disabled={regenerando}>
+                        {regenerando ? "..." : "Confirmar"}
+                      </button>
+                      <button className="invite-cancelar" onClick={() => setConfirmarRegen(false)}>
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

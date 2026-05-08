@@ -11,6 +11,20 @@ from routers import academia, aluno, banco, desafio, invite, presenca, push, ran
 
 Base.metadata.create_all(bind=engine)
 
+# ─── Migrações automáticas (adiciona colunas novas sem apagar dados) ──────────
+
+def _auto_migrate():
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        cols = [row[1] for row in conn.execute(text("PRAGMA table_info(alunos)")).fetchall()]
+        if "apelido" not in cols:
+            conn.execute(text("ALTER TABLE alunos ADD COLUMN apelido TEXT"))
+        if "foto" not in cols:
+            conn.execute(text("ALTER TABLE alunos ADD COLUMN foto TEXT"))
+        conn.commit()
+
+_auto_migrate()
+
 # ─── Seed de dados de demonstração ────────────────────────────────────────────
 
 _ALUNOS = [

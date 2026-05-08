@@ -15,10 +15,10 @@ export default function Historico({ nomeAluno, onTrocarNome }) {
   const [carregandoId, setCarregandoId] = useState(null);
 
   useEffect(() => {
-    getHistorico()
+    getHistorico(nomeAluno ?? "")
       .then(h => { setLista(h); setEstado("ok"); })
       .catch(() => setEstado("erro"));
-  }, []);
+  }, [nomeAluno]);
 
   async function toggle(id) {
     if (expandido === id) { setExpandido(null); return; }
@@ -93,8 +93,8 @@ export default function Historico({ nomeAluno, onTrocarNome }) {
                   {item.desafio_nome && (
                     <span className="hist-desafio">🏆 {item.desafio_nome}</span>
                   )}
-                  {meuResultado && (
-                    <span className="hist-meu-resultado">{meuResultado.valor} reps</span>
+                  {item.meu_resultado && (
+                    <span className="hist-meu-resultado">{item.meu_resultado} reps</span>
                   )}
                 </div>
                 <span className="hist-chevron" style={{ transform: aberto ? "rotate(180deg)" : "" }}>▾</span>

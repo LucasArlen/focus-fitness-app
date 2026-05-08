@@ -1,45 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getReacoes, toggleReacao } from "../api/reacao";
 
 const EMOJIS = ["🔥", "💀", "❤️", "😅", "💪"];
 
-function carregarReacoes(blocoId) {
-  try { return JSON.parse(localStorage.getItem(`r_${blocoId}`)) || {}; }
-  catch { return {}; }
-}
-
-function salvarReacoes(blocoId, data) {
-  localStorage.setItem(`r_${blocoId}`, JSON.stringify(data));
-}
-
 export default function BlocoCard({ bloco }) {
-  const [expandida, setExpandida] = useState(null);
-  const [reacoes, setReacoes] = useState(() => carregarReacoes(bloco.id));
+  const [reacoes, setReacoes] = useState({ contagens: {}, meu_emoji: null });
 
-  function togglePicker(linhaId) {
-    setExpandida(prev => prev === linhaId ? null : linhaId);
-  }
+  useEffect(() => {
+    getReacoes([bloco.id])
+      .then(data => setReacoes(data[String(bloco.id)] ?? { contagens: {}, meu_emoji: null }))
+      .catch(() => {});
+  }, [bloco.id]);
 
-  function reagir(linhaId, emoji) {
-    setReacoes(prev => {
-      const atual = prev[linhaId] || {};
-      const meu = atual._meu;
-      const novo = { ...atual };
+  async function reagir(emoji) {
+    const prev = reacoes;
+    const novoMeu = prev.meu_emoji === emoji ? null : emoji;
 
-      if (meu) {
-        novo[meu] = Math.max(0, (novo[meu] || 1) - 1);
-        if (novo[meu] === 0) delete novo[meu];
-        delete novo._meu;
+    // Optimistic update
+    setReacoes(() => {
+      const conts = { ...prev.contagens };
+      if (prev.meu_emoji) {
+        conts[prev.meu_emoji] = Math.max(0, (conts[prev.meu_emoji] || 1) - 1);
+        if (conts[prev.meu_emoji] === 0) delete conts[prev.meu_emoji];
       }
-      if (meu !== emoji) {
-        novo[emoji] = (novo[emoji] || 0) + 1;
-        novo._meu = emoji;
+      if (novoMeu) {
+        conts[novoMeu] = (conts[novoMeu] || 0) + 1;
       }
-
-      const prox = { ...prev, [linhaId]: novo };
-      salvarReacoes(bloco.id, prox);
-      return prox;
+      return { contagens: conts, meu_emoji: novoMeu };
     });
-    setExpandida(null);
+
+    try {
+      await toggleReacao(bloco.id, emoji);
+    } catch {
+      // revert on error
+      getReacoes([bloco.id])
+        .then(data => setReacoes(data[String(bloco.id)] ?? { contagens: {}, meu_emoji: null }))
+        .catch(() => {});
+    }
   }
 
   return (
@@ -50,45 +47,35 @@ export default function BlocoCard({ bloco }) {
       </div>
 
       <ul className="linha-list">
-        {bloco.linhas.map(linha => {
-          const r = reacoes[linha.id] || {};
-          const pills = Object.entries(r).filter(([k]) => k !== "_meu").sort(([, a], [, b]) => b - a);
-          const aberta = expandida === linha.id;
-
-          return (
-            <li key={linha.id} className="linha-item" onClick={() => togglePicker(linha.id)}>
-              <div className="linha-row">
-                <span className="exercicio">{linha.exercicio}</span>
-                <div className="linha-right">
-                  {linha.dropset && <span className="dropset-tag">Drop Set</span>}
-                  <span className="serie">{linha.serie}</span>
-                </div>
+        {bloco.linhas.map(linha => (
+          <li key={linha.id} className="linha-item">
+            <div className="linha-row">
+              <span className="exercicio">{linha.exercicio}</span>
+              <div className="linha-right">
+                {linha.dropset && <span className="dropset-tag">Drop Set</span>}
+                <span className="serie">{linha.serie}</span>
               </div>
+            </div>
+          </li>
+        ))}
+      </ul>
 
-              {pills.length > 0 && (
-                <div className="reacoes-display" onClick={e => e.stopPropagation()}>
-                  {pills.map(([emoji, count]) => (
-                    <span key={emoji} className={`reacao-pill ${r._meu === emoji ? "minha" : ""}`}
-                      onClick={() => reagir(linha.id, emoji)}>
-                      <span className="emoji-val">{emoji}</span>
-                      <span className="emoji-count">{count}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {aberta && (
-                <div className="emoji-picker" onClick={e => e.stopPropagation()}>
-                  {EMOJIS.map(emoji => (
-                    <button key={emoji} className={`emoji-btn ${r._meu === emoji ? "ativo" : ""}`}
-                      onClick={() => reagir(linha.id, emoji)}>{emoji}</button>
-                  ))}
-                </div>
-              )}
-            </li>
+      <div className="reaction-bar">
+        {EMOJIS.map(emoji => {
+          const count = reacoes.contagens[emoji] || 0;
+          const minha = reacoes.meu_emoji === emoji;
+          return (
+            <button
+              key={emoji}
+              className={`reaction-btn ${minha ? "ativo" : ""}`}
+              onClick={() => reagir(emoji)}
+            >
+              <span className="reaction-emoji">{emoji}</span>
+              {count > 0 && <span className="reaction-count">{count}</span>}
+            </button>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 }

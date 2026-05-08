@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth import ADMIN_PASSWORD, ADMIN_USERNAME, create_token, require_admin
+from auth import ADMIN_PASSWORD, ADMIN_USERNAME, create_token, require_admin, require_any
 from database import get_db
 from models import Aluno, AppConfig
-from schemas import AdminLoginIn, AlunoIn, Token
+from schemas import AdminLoginIn, AlunoIn, Token, PerfilOut, PerfilIn
 
 router = APIRouter()
 
@@ -36,6 +36,31 @@ def cadastrar_aluno(body: AlunoIn, db: Session = Depends(get_db)):
         access_token=create_token({"sub": str(aluno.id), "role": "aluno", "nome": aluno.nome}),
         role="aluno",
     )
+
+
+@router.get("/aluno/perfil", response_model=PerfilOut)
+def get_perfil(db: Session = Depends(get_db), user=Depends(require_any)):
+    if user.get("role") != "aluno":
+        raise HTTPException(403, "Apenas alunos têm perfil")
+    aluno = db.get(Aluno, int(user["sub"]))
+    if not aluno:
+        raise HTTPException(404, "Aluno não encontrado")
+    return aluno
+
+
+@router.patch("/aluno/perfil")
+def update_perfil(body: PerfilIn, db: Session = Depends(get_db), user=Depends(require_any)):
+    if user.get("role") != "aluno":
+        raise HTTPException(403, "Apenas alunos têm perfil")
+    aluno = db.get(Aluno, int(user["sub"]))
+    if not aluno:
+        raise HTTPException(404, "Aluno não encontrado")
+    if body.apelido is not None:
+        aluno.apelido = body.apelido.strip() or None
+    if body.foto is not None:
+        aluno.foto = body.foto or None
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/alunos")

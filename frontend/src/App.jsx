@@ -8,6 +8,7 @@ import AdminModoAula from "./pages/AdminModoAula";
 import Historico from "./pages/Historico";
 import Login from "./pages/Login";
 import Onboarding from "./components/Onboarding";
+import Perfil from "./pages/Perfil";
 import { useAluno, freqMes } from "./hooks/useAluno";
 
 const IconTreino = () => (
@@ -34,11 +35,17 @@ const IconHistorico = () => (
   </svg>
 );
 
+const IconPerfil = () => (
+  <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+  </svg>
+);
+
 export default function App() {
   const [view, setView]           = useState("treino");
   const [adminView, setAdminView] = useState("dashboard");
   const [role, setRole]           = useState(() => localStorage.getItem("role") || "guest");
-  const { nome, salvar, limpar }  = useAluno();
+  const { nome, apelido, displayNome, salvar, salvarApelido, limpar } = useAluno();
   const pressTimer                = useRef(null);
 
   const isAdmin = role === "admin";
@@ -82,7 +89,8 @@ export default function App() {
     { id: "treino",    label: "Treino",    Icon: IconTreino },
     { id: "desafio",   label: "Desafio",   Icon: IconDesafio },
     { id: "historico", label: "Histórico", Icon: IconHistorico },
-    ...(isAdmin ? [{ id: "admin", label: "Admin ✓", Icon: IconAdmin }] : []),
+    ...(!isAdmin ? [{ id: "perfil", label: "Perfil", Icon: IconPerfil }] : []),
+    ...(isAdmin  ? [{ id: "admin",  label: "Admin ✓", Icon: IconAdmin }] : []),
   ];
 
   return (
@@ -117,6 +125,14 @@ export default function App() {
       )}
       {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} nomeAluno={nome} freqMes={freqMes()} />}
       {view === "historico" && <Historico nomeAluno={nome} onTrocarNome={limpar} />}
+      {view === "perfil" && !isAdmin && (
+        <Perfil
+          nome={nome}
+          apelido={apelido}
+          onSalvarApelido={salvarApelido}
+          onTrocarNome={limpar}
+        />
+      )}
 
       <nav className="bottom-nav">
         {TABS.map(({ id, label, Icon }) => (

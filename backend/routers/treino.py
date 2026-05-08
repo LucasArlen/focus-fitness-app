@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/treino/historico", response_model=list[TreinoResumoOut])
-def get_historico(limite: int = 30, db: Session = Depends(get_db)):
+def get_historico(limite: int = 30, aluno: str = "", db: Session = Depends(get_db)):
     treinos = (
         db.query(Treino)
         .filter(Treino.publicado == True)
@@ -22,6 +22,15 @@ def get_historico(limite: int = 30, db: Session = Depends(get_db)):
     result = []
     for t in treinos:
         total_ex = sum(len(b.linhas) for b in t.blocos)
+        meu_resultado = None
+        if aluno and t.desafio:
+            pontuacao = next(
+                (p for p in t.desafio.pontuacoes
+                 if p.aluno_nome.strip().lower() == aluno.strip().lower()),
+                None
+            )
+            if pontuacao:
+                meu_resultado = pontuacao.valor
         result.append(TreinoResumoOut(
             id=t.id,
             data=t.data,
@@ -29,6 +38,7 @@ def get_historico(limite: int = 30, db: Session = Depends(get_db)):
             total_exercicios=total_ex,
             nomes_blocos=[b.nome for b in t.blocos],
             desafio_nome=t.desafio.nome if t.desafio else None,
+            meu_resultado=meu_resultado,
         ))
     return result
 

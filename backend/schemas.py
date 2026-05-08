@@ -66,6 +66,7 @@ class TreinoResumoOut(BaseModel):
     total_exercicios: int
     nomes_blocos: List[str]
     desafio_nome: Optional[str] = None
+    meu_resultado: Optional[str] = None
     model_config = {"from_attributes": True}
 
 
@@ -118,3 +119,15 @@ class EvolucaoItem(BaseModel):
     data: str
     desafio: str
     valor: str
+
+
+class PerfilOut(BaseModel):
+    nome: str
+    apelido: Optional[str] = None
+    foto: Optional[str] = None
+    model_config = {"from_attributes": True}
+
+
+class PerfilIn(BaseModel):
+    apelido: Optional[str] = None
+    foto: Optional[str] = None
