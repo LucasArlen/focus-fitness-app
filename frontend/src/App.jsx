@@ -96,7 +96,7 @@ export default function App() {
   return (
     <>
       {view === "treino"    && (
-        <Hoje nomeAluno={nome} onLogoStart={logoStart} onLogoEnd={logoEnd} />
+        <Hoje nomeAluno={nome} onLogoStart={logoStart} onLogoEnd={logoEnd} onVerDesafio={() => setView("desafio")} />
       )}
       {view === "admin"     && !isAdmin && <Login onLogin={onLogin} />}
       {view === "admin"     && isAdmin  && adminView === "dashboard" && (

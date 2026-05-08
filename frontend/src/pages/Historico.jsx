@@ -140,7 +140,7 @@ export default function Historico({ nomeAluno }) {
                             <div key={l.id} className="hist-linha">
                               <span className="hist-exercicio">{l.exercicio}</span>
                               <span className="hist-serie">{l.serie}</span>
-                              {l.dropset && <span className="dropset-tag">DS</span>}
+                              {l.dropset && <span className="dropset-tag" title="Reduza o peso e continue sem pausa">DS</span>}
                             </div>
                           ))}
                         </div>

@@ -194,7 +194,27 @@ body {
   padding: 3px 6px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  cursor: help;
 }
+
+.opcional-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.reacao-hint {
+  font-size: 14px;
+  opacity: 0.25;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+.linha-item:hover .reacao-hint { opacity: 0.5; }
 
 /* ─────────────────────────────────────────────────────────────
    Reações
@@ -2386,6 +2406,24 @@ body {
 /* ─────────────────────────────────────────────────────────────
    Banner de notificações
 ───────────────────────────────────────────────────────────── */
+
+.desafio-teaser {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: rgba(232,255,71,0.04);
+  border: 1px solid rgba(232,255,71,0.18);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: background .15s;
+}
+.desafio-teaser:active { background: rgba(232,255,71,0.09); }
+.desafio-teaser-icon { font-size: 18px; flex-shrink: 0; }
+.desafio-teaser-nome { flex: 1; font-size: 14px; font-weight: 600; color: var(--text-1); }
+.desafio-teaser-cta  { font-size: 12px; color: var(--accent); font-weight: 700; flex-shrink: 0; }
 
 .notif-banner {
   display: flex;

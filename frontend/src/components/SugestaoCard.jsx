@@ -9,6 +9,7 @@ export default function SugestaoCard({ bloco }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div className="bloco-accent" />
           <span className="bloco-nome">{bloco.nome}</span>
+          <span className="opcional-tag">Opcional</span>
         </div>
         <span className={`sugestao-chevron ${aberto ? "aberto" : ""}`}>▼</span>
       </button>
@@ -20,7 +21,7 @@ export default function SugestaoCard({ bloco }) {
               <div className="linha-row">
                 <span className="exercicio">{linha.exercicio}</span>
                 <div className="linha-right">
-                  {linha.dropset && <span className="dropset-tag">Drop Set</span>}
+                  {linha.dropset && <span className="dropset-tag" title="Reduza o peso e continue sem pausa">DS</span>}
                   <span className="serie">{linha.serie}</span>
                 </div>
               </div>

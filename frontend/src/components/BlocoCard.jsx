@@ -7,14 +7,20 @@ function LinhaItem({ linha, reacao, onToggle }) {
   const [pickerAberto, setPickerAberto] = useState(false);
   const pills = Object.entries(reacao.contagens || {}).sort(([, a], [, b]) => b - a);
   const meuEmoji = reacao.meu_emoji;
+  const semReacoes = pills.length === 0;
 
   return (
     <li className="linha-item" onClick={() => setPickerAberto(v => !v)}>
       <div className="linha-row">
         <span className="exercicio">{linha.exercicio}</span>
         <div className="linha-right">
-          {linha.dropset && <span className="dropset-tag">Drop Set</span>}
+          {linha.dropset && (
+            <span className="dropset-tag" title="Reduza o peso e continue sem pausa">DS</span>
+          )}
           <span className="serie">{linha.serie}</span>
+          {semReacoes && (
+            <span className="reacao-hint" title="Toque para reagir">😀</span>
+          )}
         </div>
       </div>
 

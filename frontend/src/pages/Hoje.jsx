@@ -4,7 +4,6 @@ import { getStatus } from "../api/academia";
 import { getPresencas } from "../api/presenca";
 import BlocoCard from "../components/BlocoCard";
 import SugestaoCard from "../components/SugestaoCard";
-import DesafioRanking from "../components/DesafioRanking";
 import { getVapidKey, subscribePush, urlBase64ToUint8Array } from "../api/push";
 
 const STATUS_CFG = {
@@ -118,7 +117,7 @@ function PresencasHoje() {
   );
 }
 
-export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd }) {
+export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd, onVerDesafio }) {
   const [treino, setTreino] = useState(null);
   const [estado, setEstado] = useState("carregando");
   const [statusAcad, setStatusAcad] = useState(null);
@@ -202,7 +201,13 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd }) {
                 ? <SugestaoCard key={bloco.id} bloco={bloco} />
                 : <BlocoCard key={bloco.id} bloco={bloco} />
             )}
-            {treino.desafio && <DesafioRanking desafio={treino.desafio} nomeAluno={nomeAluno} />}
+            {treino.desafio && (
+              <button className="desafio-teaser" onClick={onVerDesafio}>
+                <span className="desafio-teaser-icon">🏆</span>
+                <span className="desafio-teaser-nome">{treino.desafio.nome}</span>
+                <span className="desafio-teaser-cta">Ver ranking →</span>
+              </button>
+            )}
           </>
         )}
       </main>
