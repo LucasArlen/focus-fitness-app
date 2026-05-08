@@ -6,6 +6,7 @@ from auth import require_admin
 from database import get_db
 from models import Desafio, Pontuacao, Treino
 from schemas import DesafioOut, PontuacaoIn, PontuacaoOut
+from routers.push import send_push_to_all
 
 router = APIRouter()
 
@@ -64,4 +65,17 @@ def fechar_desafio(desafio_id: int, db: Session = Depends(get_db), _=Depends(req
         raise HTTPException(404, "Desafio não encontrado")
     desafio.fechado = True
     db.commit()
+
+    ranking = sorted(
+        desafio.pontuacoes,
+        key=lambda p: float("".join(c for c in p.valor if c.isdigit() or c == ".") or "0"),
+        reverse=True,
+    )
+    MEDALHAS = ["🥇", "🥈", "🥉"]
+    podio = "  ".join(
+        f"{MEDALHAS[i]} {p.aluno_nome.split()[0]} {p.valor}"
+        for i, p in enumerate(ranking[:3])
+    )
+    send_push_to_all(db, f"🏆 Ranking publicado!", f"{desafio.nome}\n{podio}")
+
     return {"ok": True}

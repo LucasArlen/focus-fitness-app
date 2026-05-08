@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getPerfil, updatePerfil } from "../api/aluno";
-import { freqMes } from "../hooks/useAluno";
+import { freqMes, calcStreak } from "../hooks/useAluno";
 import { getVapidKey, subscribePush, urlBase64ToUint8Array } from "../api/push";
 import { getEvolucaoAluno } from "../api/ranking";
 
@@ -115,6 +115,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
 
   const inicial = (apelido_ || nome || "?")[0].toUpperCase();
   const freq    = freqMes();
+  const streak  = calcStreak();
   const mesNome = new Date().toLocaleString("pt-BR", { month: "long" });
 
   return (
@@ -170,7 +171,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
           </button>
         )}
 
-        {/* ── Frequência ── */}
+        {/* ── Frequência + Streak ── */}
         <div className="perfil-section">
           <div className="perfil-stat-grid">
             <div className="perfil-stat">
@@ -185,6 +186,12 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
               })()}</span>
               <span className="perfil-stat-label">dias em {new Date().getFullYear()}</span>
             </div>
+            {streak > 0 && (
+              <div className="perfil-stat perfil-stat-streak">
+                <span className="perfil-stat-val">🔥 {streak}</span>
+                <span className="perfil-stat-label">{streak === 1 ? "dia seguido" : "dias seguidos"}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -218,17 +225,32 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
           <div className="perfil-section">
             <p className="perfil-section-titulo">🏆 Meus desafios</p>
             <div className="perfil-evolucao-lista">
-              {[...evolucao].reverse().slice(0, 10).map((e, i) => {
-                const d = new Date(e.data + "T12:00:00");
-                const label = d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
-                return (
-                  <div key={i} className="perfil-evolucao-item">
-                    <span className="perfil-evolucao-data">{label}</span>
-                    <span className="perfil-evolucao-desafio">{e.desafio}</span>
-                    <span className="perfil-evolucao-valor">{e.valor}</span>
-                  </div>
-                );
-              })}
+              {(() => {
+                // PR por tipo de desafio (nome do desafio como chave)
+                const prPorDesafio = {};
+                evolucao.forEach(e => {
+                  const v = parseFloat(e.valor) || 0;
+                  if (!prPorDesafio[e.desafio] || v > prPorDesafio[e.desafio]) {
+                    prPorDesafio[e.desafio] = v;
+                  }
+                });
+
+                return [...evolucao].reverse().slice(0, 10).map((e, i) => {
+                  const d     = new Date(e.data + "T12:00:00");
+                  const label = d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+                  const isPR  = (parseFloat(e.valor) || 0) === prPorDesafio[e.desafio];
+                  return (
+                    <div key={i} className="perfil-evolucao-item">
+                      <span className="perfil-evolucao-data">{label}</span>
+                      <span className="perfil-evolucao-desafio">{e.desafio}</span>
+                      <span className="perfil-evolucao-valor">
+                        {e.valor} reps
+                        {isPR && <span className="perfil-pr-badge">PR</span>}
+                      </span>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
         )}

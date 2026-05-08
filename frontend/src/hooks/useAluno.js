@@ -20,6 +20,20 @@ export function freqMes() {
   return freq.filter(d => d.startsWith(mes)).length;
 }
 
+export function calcStreak() {
+  const freq = JSON.parse(localStorage.getItem(FREQ_KEY) || "[]");
+  if (freq.length === 0) return 0;
+  const sorted = [...new Set(freq)].sort().reverse();
+  let streak = 1;
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const curr = new Date(sorted[i]   + "T12:00:00");
+    const prev = new Date(sorted[i+1] + "T12:00:00");
+    if ((curr - prev) / 86400000 === 1) streak++;
+    else break;
+  }
+  return streak;
+}
+
 export function useAluno() {
   const [nome,    setNome]    = useState(() => localStorage.getItem(NOME_KEY)    || "");
   const [apelido, setApelido] = useState(() => localStorage.getItem(APELIDO_KEY) || "");

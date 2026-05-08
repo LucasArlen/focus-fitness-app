@@ -202,7 +202,7 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd }) {
                 ? <SugestaoCard key={bloco.id} bloco={bloco} />
                 : <BlocoCard key={bloco.id} bloco={bloco} />
             )}
-            {treino.desafio && <DesafioRanking desafio={treino.desafio} />}
+            {treino.desafio && <DesafioRanking desafio={treino.desafio} nomeAluno={nomeAluno} />}
           </>
         )}
       </main>

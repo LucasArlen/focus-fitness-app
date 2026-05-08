@@ -300,11 +300,11 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
                     </div>
                     <div className="meu-stat">
                       <span className="meu-stat-valor">{meuDado.melhor.toFixed(0)}</span>
-                      <span className="meu-stat-label">Melhor</span>
+                      <span className="meu-stat-label">Melhor (reps)</span>
                     </div>
                     <div className="meu-stat">
                       <span className="meu-stat-valor">{meuDado.total.toFixed(0)}</span>
-                      <span className="meu-stat-label">Total</span>
+                      <span className="meu-stat-label">Total (reps)</span>
                     </div>
                   </div>
                 ) : (
@@ -351,7 +351,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
                         </p>
                       </div>
                       <div style={{ textAlign: "right" }}>
-                        <p className="ranking-valor">{a.total.toFixed(0)}</p>
+                        <p className="ranking-valor">{a.total.toFixed(0)} reps</p>
                         <p style={{ fontSize: 11, color: "var(--text-2)" }}>melhor: {a.melhor.toFixed(0)}</p>
                       </div>
                       <span style={{ color: "var(--text-3)", fontSize: 12, marginLeft: 6 }}>›</span>
