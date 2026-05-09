@@ -14,6 +14,14 @@ function formatarExpira(dataStr) {
   return d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
 }
 
+function resumoConfs(confs) {
+  const nomes = confs.map(c => c.aluno_nome.split(" ")[0]);
+  if (nomes.length === 0) return "";
+  if (nomes.length === 1) return `${nomes[0]} vai comparecer`;
+  if (nomes.length === 2) return `${nomes[0]} e ${nomes[1]} vão comparecer`;
+  return `${nomes[0]}, ${nomes[1]} e mais ${nomes.length - 2}`;
+}
+
 function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
   const cfg = CAT_CFG[aviso.categoria] || CAT_CFG.aviso;
   const jaConfirmou = aviso.confirmacoes?.some(c => c.aluno_nome === nomeAluno);
@@ -38,6 +46,14 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
         <p className="aviso-data-evento">🗓 {aviso.data_evento}</p>
       )}
 
+      {/* Status de confirmação — logo abaixo da data */}
+      {aviso.categoria === "evento" && !isAdmin && jaConfirmou && (
+        <div className="aviso-conf-confirmado">
+          <span className="aviso-conf-label">✓ Confirmado</span>
+          <button className="aviso-conf-cancelar" onClick={() => onConfirmar(aviso.id)} title="Cancelar presença">✕</button>
+        </div>
+      )}
+
       {aviso.corpo && (
         <p className="aviso-corpo">{aviso.corpo}</p>
       )}
@@ -46,23 +62,13 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
         <img className="aviso-foto" src={aviso.foto} alt="" loading="lazy" />
       )}
 
+      {/* Rodapé do evento */}
       {aviso.categoria === "evento" && (
         <div className="aviso-confs">
-          {!isAdmin && (
-            jaConfirmou ? (
-              <div className="aviso-conf-confirmado">
-                <span className="aviso-conf-label">✓ Confirmado</span>
-                <button className="aviso-conf-cancelar" onClick={() => onConfirmar(aviso.id)} title="Cancelar presença">✕</button>
-              </div>
-            ) : (
-              <button className="aviso-conf-btn" onClick={() => onConfirmar(aviso.id)}>
-                Confirmar presença
-              </button>
-            )
-          )}
           {total > 0 && (
             <button className="aviso-confs-toggle" onClick={() => setExpandirConfs(v => !v)}>
-              {total} {total === 1 ? "confirmado" : "confirmados"} {expandirConfs ? "▴" : "▾"}
+              <span className="aviso-confs-resumo">👥 {resumoConfs(aviso.confirmacoes)}</span>
+              <span className="aviso-confs-chevron">{expandirConfs ? "▴" : "▾"}</span>
             </button>
           )}
           {expandirConfs && (
@@ -71,6 +77,11 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
                 <span key={c.aluno_nome} className="aviso-conf-pill">{c.aluno_nome.split(" ")[0]}</span>
               ))}
             </div>
+          )}
+          {!isAdmin && !jaConfirmou && (
+            <button className="aviso-conf-btn" onClick={() => onConfirmar(aviso.id)}>
+              Confirmar presença
+            </button>
           )}
         </div>
       )}

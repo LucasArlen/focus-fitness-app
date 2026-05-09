@@ -3112,7 +3112,7 @@ body {
   width: 100%;
   border-radius: var(--radius-sm);
   object-fit: cover;
-  max-height: 280px;
+  max-height: 160px;
 }
 
 .aviso-confs {
@@ -3158,13 +3158,23 @@ body {
 .aviso-conf-cancelar:hover { color: #ff5252; }
 
 .aviso-confs-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   background: none;
   border: none;
-  color: var(--text-2);
-  font-size: 13px;
   cursor: pointer;
-  padding: 2px 0;
+  padding: 4px 0;
   text-align: left;
+}
+.aviso-confs-resumo {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.aviso-confs-chevron {
+  font-size: 11px;
+  color: var(--text-3);
 }
 
 .aviso-confs-lista {
