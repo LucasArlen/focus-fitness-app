@@ -166,7 +166,7 @@ export default function Admin({ onLogout, onVoltar }) {
               )}
             </div>
             <button className="btn-publicar" onClick={publicar} disabled={salvando}>
-              {salvando ? "Salvando..." : temHoje ? "Atualizar" : "Publicar"}
+              {salvando ? "Salvando..." : temTreino ? "Atualizar" : "Publicar"}
             </button>
           </div>
         </div>
