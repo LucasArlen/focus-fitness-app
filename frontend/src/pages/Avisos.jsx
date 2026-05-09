@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { comprimirImagem } from "../utils/imagem";
 import { getAvisos, criarAviso, deletarAviso, confirmarAviso } from "../api/aviso";
 
 const CAT_CFG = {
@@ -41,6 +42,10 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
         <p className="aviso-corpo">{aviso.corpo}</p>
       )}
 
+      {aviso.foto && (
+        <img className="aviso-foto" src={aviso.foto} alt="" loading="lazy" />
+      )}
+
       {aviso.categoria === "evento" && (
         <div className="aviso-confs">
           {!isAdmin && (
@@ -80,12 +85,22 @@ function AdminForm({ onCriado }) {
   const [categoria,  setCategoria]  = useState("aviso");
   const [dataEvento, setDataEvento] = useState("");
   const [expiraEm,   setExpiraEm]   = useState("");
+  const [foto,       setFoto]       = useState(null);
   const [salvando,   setSalvando]   = useState(false);
   const [erro,       setErro]       = useState("");
+  const fileRef = useRef();
 
   function resetar() {
     setTitulo(""); setCorpo(""); setCategoria("aviso");
-    setDataEvento(""); setExpiraEm(""); setErro("");
+    setDataEvento(""); setExpiraEm(""); setFoto(null); setErro("");
+  }
+
+  async function handleFoto(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Comprime para máx 900px, qualidade 65% — reduz de ~2MB para ~50-80KB
+    const base64 = await comprimirImagem(file, 900, 0.65);
+    setFoto(base64);
   }
 
   async function salvar() {
@@ -95,6 +110,7 @@ function AdminForm({ onCriado }) {
       const novo = await criarAviso({
         titulo: titulo.trim(),
         corpo: corpo.trim() || null,
+        foto: foto || null,
         categoria,
         data_evento: dataEvento.trim() || null,
         expira_em: expiraEm,
@@ -161,6 +177,19 @@ function AdminForm({ onCriado }) {
         onChange={e => setCorpo(e.target.value)}
         rows={3}
       />
+
+      <div className="aviso-form-row">
+        <label className="aviso-foto-label">
+          {foto ? "✓ Foto selecionada" : "📷 Adicionar foto"}
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFoto} />
+        </label>
+        {foto && (
+          <button className="aviso-foto-remover" onClick={() => { setFoto(null); if (fileRef.current) fileRef.current.value = ""; }}>
+            Remover
+          </button>
+        )}
+      </div>
+      {foto && <img className="aviso-foto-preview" src={foto} alt="Preview" />}
 
       <div className="aviso-form-row aviso-form-row-expira">
         <label className="aviso-expira-label">Válido até</label>
