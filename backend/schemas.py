@@ -48,6 +48,7 @@ class DesafioOut(BaseModel):
 class TreinoIn(BaseModel):
     blocos: List[BlocoIn] = []
     desafio_nome: Optional[str] = ""
+    data: Optional[datetime.date] = None
 
 
 class TreinoOut(BaseModel):

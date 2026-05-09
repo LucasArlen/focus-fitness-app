@@ -52,6 +52,36 @@ def get_historico(limite: int = 30, aluno: str = "", db: Session = Depends(get_d
     return result
 
 
+@router.get("/treino/semana")
+def get_semana(db: Session = Depends(get_db), _=Depends(require_admin)):
+    hoje = datetime.date.today()
+    segunda = hoje - datetime.timedelta(days=hoje.weekday())
+    dias = [segunda + datetime.timedelta(days=i) for i in range(7)]
+    treinos = db.query(Treino).filter(Treino.data.in_(dias)).all()
+    mapa = {t.data: t for t in treinos}
+    return [
+        {
+            "data": d.isoformat(),
+            "tem_treino": d in mapa,
+            "total_blocos": len(mapa[d].blocos) if d in mapa else 0,
+            "eh_hoje": d == hoje,
+        }
+        for d in dias
+    ]
+
+
+@router.get("/treino/data/{data_str}", response_model=TreinoOut)
+def get_treino_por_data(data_str: str, db: Session = Depends(get_db), _=Depends(require_admin)):
+    try:
+        data = datetime.date.fromisoformat(data_str)
+    except ValueError:
+        raise HTTPException(400, "Data inválida")
+    treino = db.query(Treino).filter(Treino.data == data).first()
+    if not treino:
+        raise HTTPException(404, "Sem treino nesta data")
+    return treino
+
+
 @router.get("/treino/ultimo", response_model=TreinoOut)
 def get_treino_ultimo(db: Session = Depends(get_db)):
     treino = (
@@ -84,13 +114,14 @@ def get_treino(treino_id: int, db: Session = Depends(get_db)):
 @router.post("/treino", response_model=TreinoOut)
 def create_treino(body: TreinoIn, db: Session = Depends(get_db), _=Depends(require_admin)):
     hoje = datetime.date.today()
+    data_treino = body.data or hoje
 
-    existente = db.query(Treino).filter(Treino.data == hoje).first()
+    existente = db.query(Treino).filter(Treino.data == data_treino).first()
     if existente:
         db.delete(existente)
         db.commit()
 
-    treino = Treino(data=hoje, publicado=True)
+    treino = Treino(data=data_treino, publicado=True)
     db.add(treino)
     db.flush()
 
@@ -111,15 +142,16 @@ def create_treino(body: TreinoIn, db: Session = Depends(get_db), _=Depends(requi
     db.commit()
     db.refresh(treino)
 
-    # Push notification to all subscribers
-    try:
-        from routers.push import send_push_to_all
-        send_push_to_all(
-            db,
-            title="Treino publicado! 💪",
-            body="O treino de hoje está disponível. Bora treinar!",
-        )
-    except Exception:
-        pass
+    # Push notification só para treinos de hoje
+    if data_treino == hoje:
+        try:
+            from routers.push import send_push_to_all
+            send_push_to_all(
+                db,
+                title="Treino publicado! 💪",
+                body="O treino de hoje está disponível. Bora treinar!",
+            )
+        except Exception:
+            pass
 
     return treino

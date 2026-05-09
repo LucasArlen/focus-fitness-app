@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTreinoHoje } from "../api/treino";
+import { getTreinoHoje, getSemana } from "../api/treino";
 import { getDesafioHoje } from "../api/desafio";
 import { getChamada, marcarPresenca } from "../api/presenca";
 import { getStatus, putStatus } from "../api/academia";
@@ -32,6 +32,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
   const [credPass,      setCredPass]      = useState("");
   const [credStatus,    setCredStatus]    = useState(null); // "ok" | "erro" | null
   const [marcando,      setMarcando]      = useState(null);
+  const [semana,        setSemana]        = useState([]);
 
   function carregar() {
     setCarregando(true);
@@ -41,6 +42,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
       getChamada().then(setChamada).catch(() => setChamada([])),
       getStatus().then(setStatus).catch(() => {}),
       getInvite().then(r => setInviteCode(r.code)).catch(() => {}),
+      getSemana().then(setSemana).catch(() => {}),
     ]).finally(() => setCarregando(false));
   }
 
@@ -137,6 +139,30 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
         <p className="data-header" style={{ textTransform: "capitalize", paddingTop: 4 }}>
           {hoje}
         </p>
+
+        {/* ── SEMANA ── */}
+        {semana.length > 0 && (
+          <div className="semana-strip">
+            {semana.map(dia => {
+              const [, , d] = dia.data.split("-");
+              const label = new Date(dia.data + "T12:00:00")
+                .toLocaleDateString("pt-BR", { weekday: "short" })
+                .replace(".", "");
+              return (
+                <button
+                  key={dia.data}
+                  className={`semana-dia ${dia.eh_hoje ? "hoje" : ""} ${dia.tem_treino ? "tem-treino" : ""}`}
+                  onClick={onEditarTreino}
+                  title={dia.tem_treino ? `${dia.total_blocos} bloco(s)` : "Sem treino"}
+                >
+                  <span className="semana-dia-label">{label}</span>
+                  <span className="semana-dia-num">{d}</span>
+                  <span className="semana-dia-dot" />
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* ── TREINO ── */}
         <div className="dash-card">

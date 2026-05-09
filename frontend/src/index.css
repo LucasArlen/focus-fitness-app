@@ -2709,6 +2709,84 @@ body {
 }
 .ultimo-treino-banner strong { color: var(--accent); }
 
+/* ── Seletor de data no editor admin ── */
+.date-sel {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 10px;
+  outline: none;
+  cursor: pointer;
+}
+.date-sel:focus { border-color: var(--accent); }
+.date-sel::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.5); cursor: pointer; }
+
+.date-sel-badge {
+  font-size: 12px;
+  color: #4cd964;
+  font-weight: 600;
+  align-self: center;
+}
+
+/* ── Tira da semana (dashboard admin) ── */
+.semana-strip {
+  display: flex;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.semana-dia {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 6px 2px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.semana-dia:hover { background: var(--surface2); }
+
+.semana-dia-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+
+.semana-dia-num {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.semana-dia-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.semana-dia.tem-treino .semana-dia-dot { background: #4cd964; }
+.semana-dia.tem-treino .semana-dia-num { color: var(--text); }
+
+.semana-dia.hoje {
+  border-color: var(--accent);
+  background: rgba(232,255,71,.05);
+}
+.semana-dia.hoje .semana-dia-label { color: var(--accent); }
+.semana-dia.hoje .semana-dia-num   { color: var(--accent); }
+
 /* ─────────────────────────────────────────────────────────────
    Perfil
 ───────────────────────────────────────────────────────────── */

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { postTreino, getTreinoHoje } from "../api/treino";
+import { postTreino, getTreinoPorData } from "../api/treino";
 import { getHistorico, getTreino } from "../api/ranking";
 import { getBanco } from "../api/banco";
 
@@ -24,23 +24,31 @@ function apiParaEstado(treino) {
   };
 }
 
+const hoje = new Date().toISOString().split("T")[0];
+
 export default function Admin({ onLogout, onVoltar }) {
   const [blocos, setBlocos]           = useState([novoBloco()]);
   const [desafioNome, setDesafioNome] = useState("");
   const [banco, setBanco]             = useState([]);
   const [salvando, setSalvando]       = useState(false);
   const [msg, setMsg]                 = useState(null);
-  const [temHoje, setTemHoje]         = useState(false);
+  const [temTreino, setTemTreino]     = useState(false);
+  const [dataSel, setDataSel]         = useState(hoje);
   const [pickerAberto,   setPickerAberto]   = useState(false);
   const [pickerItens,    setPickerItens]    = useState([]);
   const [pickerLoad,     setPickerLoad]     = useState(false);
   const pickerRef = useRef(null);
 
+  function carregarData(data) {
+    setBlocos([novoBloco()]); setDesafioNome(""); setTemTreino(false); setMsg(null);
+    getTreinoPorData(data)
+      .then(t => { const { blocos: b, desafioNome: d } = apiParaEstado(t); setBlocos(b); setDesafioNome(d); setTemTreino(true); })
+      .catch(() => {});
+  }
+
   useEffect(() => {
     getBanco().then(b => setBanco(b.map(e => e.nome))).catch(() => {});
-    getTreinoHoje()
-      .then(t => { const { blocos: b, desafioNome: d } = apiParaEstado(t); setBlocos(b); setDesafioNome(d); setTemHoje(true); })
-      .catch(() => setTemHoje(false));
+    carregarData(hoje);
   }, []);
 
   /* ── Blocos ── */
@@ -98,16 +106,18 @@ export default function Admin({ onLogout, onVoltar }) {
           })),
         })),
         desafio_nome: desafioNome.trim(),
+        data: dataSel,
       });
-      setTemHoje(true);
-      setMsg({ tipo: "ok", texto: temHoje ? "Treino atualizado com sucesso!" : "Treino publicado! Alunos já podem ver." });
+      setTemTreino(true);
+      const ehHoje = dataSel === hoje;
+      setMsg({ tipo: "ok", texto: temTreino
+        ? (ehHoje ? "Treino de hoje atualizado!" : "Treino atualizado!")
+        : (ehHoje ? "Treino publicado! Alunos já podem ver." : `Treino de ${fmtData(dataSel)} agendado!`) });
       getBanco().then(b => setBanco(b.map(e => e.nome))).catch(() => {});
     } catch (err) {
       setMsg({ tipo: "erro", texto: err.message });
     } finally { setSalvando(false); }
   }
-
-  const hoje = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
   return (
     <div className="page">
@@ -123,7 +133,13 @@ export default function Admin({ onLogout, onVoltar }) {
 
       <main className="feed">
         <div className="admin-toolbar">
-          <span className="data-header" style={{ textTransform: "capitalize" }}>{hoje}</span>
+          <input
+            type="date"
+            className="date-sel"
+            value={dataSel}
+            onChange={e => { setDataSel(e.target.value); carregarData(e.target.value); }}
+          />
+          {temTreino && <span className="date-sel-badge">✓ Treino salvo</span>}
           <div style={{ display: "flex", gap: 8 }}>
             <div style={{ position: "relative" }} ref={pickerRef}>
               <button
