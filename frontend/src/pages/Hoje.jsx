@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTreinoHoje } from "../api/treino";
+import { getTreinoHoje, getTreinoUltimo } from "../api/treino";
 import { getStatus } from "../api/academia";
 import { getPresencas } from "../api/presenca";
 import BlocoCard from "../components/BlocoCard";
@@ -118,14 +118,20 @@ function PresencasHoje() {
 }
 
 export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd, onVerDesafio }) {
-  const [treino, setTreino] = useState(null);
-  const [estado, setEstado] = useState("carregando");
+  const [treino,    setTreino]    = useState(null);
+  const [estado,    setEstado]    = useState("carregando");
+  const [ehHoje,    setEhHoje]    = useState(true);   // false = mostrando último treino
   const [statusAcad, setStatusAcad] = useState(null);
 
   useEffect(() => {
     getTreinoHoje()
-      .then(t => { setTreino(t); setEstado("ok"); })
-      .catch(err => setEstado(err.message.includes("404") ? "vazio" : "erro"));
+      .then(t => { setTreino(t); setEhHoje(true); setEstado("ok"); })
+      .catch(() => {
+        // Sem treino hoje — tenta carregar o último publicado
+        getTreinoUltimo()
+          .then(t => { setTreino(t); setEhHoje(false); setEstado("ok"); })
+          .catch(() => setEstado("vazio"));
+      });
     getStatus()
       .then(s => { if (s.ativo) setStatusAcad(s.status); })
       .catch(() => {});
@@ -169,32 +175,21 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd, onVerDesafio }
 
         {estado === "vazio" && (
           <div className="estado-vazio">
-            <span className="estado-vazio-icon">🏋️</span>
-            <p className="estado-vazio-titulo">Nenhum treino hoje</p>
-            <p className="estado-vazio-sub">O treinador ainda não publicou o treino de hoje. Volta em breve!</p>
-          </div>
-        )}
-
-        {estado === "erro" && (
-          <div className="estado-vazio">
-            <span className="estado-vazio-icon">📡</span>
-            <p className="estado-vazio-titulo">Sem conexão</p>
-            <p className="estado-vazio-sub">Verifique sua internet e tente novamente.</p>
-            <button className="btn-publicar" style={{ marginTop: 16 }} onClick={() => {
-              setEstado("carregando");
-              getTreinoHoje()
-                .then(t => { setTreino(t); setEstado("ok"); })
-                .catch(() => setEstado("erro"));
-            }}>
-              Tentar novamente
-            </button>
+            <span className="estado-vazio-icon">😴</span>
+            <p className="estado-vazio-titulo">Nenhum treino publicado ainda</p>
           </div>
         )}
 
         {estado === "ok" && treino && (
           <>
             <NotifBanner />
-            <PresencasHoje />
+            {!ehHoje && (
+              <div className="ultimo-treino-banner">
+                <span>📅</span>
+                <span>Sem treino hoje — mostrando o último: <strong>{formatarData(treino.data)}</strong></span>
+              </div>
+            )}
+            {ehHoje && <PresencasHoje />}
 
             {treino.blocos.map(bloco =>
               bloco.sugestao

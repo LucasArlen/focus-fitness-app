@@ -2695,6 +2695,20 @@ body {
 .inicio-aviso-emoji  { font-size: 16px; flex-shrink: 0; }
 .inicio-aviso-titulo { font-size: 13px; color: var(--text-1); flex: 1; }
 
+/* Banner de último treino */
+.ultimo-treino-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(232,255,71,0.06);
+  border: 1px solid rgba(232,255,71,0.2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text-2);
+}
+.ultimo-treino-banner strong { color: var(--accent); }
+
 /* ─────────────────────────────────────────────────────────────
    Perfil
 ───────────────────────────────────────────────────────────── */

@@ -52,6 +52,19 @@ def get_historico(limite: int = 30, aluno: str = "", db: Session = Depends(get_d
     return result
 
 
+@router.get("/treino/ultimo", response_model=TreinoOut)
+def get_treino_ultimo(db: Session = Depends(get_db)):
+    treino = (
+        db.query(Treino)
+        .filter(Treino.publicado == True)
+        .order_by(Treino.data.desc())
+        .first()
+    )
+    if not treino:
+        raise HTTPException(404, "Nenhum treino publicado")
+    return treino
+
+
 @router.get("/treino/hoje", response_model=TreinoOut)
 def get_treino_hoje(db: Session = Depends(get_db)):
     treino = db.query(Treino).filter(Treino.data == datetime.date.today()).first()
