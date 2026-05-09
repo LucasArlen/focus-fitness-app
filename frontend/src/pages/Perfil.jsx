@@ -39,7 +39,7 @@ function comprimirFoto(file) {
   });
 }
 
-export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome }) {
+export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, onLogoStart, onLogoEnd }) {
   const [apelido_,  setApelido_]  = useState(apelido || "");
   const [foto,      setFoto]      = useState(null);        // base64 or null
   const [carregando,setCarregando]= useState(true);
@@ -121,7 +121,16 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome })
   return (
     <div className="page">
       <header className="app-header">
-        <span className="logo">Focus Fitness</span>
+        <span
+            className="logo"
+            onMouseDown={onLogoStart}
+            onMouseUp={onLogoEnd}
+            onMouseLeave={onLogoEnd}
+            onTouchStart={onLogoStart}
+            onTouchEnd={onLogoEnd}
+            onTouchCancel={onLogoEnd}
+            onContextMenu={e => e.preventDefault()}
+          >Focus Fitness</span>
       </header>
 
       <main className="feed">

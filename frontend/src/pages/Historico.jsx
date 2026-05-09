@@ -7,7 +7,7 @@ function fmt(data) {
     .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
 }
 
-export default function Historico({ nomeAluno }) {
+export default function Historico({ nomeAluno, onLogoStart, onLogoEnd }) {
   const [lista, setLista]             = useState([]);
   const [estado, setEstado]           = useState("carregando");
   const [expandido, setExpandido]     = useState(null);
@@ -35,7 +35,16 @@ export default function Historico({ nomeAluno }) {
   return (
     <div className="page">
       <header className="app-header">
-        <span className="logo">Focus Fitness</span>
+        <span
+            className="logo"
+            onMouseDown={onLogoStart}
+            onMouseUp={onLogoEnd}
+            onMouseLeave={onLogoEnd}
+            onTouchStart={onLogoStart}
+            onTouchEnd={onLogoEnd}
+            onTouchCancel={onLogoEnd}
+            onContextMenu={e => e.preventDefault()}
+          >Focus Fitness</span>
         {nomeAluno && <span className="aluno-chip">👤 {nomeAluno}</span>}
       </header>
 

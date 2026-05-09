@@ -228,7 +228,7 @@ function AdminForm({ onCriado }) {
 
 // ── Página principal ─────────────────────────────────────────────────────────
 
-export default function Avisos({ isAdmin, nomeAluno }) {
+export default function Avisos({ isAdmin, nomeAluno, onLogoStart, onLogoEnd }) {
   const [avisos,     setAvisos]     = useState([]);
   const [carregando, setCarregando] = useState(true);
 
@@ -266,7 +266,16 @@ export default function Avisos({ isAdmin, nomeAluno }) {
   return (
     <div className="page">
       <header className="app-header">
-        <span className="logo">Focus Fitness</span>
+        <span
+            className="logo"
+            onMouseDown={onLogoStart}
+            onMouseUp={onLogoEnd}
+            onMouseLeave={onLogoEnd}
+            onTouchStart={onLogoStart}
+            onTouchEnd={onLogoEnd}
+            onTouchCancel={onLogoEnd}
+            onContextMenu={e => e.preventDefault()}
+          >Focus Fitness</span>
         {isAdmin && <span className="admin-badge">Admin</span>}
       </header>
 

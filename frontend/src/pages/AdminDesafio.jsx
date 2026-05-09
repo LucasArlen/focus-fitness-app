@@ -27,7 +27,7 @@ function euSou(nome, ref) {
   return ref && nome.trim().toLowerCase() === ref.trim().toLowerCase();
 }
 
-export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
+export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart, onLogoEnd }) {
   const [aba, setAba]               = useState("hoje");
   const [desafio, setDesafio]       = useState(null);
   const [estadoHoje, setEstadoHoje] = useState("carregando");
@@ -121,7 +121,16 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes }) {
   return (
     <div className="page">
       <header className="app-header">
-        <span className="logo">Focus Fitness</span>
+        <span
+            className="logo"
+            onMouseDown={onLogoStart}
+            onMouseUp={onLogoEnd}
+            onMouseLeave={onLogoEnd}
+            onTouchStart={onLogoStart}
+            onTouchEnd={onLogoEnd}
+            onTouchCancel={onLogoEnd}
+            onContextMenu={e => e.preventDefault()}
+          >Focus Fitness</span>
         {isAdmin
           ? <span className="admin-badge">Desafio</span>
           : nomeAluno && <span className="aluno-chip">👤 {nomeAluno}</span>

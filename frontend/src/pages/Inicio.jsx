@@ -24,7 +24,7 @@ function fmt(dataStr) {
     .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
 }
 
-export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPerfil }) {
+export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPerfil, onLogoStart, onLogoEnd }) {
   const [treino,       setTreino]      = useState(null);
   const [treinoEstado, setTreinoEstado]= useState("carregando");
   const [treinoEhHoje, setTreinoEhHoje]= useState(true);
@@ -64,7 +64,16 @@ export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPer
   return (
     <div className="page">
       <header className="app-header">
-        <span className="logo">Focus Fitness</span>
+        <span
+            className="logo"
+            onMouseDown={onLogoStart}
+            onMouseUp={onLogoEnd}
+            onMouseLeave={onLogoEnd}
+            onTouchStart={onLogoStart}
+            onTouchEnd={onLogoEnd}
+            onTouchCancel={onLogoEnd}
+            onContextMenu={e => e.preventDefault()}
+          >Focus Fitness</span>
       </header>
 
       <main className="feed">

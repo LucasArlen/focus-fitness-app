@@ -102,14 +102,15 @@ export default function App() {
   }
 
   // Abas: admin só aparece na nav se já estiver logado como admin
-  const TABS = [
-    ...(!isAdmin ? [{ id: "inicio",   label: "Início",   Icon: IconInicio }] : []),
-    { id: "treino",    label: "Treino",    Icon: IconTreino },
-    { id: "desafio",   label: "Desafio",   Icon: IconDesafio },
-    { id: "avisos",    label: "Avisos",    Icon: IconAvisos },
-    { id: "historico", label: "Histórico", Icon: IconHistorico },
-    ...(isAdmin  ? [{ id: "admin",  label: "Admin ✓", Icon: IconAdmin }] : []),
-  ];
+  const TABS = isAdmin
+    ? [{ id: "admin", label: "Admin ✓", Icon: IconAdmin }]
+    : [
+        { id: "treino",    label: "Treino",    Icon: IconTreino },
+        { id: "desafio",   label: "Desafio",   Icon: IconDesafio },
+        { id: "inicio",    label: "Início",    Icon: IconInicio },
+        { id: "avisos",    label: "Avisos",    Icon: IconAvisos },
+        { id: "historico", label: "Histórico", Icon: IconHistorico },
+      ];
 
   return (
     <>
@@ -119,6 +120,8 @@ export default function App() {
           onVerTreino={() => setView("treino")}
           onVerAvisos={() => setView("avisos")}
           onVerPerfil={() => setView("perfil")}
+          onLogoStart={logoStart}
+          onLogoEnd={logoEnd}
         />
       )}
       {view === "treino"    && (
@@ -150,15 +153,17 @@ export default function App() {
           onVerAlunos={() => setAdminView("alunos")}
         />
       )}
-      {view === "avisos"    && <Avisos isAdmin={isAdmin} nomeAluno={nome} />}
-      {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} nomeAluno={nome} freqMes={freqMes()} />}
-      {view === "historico" && <Historico nomeAluno={nome} />}
+      {view === "avisos"    && <Avisos isAdmin={isAdmin} nomeAluno={nome} onLogoStart={logoStart} onLogoEnd={logoEnd} />}
+      {view === "desafio"   && <AdminDesafio isAdmin={isAdmin} nomeAluno={nome} freqMes={freqMes()} onLogoStart={logoStart} onLogoEnd={logoEnd} />}
+      {view === "historico" && <Historico nomeAluno={nome} onLogoStart={logoStart} onLogoEnd={logoEnd} />}
       {view === "perfil" && !isAdmin && (
         <Perfil
           nome={nome}
           apelido={apelido}
           onSalvarApelido={salvarApelido}
           onTrocarNome={limpar}
+          onLogoStart={logoStart}
+          onLogoEnd={logoEnd}
         />
       )}
 
