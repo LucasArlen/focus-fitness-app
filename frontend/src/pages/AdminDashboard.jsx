@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../api/client";
 import { getTreinoHoje, getSemana } from "../api/treino";
 import { getDesafioHoje } from "../api/desafio";
 import { getChamada, marcarPresenca } from "../api/presenca";

@@ -6,14 +6,3 @@ export const adminLogin = (username, password) =>
     body: JSON.stringify({ username, password }),
   });
 
-export const alunoLogin = (nome, pin) =>
-  apiFetch("/aluno/login", {
-    method: "POST",
-    body: JSON.stringify({ nome, pin }),
-  });
-
-export const alunoCadastro = (nome, pin) =>
-  apiFetch("/aluno/cadastro", {
-    method: "POST",
-    body: JSON.stringify({ nome, pin }),
-  });
