@@ -49,12 +49,16 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
       {aviso.categoria === "evento" && (
         <div className="aviso-confs">
           {!isAdmin && (
-            <button
-              className={`aviso-conf-btn ${jaConfirmou ? "confirmado" : ""}`}
-              onClick={() => onConfirmar(aviso.id)}
-            >
-              {jaConfirmou ? "✓ Vou ir!" : "Confirmar presença"}
-            </button>
+            jaConfirmou ? (
+              <div className="aviso-conf-confirmado">
+                <span className="aviso-conf-label">✓ Confirmado</span>
+                <button className="aviso-conf-cancelar" onClick={() => onConfirmar(aviso.id)} title="Cancelar presença">✕</button>
+              </div>
+            ) : (
+              <button className="aviso-conf-btn" onClick={() => onConfirmar(aviso.id)}>
+                Confirmar presença
+              </button>
+            )
           )}
           {total > 0 && (
             <button className="aviso-confs-toggle" onClick={() => setExpandirConfs(v => !v)}>

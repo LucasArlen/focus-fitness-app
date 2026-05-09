@@ -3132,11 +3132,30 @@ body {
   cursor: pointer;
   transition: background 0.15s;
 }
-.aviso-conf-btn.confirmado {
-  background: var(--accent);
-  color: #000;
-}
 .aviso-conf-btn:active { opacity: 0.8; }
+
+.aviso-conf-confirmado {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.aviso-conf-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4cd964;
+}
+.aviso-conf-cancelar {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color .15s;
+}
+.aviso-conf-cancelar:hover { color: #ff5252; }
 
 .aviso-confs-toggle {
   background: none;
