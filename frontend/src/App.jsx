@@ -11,7 +11,14 @@ import Onboarding from "./components/Onboarding";
 import InstallBanner from "./components/InstallBanner";
 import Perfil from "./pages/Perfil";
 import Avisos from "./pages/Avisos";
+import Inicio from "./pages/Inicio";
 import { useAluno, freqMes } from "./hooks/useAluno";
+
+const IconInicio = () => (
+  <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+  </svg>
+);
 
 const IconTreino = () => (
   <svg className="nav-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -50,7 +57,7 @@ const IconPerfil = () => (
 );
 
 export default function App() {
-  const [view, setView]           = useState("treino");
+  const [view, setView]           = useState("inicio");
   const [adminView, setAdminView] = useState("dashboard");
   const [role, setRole]           = useState(() => localStorage.getItem("role") || "guest");
   const { nome, apelido, displayNome, salvar, salvarApelido, limpar } = useAluno();
@@ -68,7 +75,7 @@ export default function App() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     setRole("guest");
-    setView("treino");
+    setView("inicio");
     setAdminView("dashboard");
   }
 
@@ -94,16 +101,24 @@ export default function App() {
 
   // Abas: admin só aparece na nav se já estiver logado como admin
   const TABS = [
+    ...(!isAdmin ? [{ id: "inicio",   label: "Início",   Icon: IconInicio }] : []),
     { id: "treino",    label: "Treino",    Icon: IconTreino },
-    { id: "avisos",    label: "Avisos",    Icon: IconAvisos },
     { id: "desafio",   label: "Desafio",   Icon: IconDesafio },
+    { id: "avisos",    label: "Avisos",    Icon: IconAvisos },
     { id: "historico", label: "Histórico", Icon: IconHistorico },
-    ...(!isAdmin ? [{ id: "perfil", label: "Perfil", Icon: IconPerfil }] : []),
     ...(isAdmin  ? [{ id: "admin",  label: "Admin ✓", Icon: IconAdmin }] : []),
   ];
 
   return (
     <>
+      {view === "inicio" && !isAdmin && (
+        <Inicio
+          displayNome={apelido || nome}
+          onVerTreino={() => setView("treino")}
+          onVerAvisos={() => setView("avisos")}
+          onVerPerfil={() => setView("perfil")}
+        />
+      )}
       {view === "treino"    && (
         <Hoje nomeAluno={nome} onLogoStart={logoStart} onLogoEnd={logoEnd} onVerDesafio={() => setView("desafio")} />
       )}
