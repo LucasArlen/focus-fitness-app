@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTreinoHoje } from "../api/treino";
+import { getTreinoHoje, getTreinoUltimo } from "../api/treino";
 import { getRankingMensal } from "../api/ranking";
 import { getAvisos } from "../api/aviso";
 import { getStatus } from "../api/academia";
@@ -27,6 +27,7 @@ function fmt(dataStr) {
 export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPerfil }) {
   const [treino,       setTreino]      = useState(null);
   const [treinoEstado, setTreinoEstado]= useState("carregando");
+  const [treinoEhHoje, setTreinoEhHoje]= useState(true);
   const [ranking,      setRanking]     = useState([]);
   const [avisos,       setAvisos]      = useState([]);
   const [acadStatus,   setAcadStatus]  = useState(null);
@@ -36,8 +37,12 @@ export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPer
 
   useEffect(() => {
     getTreinoHoje()
-      .then(t => { setTreino(t); setTreinoEstado("ok"); })
-      .catch(err => setTreinoEstado(err.message.includes("404") ? "vazio" : "erro"));
+      .then(t => { setTreino(t); setTreinoEhHoje(true); setTreinoEstado("ok"); })
+      .catch(() => {
+        getTreinoUltimo()
+          .then(t => { setTreino(t); setTreinoEhHoje(false); setTreinoEstado("ok"); })
+          .catch(() => setTreinoEstado("vazio"));
+      });
 
     getRankingMensal()
       .then(r => setRanking(Array.isArray(r) ? r : []))
@@ -97,8 +102,9 @@ export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPer
           <div className="inicio-card-header">
             <span className="inicio-card-icon">💪</span>
             <span className="inicio-card-titulo">Treino de hoje</span>
-            {treinoEstado === "ok"    && <span className="dash-badge ok"   style={{ marginLeft: "auto" }}>Publicado</span>}
-            {treinoEstado === "vazio" && <span className="dash-badge vazio" style={{ marginLeft: "auto" }}>Sem treino</span>}
+            {treinoEstado === "ok" && treinoEhHoje  && <span className="dash-badge ok"   style={{ marginLeft: "auto" }}>Publicado</span>}
+            {treinoEstado === "ok" && !treinoEhHoje && <span className="dash-badge vazio" style={{ marginLeft: "auto" }}>Sem treino hoje</span>}
+            {treinoEstado === "vazio"     && <span className="dash-badge vazio" style={{ marginLeft: "auto" }}>Sem treino</span>}
           </div>
 
           {treinoEstado === "ok" && treino && (
@@ -107,20 +113,16 @@ export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPer
                 {fmt(treino.data)} · {treino.blocos.length} bloco{treino.blocos.length !== 1 ? "s" : ""} · {totalExercicios} exercício{totalExercicios !== 1 ? "s" : ""}
                 {treino.desafio ? " · 🏆" : ""}
               </p>
-              <p className="inicio-card-cta">Ver treino →</p>
+              <p className="inicio-card-cta">{treinoEhHoje ? "Ver treino →" : "Ver último treino →"}</p>
             </>
           )}
 
           {treinoEstado === "vazio" && (
-            <p className="inicio-card-sub">O instrutor ainda não publicou o treino de hoje.</p>
+            <p className="inicio-card-sub">Nenhum treino publicado ainda.</p>
           )}
 
           {treinoEstado === "carregando" && (
             <p className="inicio-card-sub">Carregando...</p>
-          )}
-
-          {treinoEstado === "erro" && (
-            <p className="inicio-card-sub">Sem conexão — verifique sua internet.</p>
           )}
         </div>
 
