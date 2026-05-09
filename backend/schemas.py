@@ -165,7 +165,6 @@ class AvisoOut(BaseModel):
     id: int
     titulo: str
     corpo: Optional[str] = None
-    foto: Optional[str] = None
     categoria: str
     data_evento: Optional[str] = None
     expira_em: datetime.date

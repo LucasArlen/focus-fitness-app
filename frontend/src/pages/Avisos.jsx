@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getAvisos, criarAviso, deletarAviso, confirmarAviso } from "../api/aviso";
 
 const CAT_CFG = {
@@ -41,10 +41,6 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
         <p className="aviso-corpo">{aviso.corpo}</p>
       )}
 
-      {aviso.foto && (
-        <img className="aviso-foto" src={aviso.foto} alt="Imagem do aviso" />
-      )}
-
       {aviso.categoria === "evento" && (
         <div className="aviso-confs">
           {!isAdmin && (
@@ -84,22 +80,12 @@ function AdminForm({ onCriado }) {
   const [categoria,  setCategoria]  = useState("aviso");
   const [dataEvento, setDataEvento] = useState("");
   const [expiraEm,   setExpiraEm]   = useState("");
-  const [foto,       setFoto]       = useState(null);
   const [salvando,   setSalvando]   = useState(false);
   const [erro,       setErro]       = useState("");
-  const fileRef = useRef();
 
   function resetar() {
     setTitulo(""); setCorpo(""); setCategoria("aviso");
-    setDataEvento(""); setExpiraEm(""); setFoto(null); setErro("");
-  }
-
-  async function handleFoto(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => setFoto(ev.target.result);
-    reader.readAsDataURL(file);
+    setDataEvento(""); setExpiraEm(""); setErro("");
   }
 
   async function salvar() {
@@ -109,7 +95,6 @@ function AdminForm({ onCriado }) {
       const novo = await criarAviso({
         titulo: titulo.trim(),
         corpo: corpo.trim() || null,
-        foto: foto || null,
         categoria,
         data_evento: dataEvento.trim() || null,
         expira_em: expiraEm,
@@ -177,18 +162,6 @@ function AdminForm({ onCriado }) {
         rows={3}
       />
 
-      <div className="aviso-form-row">
-        <label className="aviso-foto-label">
-          {foto ? "✓ Foto selecionada" : "📷 Adicionar foto"}
-          <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFoto} />
-        </label>
-        {foto && (
-          <button className="aviso-foto-remover" onClick={() => { setFoto(null); if (fileRef.current) fileRef.current.value = ""; }}>
-            Remover
-          </button>
-        )}
-      </div>
-
       <div className="aviso-form-row aviso-form-row-expira">
         <label className="aviso-expira-label">Válido até</label>
         <input
@@ -199,8 +172,6 @@ function AdminForm({ onCriado }) {
           onChange={e => setExpiraEm(e.target.value)}
         />
       </div>
-
-      {foto && <img className="aviso-foto-preview" src={foto} alt="Preview" />}
 
       {erro && <p className="aviso-erro">{erro}</p>}
 

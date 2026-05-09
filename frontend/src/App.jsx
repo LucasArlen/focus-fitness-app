@@ -57,7 +57,9 @@ const IconPerfil = () => (
 );
 
 export default function App() {
-  const [view, setView]           = useState("inicio");
+  const [view, setView]           = useState(() =>
+    localStorage.getItem("role") === "admin" ? "admin" : "inicio"
+  );
   const [adminView, setAdminView] = useState("dashboard");
   const [role, setRole]           = useState(() => localStorage.getItem("role") || "guest");
   const { nome, apelido, displayNome, salvar, salvarApelido, limpar } = useAluno();
