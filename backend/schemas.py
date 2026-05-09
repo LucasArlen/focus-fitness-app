@@ -72,8 +72,13 @@ class TreinoResumoOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ApelidoIn(BaseModel):
+    apelido: Optional[str] = None
+
+
 class RankingMensalItem(BaseModel):
     nome: str
+    apelido: Optional[str] = None
     participacoes: int
     total: float
     melhor: float
@@ -124,6 +129,7 @@ class ExercicioOut(BaseModel):
 
 class RankingAnualItem(BaseModel):
     nome: str
+    apelido: Optional[str] = None
     participacoes: int
     total: float
     melhor: float

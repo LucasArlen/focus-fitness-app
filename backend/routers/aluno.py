@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from auth import ADMIN_PASSWORD, ADMIN_USERNAME, create_token, require_admin, require_any
 from database import get_db
 from models import Aluno, AppConfig, Bloco, Desafio, Linha, Pontuacao, Presenca, PushSubscription, Reacao, Treino
-from schemas import AdminLoginIn, AlunoIn, CredenciaisIn, Token, PerfilOut, PerfilIn
+from schemas import AdminLoginIn, AlunoIn, ApelidoIn, CredenciaisIn, Token, PerfilOut, PerfilIn
 
 router = APIRouter()
 
@@ -97,11 +97,22 @@ def listar_alunos(page: int = 1, db: Session = Depends(get_db), _=Depends(requir
         .all()
     )
     return {
-        "alunos": [{"nome": a.nome, "criado_em": a.criado_em.strftime("%d/%m/%Y")} for a in alunos],
+        "alunos": [{"nome": a.nome, "apelido": a.apelido, "criado_em": a.criado_em.strftime("%d/%m/%Y")} for a in alunos],
         "total": total,
         "page": page,
         "pages": max(1, -(-total // per_page)),
     }
+
+
+@router.put("/admin/alunos/{nome}/apelido")
+def set_apelido_aluno(nome: str, body: ApelidoIn, db: Session = Depends(get_db), _=Depends(require_admin)):
+    """Admin: define ou remove o apelido de um aluno."""
+    aluno = db.query(Aluno).filter(Aluno.nome == nome).first()
+    if not aluno:
+        raise HTTPException(404, "Aluno não encontrado")
+    aluno.apelido = body.apelido.strip() if body.apelido else None
+    db.commit()
+    return {"ok": True, "apelido": aluno.apelido}
 
 
 @router.post("/admin/reset")

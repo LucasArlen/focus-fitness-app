@@ -120,7 +120,8 @@ export default function App() {
     <>
       {view === "inicio" && !isAdmin && (
         <Inicio
-          displayNome={apelido || nome}
+          nome={nome}
+          apelido={apelido}
           onVerTreino={() => setView("treino")}
           onVerAvisos={() => setView("avisos")}
           onVerPerfil={() => setView("perfil")}

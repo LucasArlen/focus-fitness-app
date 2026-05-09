@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from database import get_db
-from models import Desafio, Pontuacao, Treino
+from models import Aluno, Desafio, Pontuacao, Treino
 from schemas import RankingAnualItem, RankingMensalItem, EvolucaoItem
 
 router = APIRouter()
@@ -35,8 +35,11 @@ def get_ranking_anual(db: Session = Depends(get_db)):
         alunos[p.aluno_nome]["total"] += val
         alunos[p.aluno_nome]["melhor"] = max(alunos[p.aluno_nome]["melhor"], val)
 
+    nomes = list(alunos.keys())
+    apelido_map = {a.nome: a.apelido for a in db.query(Aluno).filter(Aluno.nome.in_(nomes)).all()} if nomes else {}
+
     return sorted(
-        [RankingAnualItem(nome=k, **v) for k, v in alunos.items()],
+        [RankingAnualItem(nome=k, apelido=apelido_map.get(k), **v) for k, v in alunos.items()],
         key=lambda x: x.total,
         reverse=True,
     )
@@ -56,8 +59,12 @@ def _ranking_por_mes(mes: str, db: Session) -> list[RankingMensalItem]:
         alunos[p.aluno_nome]["participacoes"] += 1
         alunos[p.aluno_nome]["total"] += val
         alunos[p.aluno_nome]["melhor"] = max(alunos[p.aluno_nome]["melhor"], val)
+
+    nomes = list(alunos.keys())
+    apelido_map = {a.nome: a.apelido for a in db.query(Aluno).filter(Aluno.nome.in_(nomes)).all()} if nomes else {}
+
     return sorted(
-        [RankingMensalItem(nome=k, **v) for k, v in alunos.items()],
+        [RankingMensalItem(nome=k, apelido=apelido_map.get(k), **v) for k, v in alunos.items()],
         key=lambda x: x.total,
         reverse=True,
     )

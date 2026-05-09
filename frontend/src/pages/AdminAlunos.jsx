@@ -1,15 +1,20 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 import { getChamada, marcarPresenca, desmarcarPresenca } from "../api/presenca";
 
 const PER_PAGE = 20;
 
 export default function AdminAlunos({ onVoltar }) {
-  const [chamada,    setChamada]    = useState([]);   // [{nome, presente, ordem_chegada}]
+  const [chamada,    setChamada]    = useState([]);
   const [busca,      setBusca]      = useState("");
   const [page,       setPage]       = useState(1);
   const [carregando, setCarregando] = useState(true);
   const [toggling,   setToggling]   = useState(new Set());
+
+  // Apelido inline edit
+  const [editandoNome,    setEditandoNome]    = useState(null);
+  const [apelidoTemp,     setApelidoTemp]     = useState("");
+  const [salvandoApelido, setSalvandoApelido] = useState(false);
 
   useEffect(() => {
     setCarregando(true);
@@ -32,10 +37,25 @@ export default function AdminAlunos({ onVoltar }) {
     }
   }
 
+  async function salvarApelido(nome) {
+    setSalvandoApelido(true);
+    try {
+      await apiFetch(`/admin/alunos/${encodeURIComponent(nome)}/apelido`, {
+        method: "PUT",
+        body: JSON.stringify({ apelido: apelidoTemp.trim() || null }),
+      });
+      setChamada(prev => prev.map(a =>
+        a.nome === nome ? { ...a, apelido: apelidoTemp.trim() || null } : a
+      ));
+      setEditandoNome(null);
+    } catch { /* silencioso */ }
+    finally { setSalvandoApelido(false); }
+  }
+
   // Filtra pela busca
   const buscaNorm = busca.trim().toLowerCase();
   const filtrados = chamada.filter(a =>
-    !buscaNorm || a.nome.toLowerCase().includes(buscaNorm)
+    !buscaNorm || a.nome.toLowerCase().includes(buscaNorm) || (a.apelido || "").toLowerCase().includes(buscaNorm)
   );
 
   // Ordena: presentes por chegada, ausentes alfabético
@@ -50,7 +70,6 @@ export default function AdminAlunos({ onVoltar }) {
   const pagina     = Math.min(page, totalPages);
   const visiveis   = ordenados.slice((pagina - 1) * PER_PAGE, pagina * PER_PAGE);
 
-  // Volta pra página 1 quando busca muda
   useEffect(() => { setPage(1); }, [busca]);
 
   const totalPresentes = chamada.filter(a => a.presente).length;
@@ -73,7 +92,7 @@ export default function AdminAlunos({ onVoltar }) {
           <>
             <input
               className="chamada-busca"
-              placeholder="Buscar aluno..."
+              placeholder="Buscar aluno ou apelido..."
               value={busca}
               onChange={e => setBusca(e.target.value)}
               autoComplete="off"
@@ -86,20 +105,61 @@ export default function AdminAlunos({ onVoltar }) {
               </p>
             ) : (
               <div className="chamada-lista">
-                {visiveis.map(({ nome, presente, ordem_chegada }) => (
-                  <button
-                    key={nome}
-                    className={`chamada-item ${presente ? "presente" : ""}`}
-                    disabled={toggling.has(nome)}
-                    onClick={() => togglePresenca(nome, presente)}
-                  >
-                    <span className="chamada-check">
-                      {toggling.has(nome) ? "⏳" : presente ? "✓" : ""}
-                    </span>
-                    <span className="chamada-nome">{nome}</span>
-                    {presente && <span className="chamada-ordem">{ordem_chegada}º</span>}
-                  </button>
-                ))}
+                {visiveis.map(({ nome, apelido, presente, ordem_chegada }) => {
+                  const editando = editandoNome === nome;
+                  return (
+                    <div
+                      key={nome}
+                      className={`chamada-item ${presente ? "presente" : ""}`}
+                      onClick={() => { if (!editando && !toggling.has(nome)) togglePresenca(nome, presente); }}
+                    >
+                      <span className="chamada-check">
+                        {toggling.has(nome) ? "⏳" : presente ? "✓" : ""}
+                      </span>
+
+                      <div className="chamada-info">
+                        <span className="chamada-nome">{nome}</span>
+                        {!editando && apelido && (
+                          <span className="apelido-sub">{apelido}</span>
+                        )}
+                        {editando && (
+                          <div className="chamada-apelido-edit" onClick={e => e.stopPropagation()}>
+                            <input
+                              className="chamada-apelido-input"
+                              value={apelidoTemp}
+                              onChange={e => setApelidoTemp(e.target.value)}
+                              placeholder="ex: Lucas 1"
+                              maxLength={30}
+                              autoFocus
+                              onKeyDown={e => {
+                                if (e.key === "Enter") salvarApelido(nome);
+                                if (e.key === "Escape") setEditandoNome(null);
+                              }}
+                            />
+                            <button
+                              className="chamada-apelido-ok"
+                              onClick={() => salvarApelido(nome)}
+                              disabled={salvandoApelido}
+                            >✓</button>
+                            <button
+                              className="chamada-apelido-cancel"
+                              onClick={() => setEditandoNome(null)}
+                            >✕</button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="chamada-right" onClick={e => e.stopPropagation()}>
+                        {presente && <span className="chamada-ordem">{ordem_chegada}º</span>}
+                        <button
+                          className="chamada-edit-apelido"
+                          title="Definir apelido"
+                          onClick={() => { setEditandoNome(nome); setApelidoTemp(apelido || ""); }}
+                        >✎</button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 

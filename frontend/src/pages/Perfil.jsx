@@ -40,11 +40,11 @@ function comprimirFoto(file) {
 }
 
 export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, onLogoStart, onLogoEnd }) {
-  const [apelido_,  setApelido_]  = useState(apelido || "");
-  const [foto,      setFoto]      = useState(null);        // base64 or null
+  const [apelidoServidor, setApelidoServidor] = useState(apelido || null);
+  const [foto,      setFoto]      = useState(null);
   const [carregando,setCarregando]= useState(true);
   const [salvando,  setSalvando]  = useState(false);
-  const [dirty,     setDirty]     = useState(false);
+  const [fotoAlterada, setFotoAlterada] = useState(false);
   const [erroSalvar,setErroSalvar]= useState("");
   const [notif,     setNotif]     = useState(getNotifEstado);
   const [notifLoad, setNotifLoad] = useState(false);
@@ -54,7 +54,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, o
   useEffect(() => {
     getPerfil()
       .then(p => {
-        if (p.apelido) { setApelido_(p.apelido); }
+        if (p.apelido) { setApelidoServidor(p.apelido); onSalvarApelido(p.apelido); }
         if (p.foto)    { setFoto(p.foto); }
       })
       .catch(() => {})
@@ -69,16 +69,15 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, o
     if (!file) return;
     const base64 = await comprimirFoto(file);
     setFoto(base64);
-    setDirty(true);
+    setFotoAlterada(true);
   }
 
   async function salvar() {
     setSalvando(true);
     setErroSalvar("");
     try {
-      await updatePerfil({ apelido: apelido_.trim() || null, foto: foto || null });
-      onSalvarApelido(apelido_.trim());
-      setDirty(false);
+      await updatePerfil({ foto: foto || null });
+      setFotoAlterada(false);
     } catch (err) {
       setErroSalvar(err.message || "Erro ao salvar. Tente novamente.");
     } finally {
@@ -113,7 +112,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, o
     setNotif("dismissed");
   }
 
-  const inicial = (apelido_ || nome || "?")[0].toUpperCase();
+  const inicial = (nome || "?")[0].toUpperCase();
   const freq    = freqMes();
   const streak  = calcStreak();
   const mesNome = new Date().toLocaleString("pt-BR", { month: "long" });
@@ -146,37 +145,34 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, o
             <span className="perfil-avatar-edit">✎</span>
           </div>
           <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={escolherFoto} />
-          <p className="perfil-display-nome">{apelido_ || nome}</p>
+          <p className="perfil-display-nome">{nome}</p>
+          {apelidoServidor && <span className="apelido-sub" style={{ marginTop: 2 }}>{apelidoServidor}</span>}
         </div>
 
         {/* ── Editar perfil ── */}
         <div className="perfil-section">
           <div className="perfil-row">
-            <span className="perfil-label">Apelido</span>
-            <input
-              className="perfil-input"
-              placeholder={nome}
-              value={apelido_}
-              maxLength={30}
-              onChange={e => { setApelido_(e.target.value); setDirty(true); }}
-            />
-          </div>
-          <div className="perfil-row">
-            <span className="perfil-label">Nome no sistema</span>
+            <span className="perfil-label">Nome</span>
             <span className="perfil-value-readonly">{nome}</span>
           </div>
-          <div className="perfil-row" style={{ fontSize: 11, color: "var(--text-3)", padding: "8px 16px" }}>
-            O nome no sistema é o que o instrutor usa para marcar sua presença e pontuação. Não pode ser alterado aqui.
+          <div className="perfil-row">
+            <span className="perfil-label">Apelido</span>
+            <span className="perfil-value-readonly">{apelidoServidor || "—"}</span>
           </div>
+          {apelidoServidor && (
+            <div style={{ fontSize: 11, color: "var(--text-3)", padding: "0 16px 10px" }}>
+              Definido pelo seu instrutor.
+            </div>
+          )}
         </div>
 
         {erroSalvar && (
           <p style={{ color: "var(--danger)", fontSize: 13, padding: "0 4px" }}>{erroSalvar}</p>
         )}
 
-        {dirty && (
+        {fotoAlterada && (
           <button className="dash-action-btn dash-action-btn-destaque" onClick={salvar} disabled={salvando}>
-            {salvando ? "Salvando..." : "💾  Salvar alterações"}
+            {salvando ? "Salvando..." : "💾  Salvar foto"}
           </button>
         )}
 

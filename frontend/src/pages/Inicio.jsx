@@ -24,7 +24,7 @@ function fmt(dataStr) {
     .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
 }
 
-export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPerfil, onLogoStart, onLogoEnd }) {
+export default function Inicio({ nome, apelido, onVerTreino, onVerAvisos, onVerPerfil, onLogoStart, onLogoEnd }) {
   const [treino,       setTreino]      = useState(null);
   const [treinoEstado, setTreinoEstado]= useState("carregando");
   const [treinoEhHoje, setTreinoEhHoje]= useState(true);
@@ -81,10 +81,11 @@ export default function Inicio({ displayNome, onVerTreino, onVerAvisos, onVerPer
         {/* ── PERFIL ── */}
         <div className="inicio-perfil-card" onClick={onVerPerfil}>
           <div className="inicio-perfil-avatar">
-            {(displayNome || "?")[0].toUpperCase()}
+            {(nome || "?")[0].toUpperCase()}
           </div>
           <div className="inicio-perfil-info">
-            <p className="inicio-perfil-nome">{displayNome || "Aluno"}</p>
+            <p className="inicio-perfil-nome">{nome || "Aluno"}</p>
+            {apelido && <span className="apelido-sub">{apelido}</span>}
             <div className="inicio-perfil-stats">
               {streak > 0 && (
                 <span className="inicio-stat-pill streak">🔥 {streak} {streak === 1 ? "dia" : "dias"}</span>

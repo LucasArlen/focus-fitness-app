@@ -46,8 +46,9 @@ def get_chamada(db: Session = Depends(get_db), _=Depends(require_admin)):
     return [
         {
             "nome": a.nome,
+            "apelido": a.apelido,
             "presente": a.nome in ordem_chegada,
-            "ordem_chegada": ordem_chegada.get(a.nome),  # None se ausente
+            "ordem_chegada": ordem_chegada.get(a.nome),
         }
         for a in alunos
     ]

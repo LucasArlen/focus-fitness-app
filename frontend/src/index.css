@@ -1782,12 +1782,82 @@ body {
 }
 
 .chamada-ordem {
-  margin-left: auto;
   font-size: 12px;
   font-weight: 700;
   color: rgba(76,217,100,0.6);
   letter-spacing: 0.02em;
 }
+
+/* ─── Apelido sub-label (nome menor, translúcido) ─────────────── */
+.apelido-sub {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-3);
+  opacity: 0.6;
+  margin-top: 1px;
+}
+
+/* ─── Chamada — info column + right side + apelido edit ────────── */
+.chamada-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.chamada-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.chamada-edit-apelido {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  opacity: 0.4;
+  transition: opacity .15s;
+  border-radius: 6px;
+}
+.chamada-edit-apelido:hover { opacity: 1; color: var(--accent); }
+
+.chamada-apelido-edit {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.chamada-apelido-input {
+  background: var(--surface3);
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  padding: 3px 8px;
+  flex: 1;
+  min-width: 0;
+  outline: none;
+}
+
+.chamada-apelido-ok,
+.chamada-apelido-cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 2px 5px;
+  border-radius: 6px;
+  line-height: 1;
+}
+.chamada-apelido-ok     { color: #4cd964; }
+.chamada-apelido-cancel { color: var(--danger); }
 
 /* ─────────────────────────────────────────────────────────────
    "Vou Hoje" strip

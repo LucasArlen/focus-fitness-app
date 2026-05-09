@@ -115,8 +115,10 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
   }
 
   // Dados pessoais do aluno no ranking anual
-  const meuIdx  = anual.findIndex(a => euSou(a.nome, nomeAluno));
-  const meuDado = meuIdx >= 0 ? anual[meuIdx] : null;
+  const meuIdx    = anual.findIndex(a => euSou(a.nome, nomeAluno));
+  const meuDado   = meuIdx >= 0 ? anual[meuIdx] : null;
+  // Apelido map a partir da chamada (aba Hoje)
+  const apelidoMap = Object.fromEntries(chamada.filter(a => a.apelido).map(a => [a.nome, a.apelido]));
 
   return (
     <div className="page">
@@ -240,6 +242,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                           className={`podio-item pos-${i + 1} ${euSou(p.aluno_nome, nomeAluno) ? "meu-podio" : ""}`}>
                           <span className="podio-medalha">{MEDALHAS[i]}</span>
                           <span className="podio-nome">{p.aluno_nome.split(" ")[0]}</span>
+                          {apelidoMap[p.aluno_nome] && <span className="apelido-sub" style={{ fontSize: 10, textAlign: "center" }}>{apelidoMap[p.aluno_nome]}</span>}
                           <span className="podio-valor">{p.valor}</span>
                           {isAdmin && !desafio.fechado && (
                             <button className="btn-icon danger podio-del"
@@ -255,7 +258,10 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                           <li key={p.id}
                             className={`ranking-item ${euSou(p.aluno_nome, nomeAluno) ? "minha-linha" : ""}`}>
                             <span className="medalha" style={{ fontSize: 13, color: "var(--text-3)" }}>{i + 4}º</span>
-                            <span className="ranking-nome">{p.aluno_nome}</span>
+                            <div style={{ flex: 1 }}>
+                              <span className="ranking-nome">{p.aluno_nome.split(" ")[0]}</span>
+                              {apelidoMap[p.aluno_nome] && <span className="apelido-sub">{apelidoMap[p.aluno_nome]}</span>}
+                            </div>
                             <span className="ranking-valor">{p.valor}</span>
                             {isAdmin && !desafio.fechado && (
                               <button className="btn-icon danger" style={{ marginLeft: "auto" }}
@@ -350,7 +356,10 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                   {rankingPassado.slice(0, 3).map((a, i) => (
                     <li key={a.nome} className={`ranking-item pos-${i + 1} ${euSou(a.nome, nomeAluno) ? "minha-linha" : ""}`}>
                       <span className="medalha">{MEDALHAS[i]}</span>
-                      <span className="ranking-nome">{a.nome}</span>
+                      <div style={{ flex: 1 }}>
+                        <span className="ranking-nome">{a.nome.split(" ")[0]}</span>
+                        {a.apelido && <span className="apelido-sub">{a.apelido}</span>}
+                      </div>
                       <div style={{ textAlign: "right" }}>
                         <p className="ranking-valor">{a.total.toFixed(0)} reps</p>
                         <p style={{ fontSize: 11, color: "var(--text-2)" }}>{a.participacoes} desafio{a.participacoes !== 1 ? "s" : ""}</p>
@@ -391,7 +400,8 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                       onClick={() => verEvolucao(a.nome)}>
                       <span className="medalha">{MEDALHAS[i] ?? `${i + 1}º`}</span>
                       <div style={{ flex: 1 }}>
-                        <p className="ranking-nome">{a.nome}</p>
+                        <p className="ranking-nome">{a.nome.split(" ")[0]}</p>
+                        {a.apelido && <span className="apelido-sub">{a.apelido}</span>}
                         <p style={{ fontSize: 11, color: "var(--text-2)" }}>
                           {a.participacoes} desafio{a.participacoes !== 1 ? "s" : ""}
                         </p>
