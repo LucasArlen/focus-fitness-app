@@ -103,7 +103,11 @@ export default function App() {
 
   // Abas: admin só aparece na nav se já estiver logado como admin
   const TABS = isAdmin
-    ? [{ id: "admin", label: "Admin ✓", Icon: IconAdmin }]
+    ? [
+        { id: "admin",   label: "Painel",   Icon: IconAdmin },
+        { id: "avisos",  label: "Avisos",   Icon: IconAvisos },
+        { id: "desafio", label: "Desafio",  Icon: IconDesafio },
+      ]
     : [
         { id: "treino",    label: "Treino",    Icon: IconTreino },
         { id: "desafio",   label: "Desafio",   Icon: IconDesafio },
@@ -174,7 +178,7 @@ export default function App() {
           <button
             key={id}
             className={`nav-btn ${view === id ? "ativo" : ""}`}
-            onClick={() => setView(id)}
+            onClick={() => { setView(id); if (id === "admin") setAdminView("dashboard"); }}
           >
             <Icon />
             <span>{label}</span>
