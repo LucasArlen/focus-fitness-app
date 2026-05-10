@@ -130,7 +130,7 @@ def create_treino(body: TreinoIn, db: Session = Depends(get_db), _=Depends(requi
         db.add(bloco)
         db.flush()
         for l in b.linhas:
-            db.add(Linha(bloco_id=bloco.id, exercicio=l.exercicio, serie=l.serie, dropset=l.dropset))
+            db.add(Linha(bloco_id=bloco.id, exercicio=l.exercicio, serie=l.serie, dropset=l.dropset, video_url=l.video_url or None))
             # Auto-populate banco de exercícios
             nome = l.exercicio.strip()
             if nome and not db.query(ExercicioBanco).filter(ExercicioBanco.nome == nome).first():

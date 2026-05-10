@@ -31,6 +31,7 @@ class Linha(Base):
     exercicio = Column(Text)
     serie = Column(Text)
     dropset = Column(Boolean, default=False)
+    video_url = Column(Text, nullable=True)
     bloco = relationship("Bloco", back_populates="linhas")
 
 

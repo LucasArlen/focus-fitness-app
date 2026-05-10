@@ -12,13 +12,13 @@ function fmtData(data) {
 let nextId = 1000;
 const uid = () => ++nextId;
 const novoBloco = () => ({ id: uid(), nome: "", sugestao: false, linhas: [] });
-const novaLinha = () => ({ id: uid(), exercicio: "", serie: "", dropset: false });
+const novaLinha = () => ({ id: uid(), exercicio: "", serie: "", dropset: false, video_url: "" });
 
 function apiParaEstado(treino) {
   return {
     blocos: treino.blocos.map(b => ({
       id: uid(), nome: b.nome, sugestao: b.sugestao,
-      linhas: b.linhas.map(l => ({ id: uid(), exercicio: l.exercicio, serie: l.serie, dropset: l.dropset })),
+      linhas: b.linhas.map(l => ({ id: uid(), exercicio: l.exercicio, serie: l.serie, dropset: l.dropset, video_url: l.video_url || "" })),
     })),
     desafioNome: treino.desafio?.nome || "",
   };
@@ -103,6 +103,7 @@ export default function Admin({ onLogout, onVoltar }) {
           nome: b.nome.trim(), sugestao: b.sugestao,
           linhas: b.linhas.filter(l => l.exercicio.trim()).map(l => ({
             exercicio: l.exercicio.trim(), serie: l.serie.trim(), dropset: l.dropset,
+            video_url: l.video_url?.trim() || null,
           })),
         })),
         desafio_nome: desafioNome.trim(),
@@ -200,17 +201,33 @@ export default function Admin({ onLogout, onVoltar }) {
 
             <div className="admin-linhas">
               {bloco.linhas.map(linha => (
-                <div key={linha.id} className="admin-linha">
-                  <input list="banco" className="input-exercicio" placeholder="Exercício"
-                    value={linha.exercicio} onChange={e => updateLinha(bloco.id, linha.id, "exercicio", e.target.value)} />
-                  <input className="input-serie" placeholder="Série"
-                    value={linha.serie} onChange={e => updateLinha(bloco.id, linha.id, "serie", e.target.value)} />
-                  <label className="ds-toggle" title="Drop Set">
-                    <input type="checkbox" checked={linha.dropset}
-                      onChange={e => updateLinha(bloco.id, linha.id, "dropset", e.target.checked)} />
-                    <span className={`ds-label ${linha.dropset ? "ativo" : ""}`}>DS</span>
-                  </label>
-                  <button className="btn-icon danger" onClick={() => removeLinha(bloco.id, linha.id)}>✕</button>
+                <div key={linha.id} className="admin-linha-wrap">
+                  <div className="admin-linha">
+                    <input list="banco" className="input-exercicio" placeholder="Exercício"
+                      value={linha.exercicio} onChange={e => updateLinha(bloco.id, linha.id, "exercicio", e.target.value)} />
+                    <input className="input-serie" placeholder="Série"
+                      value={linha.serie} onChange={e => updateLinha(bloco.id, linha.id, "serie", e.target.value)} />
+                    <label className="ds-toggle" title="Drop Set">
+                      <input type="checkbox" checked={linha.dropset}
+                        onChange={e => updateLinha(bloco.id, linha.id, "dropset", e.target.checked)} />
+                      <span className={`ds-label ${linha.dropset ? "ativo" : ""}`}>DS</span>
+                    </label>
+                    <button
+                      className={`btn-icon video-toggle ${linha.video_url ? "tem-video" : ""}`}
+                      title="Vídeo de demonstração"
+                      onClick={() => updateLinha(bloco.id, linha.id, "_videoAberto", !linha._videoAberto)}
+                    >🎬</button>
+                    <button className="btn-icon danger" onClick={() => removeLinha(bloco.id, linha.id)}>✕</button>
+                  </div>
+                  {linha._videoAberto && (
+                    <input
+                      className="input-video-url"
+                      placeholder="URL do vídeo (YouTube, etc.)"
+                      value={linha.video_url}
+                      onChange={e => updateLinha(bloco.id, linha.id, "video_url", e.target.value)}
+                      autoFocus
+                    />
+                  )}
                 </div>
               ))}
               <button className="btn-add-linha" onClick={() => addLinha(bloco.id)}>+ exercício</button>

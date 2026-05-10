@@ -22,6 +22,10 @@ def _auto_migrate():
             conn.execute(text("ALTER TABLE alunos ADD COLUMN apelido TEXT"))
         if "foto" not in cols_alunos:
             conn.execute(text("ALTER TABLE alunos ADD COLUMN foto TEXT"))
+        # linhas
+        cols_linhas = [row[1] for row in conn.execute(text("PRAGMA table_info(linhas)")).fetchall()]
+        if "video_url" not in cols_linhas:
+            conn.execute(text("ALTER TABLE linhas ADD COLUMN video_url TEXT"))
         # reacoes: migra de bloco_id → linha_id
         cols_reacoes = [row[1] for row in conn.execute(text("PRAGMA table_info(reacoes)")).fetchall()]
         if "linha_id" not in cols_reacoes:

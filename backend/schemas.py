@@ -7,6 +7,7 @@ class LinhaIn(BaseModel):
     exercicio: str
     serie: str
     dropset: bool = False
+    video_url: Optional[str] = None
 
 
 class LinhaOut(LinhaIn):

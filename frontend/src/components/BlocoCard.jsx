@@ -3,59 +3,131 @@ import { getReacoes, toggleReacao } from "../api/reacao";
 
 const EMOJIS = ["🔥", "💀", "❤️", "😅", "💪"];
 
+// ── Detecta YouTube e extrai ID ──────────────────────────────────────────────
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return m ? m[1] : null;
+}
+
+// ── Modal de vídeo ───────────────────────────────────────────────────────────
+function VideoModal({ url, titulo, onFechar }) {
+  const ytId = getYouTubeId(url);
+
+  return (
+    <div className="video-modal-overlay" onClick={onFechar}>
+      <div className="video-modal" onClick={e => e.stopPropagation()}>
+        <div className="video-modal-header">
+          <span className="video-modal-titulo">{titulo}</span>
+          <button className="video-modal-fechar" onClick={onFechar}>✕</button>
+        </div>
+
+        {ytId ? (
+          <div className="video-modal-player">
+            <iframe
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`}
+              title={titulo}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        ) : (
+          <div className="video-modal-externo">
+            <span className="video-modal-icon">🎬</span>
+            <p className="video-modal-hint">Vídeo em link externo</p>
+            <a
+              className="video-modal-abrir-btn"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onFechar}
+            >
+              Abrir vídeo ↗
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Linha individual ─────────────────────────────────────────────────────────
 function LinhaItem({ linha, reacao, onToggle }) {
   const [pickerAberto, setPickerAberto] = useState(false);
+  const [videoAberto,  setVideoAberto]  = useState(false);
   const pills = Object.entries(reacao.contagens || {}).sort(([, a], [, b]) => b - a);
   const meuEmoji = reacao.meu_emoji;
   const semReacoes = pills.length === 0;
 
   return (
-    <li className="linha-item" onClick={() => setPickerAberto(v => !v)}>
-      <div className="linha-row">
-        <span className="exercicio">{linha.exercicio}</span>
-        <div className="linha-right">
-          {linha.dropset && (
-            <span className="dropset-tag" title="Reduza o peso e continue sem pausa">DS</span>
-          )}
-          <span className="serie">{linha.serie}</span>
-          {semReacoes && (
-            <span className="reacao-hint" title="Toque para reagir">😀</span>
-          )}
+    <>
+      <li className="linha-item" onClick={() => setPickerAberto(v => !v)}>
+        <div className="linha-row">
+          <span className="exercicio">{linha.exercicio}</span>
+          <div className="linha-right">
+            {linha.dropset && (
+              <span className="dropset-tag" title="Reduza o peso e continue sem pausa">DS</span>
+            )}
+            <span className="serie">{linha.serie}</span>
+            {linha.video_url && (
+              <button
+                className="linha-video-btn"
+                title="Ver demonstração"
+                onClick={e => { e.stopPropagation(); setVideoAberto(true); }}
+              >
+                🎬
+              </button>
+            )}
+            {semReacoes && !linha.video_url && (
+              <span className="reacao-hint" title="Toque para reagir">😀</span>
+            )}
+          </div>
         </div>
-      </div>
 
-      {pills.length > 0 && (
-        <div className="reacoes-display" onClick={e => e.stopPropagation()}>
-          {pills.map(([emoji, count]) => (
-            <span
-              key={emoji}
-              className={`reacao-pill ${meuEmoji === emoji ? "minha" : ""}`}
-              onClick={() => onToggle(emoji)}
-            >
-              <span className="emoji-val">{emoji}</span>
-              <span className="emoji-count">{count}</span>
-            </span>
-          ))}
-        </div>
-      )}
+        {pills.length > 0 && (
+          <div className="reacoes-display" onClick={e => e.stopPropagation()}>
+            {pills.map(([emoji, count]) => (
+              <span
+                key={emoji}
+                className={`reacao-pill ${meuEmoji === emoji ? "minha" : ""}`}
+                onClick={() => onToggle(emoji)}
+              >
+                <span className="emoji-val">{emoji}</span>
+                <span className="emoji-count">{count}</span>
+              </span>
+            ))}
+          </div>
+        )}
 
-      {pickerAberto && (
-        <div className="emoji-picker" onClick={e => e.stopPropagation()}>
-          {EMOJIS.map(emoji => (
-            <button
-              key={emoji}
-              className={`emoji-btn ${meuEmoji === emoji ? "ativo" : ""}`}
-              onClick={() => { onToggle(emoji); setPickerAberto(false); }}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
+        {pickerAberto && (
+          <div className="emoji-picker" onClick={e => e.stopPropagation()}>
+            {EMOJIS.map(emoji => (
+              <button
+                key={emoji}
+                className={`emoji-btn ${meuEmoji === emoji ? "ativo" : ""}`}
+                onClick={() => { onToggle(emoji); setPickerAberto(false); }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+      </li>
+
+      {videoAberto && (
+        <VideoModal
+          url={linha.video_url}
+          titulo={linha.exercicio}
+          onFechar={() => setVideoAberto(false)}
+        />
       )}
-    </li>
+    </>
   );
 }
 
+// ── BlocoCard ────────────────────────────────────────────────────────────────
 export default function BlocoCard({ bloco }) {
   const linhaIds = bloco.linhas.map(l => l.id);
   const [reacoes, setReacoes] = useState({});
