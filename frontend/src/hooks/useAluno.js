@@ -4,6 +4,7 @@ const FREQ_KEY     = "aluno_freq";
 const NOME_KEY     = "aluno_nome";
 const TOKEN_KEY    = "aluno_token";
 const APELIDO_KEY  = "aluno_apelido";
+const FOTO_KEY     = "aluno_foto";
 
 function registrarVisita() {
   const hoje = new Date().toISOString().split("T")[0];
@@ -37,6 +38,7 @@ export function calcStreak() {
 export function useAluno() {
   const [nome,    setNome]    = useState(() => localStorage.getItem(NOME_KEY)    || "");
   const [apelido, setApelido] = useState(() => localStorage.getItem(APELIDO_KEY) || "");
+  const [foto,    setFotoState] = useState(() => localStorage.getItem(FOTO_KEY)  || "");
 
   useEffect(() => { if (nome) registrarVisita(); }, [nome]);
 
@@ -53,16 +55,24 @@ export function useAluno() {
     setApelido(novoApelido || "");
   }
 
+  function salvarFoto(novaFoto) {
+    if (novaFoto) localStorage.setItem(FOTO_KEY, novaFoto);
+    else          localStorage.removeItem(FOTO_KEY);
+    setFotoState(novaFoto || "");
+  }
+
   function limpar() {
     localStorage.removeItem(NOME_KEY);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(APELIDO_KEY);
+    localStorage.removeItem(FOTO_KEY);
     setNome("");
     setApelido("");
+    setFotoState("");
   }
 
   // displayNome: apelido if set, else nome
   const displayNome = apelido || nome;
 
-  return { nome, apelido, displayNome, salvar, salvarApelido, limpar };
+  return { nome, apelido, foto, displayNome, salvar, salvarApelido, salvarFoto, limpar };
 }

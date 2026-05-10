@@ -39,7 +39,7 @@ function comprimirFoto(file) {
   });
 }
 
-export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, onLogoStart, onLogoEnd }) {
+export default function Perfil({ nome, apelido, onSalvarApelido, onSalvarFoto, onTrocarNome, onLogoStart, onLogoEnd }) {
   const [apelidoServidor, setApelidoServidor] = useState(apelido || null);
   const [foto,      setFoto]      = useState(null);
   const [carregando,setCarregando]= useState(true);
@@ -55,7 +55,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, o
     getPerfil()
       .then(p => {
         if (p.apelido) { setApelidoServidor(p.apelido); onSalvarApelido(p.apelido); }
-        if (p.foto)    { setFoto(p.foto); }
+        if (p.foto)    { setFoto(p.foto); onSalvarFoto?.(p.foto); }
       })
       .catch(() => {})
       .finally(() => setCarregando(false));
@@ -77,6 +77,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onTrocarNome, o
     setErroSalvar("");
     try {
       await updatePerfil({ foto: foto || null });
+      onSalvarFoto?.(foto || null);
       setFotoAlterada(false);
     } catch (err) {
       setErroSalvar(err.message || "Erro ao salvar. Tente novamente.");

@@ -24,7 +24,7 @@ function fmt(dataStr) {
     .toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
 }
 
-export default function Inicio({ nome, apelido, onVerTreino, onVerAvisos, onVerPerfil, onLogoStart, onLogoEnd }) {
+export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, onVerPerfil, onLogoStart, onLogoEnd }) {
   const [treino,       setTreino]      = useState(null);
   const [treinoEstado, setTreinoEstado]= useState("carregando");
   const [treinoEhHoje, setTreinoEhHoje]= useState(true);
@@ -81,7 +81,10 @@ export default function Inicio({ nome, apelido, onVerTreino, onVerAvisos, onVerP
         {/* ── PERFIL ── */}
         <div className="inicio-perfil-card" onClick={onVerPerfil}>
           <div className="inicio-perfil-avatar">
-            {(nome || "?")[0].toUpperCase()}
+            {foto
+              ? <img src={foto} alt={nome} className="inicio-perfil-avatar-img" />
+              : (nome || "?")[0].toUpperCase()
+            }
           </div>
           <div className="inicio-perfil-info">
             <p className="inicio-perfil-nome">{nome || "Aluno"}</p>

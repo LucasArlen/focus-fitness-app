@@ -62,7 +62,7 @@ export default function App() {
   );
   const [adminView, setAdminView] = useState("dashboard");
   const [role, setRole]           = useState(() => localStorage.getItem("role") || "guest");
-  const { nome, apelido, displayNome, salvar, salvarApelido, limpar } = useAluno();
+  const { nome, apelido, foto, displayNome, salvar, salvarApelido, salvarFoto, limpar } = useAluno();
   const pressTimer                = useRef(null);
 
   const isAdmin = role === "admin";
@@ -122,6 +122,7 @@ export default function App() {
         <Inicio
           nome={nome}
           apelido={apelido}
+          foto={foto}
           onVerTreino={() => setView("treino")}
           onVerAvisos={() => setView("avisos")}
           onVerPerfil={() => setView("perfil")}
@@ -166,6 +167,7 @@ export default function App() {
           nome={nome}
           apelido={apelido}
           onSalvarApelido={salvarApelido}
+          onSalvarFoto={salvarFoto}
           onTrocarNome={limpar}
           onLogoStart={logoStart}
           onLogoEnd={logoEnd}
