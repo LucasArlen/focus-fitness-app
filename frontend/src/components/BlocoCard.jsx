@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getReacoes, toggleReacao } from "../api/reacao";
 
 const EMOJIS = ["🔥", "💀", "❤️", "😅", "💪"];
@@ -13,27 +13,109 @@ function parseYouTube(url) {
   return null;
 }
 
+// ── Carrega a YouTube IFrame API uma única vez ───────────────────────────────
+let _ytPromise = null;
+function loadYTApi() {
+  if (window.YT?.Player) return Promise.resolve();
+  if (!_ytPromise) {
+    _ytPromise = new Promise(resolve => {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => { prev?.(); resolve(); };
+      if (!document.getElementById("yt-api-script")) {
+        const s = document.createElement("script");
+        s.id  = "yt-api-script";
+        s.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(s);
+      }
+    });
+  }
+  return _ytPromise;
+}
+
+// ── Player YouTube sem controles + overlay de toque ─────────────────────────
+function YouTubePlayer({ videoId, vertical }) {
+  const divRef    = useRef(null);
+  const playerRef = useRef(null);
+  const timerRef  = useRef(null);
+  const [pausado,      setPausado]      = useState(false);
+  const [showOverlay,  setShowOverlay]  = useState(false);
+
+  useEffect(() => {
+    let destruido = false;
+    loadYTApi().then(() => {
+      if (destruido || !divRef.current) return;
+      playerRef.current = new window.YT.Player(divRef.current, {
+        videoId,
+        playerVars: {
+          autoplay:       1,
+          controls:       0,
+          rel:            0,
+          iv_load_policy: 3,
+          playsinline:    1,
+          modestbranding: 1,
+          fs:             0,
+        },
+        events: {
+          onStateChange(e) {
+            setPausado(e.data === window.YT.PlayerState.PAUSED ||
+                       e.data === window.YT.PlayerState.ENDED);
+          },
+        },
+      });
+    });
+    return () => {
+      destruido = true;
+      clearTimeout(timerRef.current);
+      try { playerRef.current?.destroy(); } catch { /* silencioso */ }
+    };
+  }, [videoId]);
+
+  function handleToque() {
+    const p = playerRef.current;
+    if (!p) return;
+    const estado = p.getPlayerState();
+    if (estado === window.YT.PlayerState.PLAYING) {
+      p.pauseVideo();
+    } else {
+      p.playVideo();
+    }
+    setShowOverlay(true);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setShowOverlay(false), 1800);
+  }
+
+  return (
+    <div
+      className={`yt-player-wrap ${vertical ? "vertical" : ""}`}
+      onClick={handleToque}
+    >
+      <div ref={divRef} className="yt-player-inner" />
+      {showOverlay && (
+        <div className="yt-overlay">
+          <span className="yt-overlay-icon">{pausado ? "▶" : "⏸"}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Modal de vídeo ───────────────────────────────────────────────────────────
 function VideoModal({ url, titulo, onFechar }) {
   const yt = parseYouTube(url);
 
   return (
     <div className="video-modal-overlay" onClick={onFechar}>
-      <div className={`video-modal ${yt?.vertical ? "video-modal-vertical" : ""}`} onClick={e => e.stopPropagation()}>
+      <div
+        className={`video-modal ${yt?.vertical ? "video-modal-vertical" : ""}`}
+        onClick={e => e.stopPropagation()}
+      >
         <div className="video-modal-header">
           <span className="video-modal-titulo">{titulo}</span>
           <button className="video-modal-fechar" onClick={onFechar}>✕</button>
         </div>
 
         {yt ? (
-          <div className={`video-modal-player ${yt.vertical ? "vertical" : ""}`}>
-            <iframe
-              src={`https://www.youtube.com/embed/${yt.id}?autoplay=1&rel=0&controls=1&iv_load_policy=3&playsinline=1`}
-              title={titulo}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
+          <YouTubePlayer videoId={yt.id} vertical={yt.vertical} />
         ) : (
           <div className="video-modal-externo">
             <span className="video-modal-icon">🎬</span>
@@ -58,7 +140,7 @@ function VideoModal({ url, titulo, onFechar }) {
 function LinhaItem({ linha, reacao, onToggle }) {
   const [pickerAberto, setPickerAberto] = useState(false);
   const [videoAberto,  setVideoAberto]  = useState(false);
-  const pills = Object.entries(reacao.contagens || {}).sort(([, a], [, b]) => b - a);
+  const pills    = Object.entries(reacao.contagens || {}).sort(([, a], [, b]) => b - a);
   const meuEmoji = reacao.meu_emoji;
   const semReacoes = pills.length === 0;
 
@@ -135,16 +217,13 @@ export default function BlocoCard({ bloco }) {
 
   useEffect(() => {
     if (linhaIds.length === 0) return;
-    getReacoes(linhaIds)
-      .then(data => setReacoes(data))
-      .catch(() => {});
+    getReacoes(linhaIds).then(setReacoes).catch(() => {});
   }, [bloco.id]);
 
   async function handleToggle(linhaId, emoji) {
-    const prev = reacoes[String(linhaId)] || { contagens: {}, meu_emoji: null };
+    const prev    = reacoes[String(linhaId)] || { contagens: {}, meu_emoji: null };
     const novoMeu = prev.meu_emoji === emoji ? null : emoji;
 
-    // Update otimista
     setReacoes(r => {
       const conts = { ...prev.contagens };
       if (prev.meu_emoji) {
@@ -158,7 +237,6 @@ export default function BlocoCard({ bloco }) {
     try {
       await toggleReacao(linhaId, emoji);
     } catch {
-      // Reverte se falhar
       getReacoes(linhaIds).then(setReacoes).catch(() => {});
     }
   }
