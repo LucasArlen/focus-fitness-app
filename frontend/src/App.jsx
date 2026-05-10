@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Hoje from "./pages/Hoje";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./pages/AdminDashboard";
