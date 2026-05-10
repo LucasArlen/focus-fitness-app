@@ -8,7 +8,6 @@ import AdminModoAula from "./pages/AdminModoAula";
 import Historico from "./pages/Historico";
 import Login from "./pages/Login";
 import Onboarding from "./components/Onboarding";
-import InstallBanner from "./components/InstallBanner";
 import Perfil from "./pages/Perfil";
 import Avisos from "./pages/Avisos";
 import Inicio from "./pages/Inicio";
@@ -190,8 +189,6 @@ export default function App() {
           onLogoEnd={logoEnd}
         />
       )}
-
-      {!isAdmin && <InstallBanner />}
 
       <button className="tema-toggle" onClick={toggleTema} title="Alternar tema">
         {claro ? "🌙" : "☀️"}

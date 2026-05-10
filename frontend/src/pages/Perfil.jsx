@@ -1,5 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { getPerfil, updatePerfil } from "../api/aluno";
+
+// ── Detecção de ambiente de instalação ──────────────────────────────────────
+const _standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const _isIOS      = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const _isIOSSafari = _isIOS && /safari/i.test(navigator.userAgent) && !/crios|fxios|opios|mercury/i.test(navigator.userAgent);
+
+function useInstallPrompt() {
+  const [prompt, setPrompt] = useState(null);
+  useEffect(() => {
+    if (_standalone || _isIOS) return;
+    function handler(e) { e.preventDefault(); setPrompt(e); }
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+  return [prompt, () => setPrompt(null)];
+}
 import { freqMes, calcStreak } from "../hooks/useAluno";
 import { getVapidKey, subscribePush, urlBase64ToUint8Array } from "../api/push";
 import { getEvolucaoAluno } from "../api/ranking";
@@ -113,6 +129,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onSalvarFoto, o
     setNotif("dismissed");
   }
 
+  const [installPrompt, clearPrompt] = useInstallPrompt();
   const inicial = (nome || "?")[0].toUpperCase();
   const freq    = freqMes();
   const streak  = calcStreak();
@@ -258,6 +275,36 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onSalvarFoto, o
                 });
               })()}
             </div>
+          </div>
+        )}
+
+        {/* ── Instalar app ── */}
+        {!_standalone && _isIOSSafari && (
+          <div className="perfil-section perfil-install-card">
+            <span className="perfil-install-icon">📲</span>
+            <div className="perfil-install-texto">
+              <p className="perfil-install-titulo">Instalar no iPhone</p>
+              <p className="perfil-install-sub">
+                Toque em <strong>⬆</strong> e depois <strong>"Adicionar à Tela de Início"</strong> para usar o app sem o navegador.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!_standalone && installPrompt && (
+          <div className="perfil-section perfil-install-card">
+            <span className="perfil-install-icon">📲</span>
+            <div className="perfil-install-texto">
+              <p className="perfil-install-titulo">Instalar o app</p>
+              <p className="perfil-install-sub">Adicione à tela inicial para acesso rápido.</p>
+            </div>
+            <button className="perfil-install-btn" onClick={async () => {
+              installPrompt.prompt();
+              await installPrompt.userChoice;
+              clearPrompt();
+            }}>
+              Instalar
+            </button>
           </div>
         )}
 
