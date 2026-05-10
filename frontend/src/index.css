@@ -234,20 +234,22 @@ body {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0,0,0,0.88);
+  background: rgba(0,0,0,0.75);
   display: flex;
-  align-items: flex-end;
-  padding-bottom: env(safe-area-inset-bottom);
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
 }
 
 .video-modal {
   background: var(--surface);
-  border-radius: var(--radius) var(--radius) 0 0;
+  border-radius: var(--radius);
   width: 100%;
-  max-height: 85vh;
+  max-width: 420px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7);
 }
 
 .video-modal-header {
