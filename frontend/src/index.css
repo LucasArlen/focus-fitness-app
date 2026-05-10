@@ -284,8 +284,18 @@ body {
 .video-modal-player {
   position: relative;
   width: 100%;
-  padding-bottom: 56.25%; /* 16:9 */
+  aspect-ratio: 16 / 9;
   background: #000;
+}
+
+/* Shorts / vídeos verticais 9:16 */
+.video-modal-vertical { max-width: 260px; }
+
+.video-modal-player.vertical {
+  aspect-ratio: 9 / 16;
+  width: auto;
+  height: min(62vh, 500px);
+  margin: 0 auto;
 }
 
 .video-modal-player iframe {

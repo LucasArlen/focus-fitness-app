@@ -3,31 +3,32 @@ import { getReacoes, toggleReacao } from "../api/reacao";
 
 const EMOJIS = ["🔥", "💀", "❤️", "😅", "💪"];
 
-// ── Detecta YouTube e extrai ID ──────────────────────────────────────────────
-function getYouTubeId(url) {
+// ── Detecta YouTube, extrai ID e formato ────────────────────────────────────
+function parseYouTube(url) {
   if (!url) return null;
-  const m = url.match(
-    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-  );
-  return m ? m[1] : null;
+  const shorts = /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/.exec(url);
+  if (shorts) return { id: shorts[1], vertical: true };
+  const m = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/.exec(url);
+  if (m) return { id: m[1], vertical: false };
+  return null;
 }
 
 // ── Modal de vídeo ───────────────────────────────────────────────────────────
 function VideoModal({ url, titulo, onFechar }) {
-  const ytId = getYouTubeId(url);
+  const yt = parseYouTube(url);
 
   return (
     <div className="video-modal-overlay" onClick={onFechar}>
-      <div className="video-modal" onClick={e => e.stopPropagation()}>
+      <div className={`video-modal ${yt?.vertical ? "video-modal-vertical" : ""}`} onClick={e => e.stopPropagation()}>
         <div className="video-modal-header">
           <span className="video-modal-titulo">{titulo}</span>
           <button className="video-modal-fechar" onClick={onFechar}>✕</button>
         </div>
 
-        {ytId ? (
-          <div className="video-modal-player">
+        {yt ? (
+          <div className={`video-modal-player ${yt.vertical ? "vertical" : ""}`}>
             <iframe
-              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`}
+              src={`https://www.youtube.com/embed/${yt.id}?autoplay=1&rel=0`}
               title={titulo}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
