@@ -40,6 +40,53 @@
   --shadow-nav: 0 -4px 30px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.8);
 }
 
+/* ── Tema claro ── */
+html.tema-claro {
+  --bg:          #f2f2f7;
+  --surface:     #ffffff;
+  --surface2:    #f0f0f5;
+  --surface3:    #e5e5ea;
+  --border:      #dcdcdc;
+  --border-hi:   #c8c8c8;
+
+  --text:        #111111;
+  --text-2:      #555555;
+  --text-3:      #999999;
+
+  --accent:      #c8d900;
+  --accent-fill: #c8d900;
+  --accent-dim:  rgba(180,195,0,0.12);
+  --accent-glow: rgba(180,195,0,0.22);
+
+  --danger-dim:  rgba(255,82,82,0.10);
+  --success-dim: rgba(76,217,100,0.10);
+
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.10);
+  --shadow:     0 4px 16px rgba(0,0,0,0.12);
+  --shadow-nav: 0 -2px 16px rgba(0,0,0,0.08);
+}
+
+/* botão fixo de tema */
+.tema-toggle {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 14px;
+  z-index: 120;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 17px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.tema-toggle:active { opacity: 0.7; }
+
 html, body { height: 100%; }
 
 body {

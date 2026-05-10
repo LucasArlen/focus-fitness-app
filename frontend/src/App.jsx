@@ -56,6 +56,21 @@ const IconPerfil = () => (
   </svg>
 );
 
+function useTema() {
+  const [claro, setClaro] = useState(() => localStorage.getItem("tema") === "claro");
+  useEffect(() => {
+    document.documentElement.classList.toggle("tema-claro", claro);
+  }, [claro]);
+  function toggle() {
+    setClaro(v => {
+      const novo = !v;
+      localStorage.setItem("tema", novo ? "claro" : "escuro");
+      return novo;
+    });
+  }
+  return { claro, toggle };
+}
+
 export default function App() {
   const [view, setView]           = useState(() =>
     localStorage.getItem("role") === "admin" ? "admin" : "inicio"
@@ -63,6 +78,7 @@ export default function App() {
   const [adminView, setAdminView] = useState("dashboard");
   const [role, setRole]           = useState(() => localStorage.getItem("role") || "guest");
   const { nome, apelido, foto, displayNome, salvar, salvarApelido, salvarFoto, limpar } = useAluno();
+  const { claro, toggle: toggleTema } = useTema();
   const pressTimer                = useRef(null);
 
   const isAdmin = role === "admin";
@@ -176,6 +192,10 @@ export default function App() {
       )}
 
       {!isAdmin && <InstallBanner />}
+
+      <button className="tema-toggle" onClick={toggleTema} title="Alternar tema">
+        {claro ? "🌙" : "☀️"}
+      </button>
 
       <nav className="bottom-nav">
         {TABS.map(({ id, label, Icon }) => (
