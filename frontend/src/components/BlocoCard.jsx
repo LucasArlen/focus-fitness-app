@@ -28,7 +28,7 @@ function VideoModal({ url, titulo, onFechar }) {
         {yt ? (
           <div className={`video-modal-player ${yt.vertical ? "vertical" : ""}`}>
             <iframe
-              src={`https://www.youtube.com/embed/${yt.id}?autoplay=1&rel=0`}
+              src={`https://www.youtube.com/embed/${yt.id}?autoplay=1&rel=0&controls=0&iv_load_policy=3&playsinline=1`}
               title={titulo}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
