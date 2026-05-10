@@ -139,6 +139,7 @@ export default function App() {
           onEditarTreino={() => setAdminView("editor")}
           onVerAlunos={() => setAdminView("alunos")}
           onModoAula={() => setAdminView("modoaula")}
+          onVerComoAluno={() => setView("treino")}
           onLogout={onLogout}
         />
       )}

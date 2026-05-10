@@ -1483,6 +1483,19 @@ body {
 .dash-refresh-btn:hover:not(:disabled) { color: var(--text-2); border-color: var(--border-hi); }
 .dash-refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+.dash-preview-btn {
+  width: 100%;
+  background: none;
+  border: 1px solid rgba(232,255,71,0.2);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-size: 14px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dash-preview-btn:hover { background: var(--accent-dim); border-color: rgba(232,255,71,0.4); }
+
 /* ── Credenciais admin ── */
 .cred-input {
   width: 100%;

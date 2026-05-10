@@ -14,7 +14,7 @@ const STATUS_OPCOES = [
   { val: "fechado",   label: "Fechado",   emoji: "🔒" },
 ];
 
-export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula, onLogout }) {
+export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula, onLogout, onVerComoAluno }) {
   const [treino,        setTreino]        = useState(null);
   const [desafio,       setDesafio]       = useState(null);
   const [chamada,       setChamada]       = useState([]);
@@ -405,6 +405,11 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
             </div>
           )}
         </div>
+
+        {/* ── VER COMO ALUNO ── */}
+        <button className="dash-preview-btn" onClick={onVerComoAluno}>
+          👁  Ver como aluno
+        </button>
 
         {/* ── ATUALIZAR ── */}
         <button className="dash-refresh-btn" onClick={carregar} disabled={carregando}>
