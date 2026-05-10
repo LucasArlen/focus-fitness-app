@@ -114,13 +114,19 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 18px 16px;
+  /* reserva espaço à direita para o botão de tema */
+  padding-right: 56px;
   position: sticky;
   top: 0;
-  background: rgba(8,8,8,0.90);
+  background: var(--header-bg, rgba(8,8,8,0.90));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   z-index: 10;
   border-bottom: 1px solid var(--border);
+}
+
+html.tema-claro .app-header {
+  --header-bg: rgba(242,242,247,0.92);
 }
 
 .logo {
@@ -597,7 +603,7 @@ body {
   width: calc(100% - 28px);
   max-width: 452px;
   display: flex;
-  background: rgba(18,18,18,0.96);
+  background: var(--nav-bg, rgba(18,18,18,0.96));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-hi);
@@ -605,6 +611,10 @@ body {
   box-shadow: var(--shadow-nav);
   z-index: 20;
   padding: 5px;
+}
+
+html.tema-claro .bottom-nav {
+  --nav-bg: rgba(255,255,255,0.96);
 }
 
 .nav-btn {
