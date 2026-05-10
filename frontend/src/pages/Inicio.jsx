@@ -25,22 +25,30 @@ function fmt(dataStr) {
 }
 
 export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, onVerPerfil, onLogoStart, onLogoEnd }) {
-  const [treino,       setTreino]      = useState(null);
-  const [treinoEstado, setTreinoEstado]= useState("carregando");
-  const [treinoEhHoje, setTreinoEhHoje]= useState(true);
-  const [ranking,      setRanking]     = useState([]);
-  const [avisos,       setAvisos]      = useState([]);
-  const [acadStatus,   setAcadStatus]  = useState(null);
+  const [treino,        setTreino]       = useState(null);
+  const [treinoEstado,  setTreinoEstado] = useState("carregando");
+  const [treinoRelativo,setTreinoRelativo]= useState("hoje"); // "hoje" | "proximo" | "ultimo"
+  const [ranking,       setRanking]      = useState([]);
+  const [avisos,        setAvisos]       = useState([]);
+  const [acadStatus,    setAcadStatus]   = useState(null);
 
   const streak      = calcStreak();
   const presencasMes = freqMes();
 
+  function dataHoje() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
   useEffect(() => {
     getTreinoHoje()
-      .then(t => { setTreino(t); setTreinoEhHoje(true); setTreinoEstado("ok"); })
+      .then(t => { setTreino(t); setTreinoRelativo("hoje"); setTreinoEstado("ok"); })
       .catch(() => {
         getTreinoUltimo()
-          .then(t => { setTreino(t); setTreinoEhHoje(false); setTreinoEstado("ok"); })
+          .then(t => {
+            const rel = t.data > dataHoje() ? "proximo" : "ultimo";
+            setTreino(t); setTreinoRelativo(rel); setTreinoEstado("ok");
+          })
           .catch(() => setTreinoEstado("vazio"));
       });
 
@@ -114,10 +122,13 @@ export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, 
         >
           <div className="inicio-card-header">
             <span className="inicio-card-icon">💪</span>
-            <span className="inicio-card-titulo">Treino de hoje</span>
-            {treinoEstado === "ok" && treinoEhHoje  && <span className="dash-badge ok"   style={{ marginLeft: "auto" }}>Publicado</span>}
-            {treinoEstado === "ok" && !treinoEhHoje && <span className="dash-badge vazio" style={{ marginLeft: "auto" }}>Sem treino hoje</span>}
-            {treinoEstado === "vazio"     && <span className="dash-badge vazio" style={{ marginLeft: "auto" }}>Sem treino</span>}
+            <span className="inicio-card-titulo">
+              {treinoRelativo === "proximo" ? "Próximo treino" : "Treino de hoje"}
+            </span>
+            {treinoEstado === "ok" && treinoRelativo === "hoje"    && <span className="dash-badge ok"      style={{ marginLeft: "auto" }}>Publicado</span>}
+            {treinoEstado === "ok" && treinoRelativo === "proximo" && <span className="dash-badge proximo" style={{ marginLeft: "auto" }}>Em breve</span>}
+            {treinoEstado === "ok" && treinoRelativo === "ultimo"  && <span className="dash-badge vazio"   style={{ marginLeft: "auto" }}>Sem treino hoje</span>}
+            {treinoEstado === "vazio"                              && <span className="dash-badge vazio"   style={{ marginLeft: "auto" }}>Sem treino</span>}
           </div>
 
           {treinoEstado === "ok" && treino && (
@@ -126,7 +137,11 @@ export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, 
                 {fmt(treino.data)} · {treino.blocos.length} bloco{treino.blocos.length !== 1 ? "s" : ""} · {totalExercicios} exercício{totalExercicios !== 1 ? "s" : ""}
                 {treino.desafio ? " · 🏆" : ""}
               </p>
-              <p className="inicio-card-cta">{treinoEhHoje ? "Ver treino →" : "Ver último treino →"}</p>
+              <p className="inicio-card-cta">
+                {treinoRelativo === "hoje"    ? "Ver treino →"          :
+                 treinoRelativo === "proximo" ? "Ver próximo treino →"  :
+                                               "Ver último treino →"}
+              </p>
             </>
           )}
 

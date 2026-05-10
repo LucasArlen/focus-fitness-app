@@ -118,18 +118,26 @@ function PresencasHoje() {
 }
 
 export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd, onVerDesafio }) {
-  const [treino,    setTreino]    = useState(null);
-  const [estado,    setEstado]    = useState("carregando");
-  const [ehHoje,    setEhHoje]    = useState(true);   // false = mostrando último treino
-  const [statusAcad, setStatusAcad] = useState(null);
+  const [treino,        setTreino]        = useState(null);
+  const [estado,        setEstado]        = useState("carregando");
+  const [treinoRelativo,setTreinoRelativo]= useState("hoje"); // "hoje" | "proximo" | "ultimo"
+  const [statusAcad,    setStatusAcad]    = useState(null);
+
+  function dataHoje() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
 
   useEffect(() => {
     getTreinoHoje()
-      .then(t => { setTreino(t); setEhHoje(true); setEstado("ok"); })
+      .then(t => { setTreino(t); setTreinoRelativo("hoje"); setEstado("ok"); })
       .catch(() => {
-        // Sem treino hoje — tenta carregar o último publicado
+        // Sem treino hoje — tenta carregar o mais próximo (futuro ou passado)
         getTreinoUltimo()
-          .then(t => { setTreino(t); setEhHoje(false); setEstado("ok"); })
+          .then(t => {
+            const rel = t.data > dataHoje() ? "proximo" : "ultimo";
+            setTreino(t); setTreinoRelativo(rel); setEstado("ok");
+          })
           .catch(() => setEstado("vazio"));
       });
     getStatus()
@@ -183,13 +191,19 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd, onVerDesafio }
         {estado === "ok" && treino && (
           <>
             <NotifBanner />
-            {!ehHoje && (
+            {treinoRelativo === "proximo" && (
+              <div className="ultimo-treino-banner">
+                <span>📅</span>
+                <span>Sem treino hoje — próximo treino: <strong>{formatarData(treino.data)}</strong></span>
+              </div>
+            )}
+            {treinoRelativo === "ultimo" && (
               <div className="ultimo-treino-banner">
                 <span>📅</span>
                 <span>Sem treino hoje — mostrando o último: <strong>{formatarData(treino.data)}</strong></span>
               </div>
             )}
-            {ehHoje && <PresencasHoje />}
+            {treinoRelativo === "hoje" && <PresencasHoje />}
 
             {treino.blocos.map(bloco =>
               bloco.sugestao

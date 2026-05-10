@@ -1481,7 +1481,8 @@ html.tema-claro .bottom-nav {
 
 .dash-badge.ok     { background: var(--success-dim); border: 1px solid rgba(76,217,100,0.3); color: var(--success); }
 .dash-badge.vazio  { background: var(--danger-dim);  border: 1px solid rgba(255,82,82,0.2);  color: var(--danger); }
-.dash-badge.aberto { background: var(--accent-dim);  border: 1px solid rgba(232,255,71,0.2); color: var(--accent); }
+.dash-badge.aberto  { background: var(--accent-dim);  border: 1px solid rgba(232,255,71,0.2); color: var(--accent); }
+.dash-badge.proximo { background: rgba(100,181,246,0.12); border: 1px solid rgba(100,181,246,0.3); color: #64b5f6; }
 
 .dash-treino-stats { display: flex; gap: 6px; padding: 0 14px; }
 
