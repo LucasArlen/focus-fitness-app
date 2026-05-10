@@ -6,6 +6,20 @@ import { getChamada } from "../api/presenca";
 const MEDALHAS = ["🥇", "🥈", "🥉"];
 const numVal = v => parseFloat(v) || 0;
 
+// Retorna Set dos primeiros nomes que aparecem mais de uma vez na lista
+function dupsSet(nomes) {
+  const count = {};
+  for (const n of nomes) { const p = n.trim().split(" ")[0]; count[p] = (count[p] || 0) + 1; }
+  return new Set(Object.keys(count).filter(p => count[p] > 1));
+}
+// "Lucas" se único, "Lucas Arlen" se há outro Lucas na lista
+function exibir(nome, dups) {
+  const partes = nome.trim().split(" ");
+  return dups.has(partes[0]) && partes.length > 1
+    ? `${partes[0]} ${partes[partes.length - 1]}`
+    : partes[0];
+}
+
 function calcMeses() {
   const hoje = new Date();
   const mesAtual   = hoje.toISOString().slice(0, 7);
@@ -113,6 +127,11 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
     setConfirmandoFechar(false);
     carregarHoje();
   }
+
+  // Sets de primeiros nomes duplicados por lista
+  const dupHoje    = dupsSet(ranking.map(p => p.aluno_nome));
+  const dupAnual   = dupsSet(anual.map(a => a.nome));
+  const dupPassado = dupsSet(rankingPassado.map(a => a.nome));
 
   // Dados pessoais do aluno no ranking anual
   const meuIdx    = anual.findIndex(a => euSou(a.nome, nomeAluno));
@@ -241,7 +260,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                         <div key={p.id}
                           className={`podio-item pos-${i + 1} ${euSou(p.aluno_nome, nomeAluno) ? "meu-podio" : ""}`}>
                           <span className="podio-medalha">{MEDALHAS[i]}</span>
-                          <span className="podio-nome">{p.aluno_nome.split(" ")[0]}</span>
+                          <span className="podio-nome">{exibir(p.aluno_nome, dupHoje)}</span>
                           {apelidoMap[p.aluno_nome] && <span className="apelido-sub" style={{ fontSize: 10, textAlign: "center" }}>{apelidoMap[p.aluno_nome]}</span>}
                           <span className="podio-valor">{p.valor}</span>
                           {isAdmin && !desafio.fechado && (
@@ -259,7 +278,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                             className={`ranking-item ${euSou(p.aluno_nome, nomeAluno) ? "minha-linha" : ""}`}>
                             <span className="medalha" style={{ fontSize: 13, color: "var(--text-3)" }}>{i + 4}º</span>
                             <div style={{ flex: 1 }}>
-                              <span className="ranking-nome">{p.aluno_nome.split(" ")[0]}</span>
+                              <span className="ranking-nome">{exibir(p.aluno_nome, dupHoje)}</span>
                               {apelidoMap[p.aluno_nome] && <span className="apelido-sub">{apelidoMap[p.aluno_nome]}</span>}
                             </div>
                             <span className="ranking-valor">{p.valor}</span>
@@ -357,7 +376,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                     <li key={a.nome} className={`ranking-item pos-${i + 1} ${euSou(a.nome, nomeAluno) ? "minha-linha" : ""}`}>
                       <span className="medalha">{MEDALHAS[i]}</span>
                       <div style={{ flex: 1 }}>
-                        <span className="ranking-nome">{a.nome.split(" ")[0]}</span>
+                        <span className="ranking-nome">{exibir(a.nome, dupPassado)}</span>
                         {a.apelido && <span className="apelido-sub">{a.apelido}</span>}
                       </div>
                       <div style={{ textAlign: "right" }}>
@@ -400,7 +419,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                       onClick={() => verEvolucao(a.nome)}>
                       <span className="medalha">{MEDALHAS[i] ?? `${i + 1}º`}</span>
                       <div style={{ flex: 1 }}>
-                        <p className="ranking-nome">{a.nome.split(" ")[0]}</p>
+                        <p className="ranking-nome">{exibir(a.nome, dupAnual)}</p>
                         {a.apelido && <span className="apelido-sub">{a.apelido}</span>}
                         <p style={{ fontSize: 11, color: "var(--text-2)" }}>
                           {a.participacoes} desafio{a.participacoes !== 1 ? "s" : ""}
