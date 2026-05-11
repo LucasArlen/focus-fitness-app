@@ -160,7 +160,7 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd, onVerDesafio }
           onTouchCancel={onLogoEnd}
           onContextMenu={e => e.preventDefault()}
         >Focus Fitness</span>
-        {treino && <span className="data-header">{formatarData(treino.data)}</span>}
+        {treino && treinoRelativo === "hoje" && <span className="data-header">{formatarData(treino.data)}</span>}
       </header>
 
       <main className="feed">
