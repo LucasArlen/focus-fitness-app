@@ -526,7 +526,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                   <div className="bloco-accent" />
                   <span className="bloco-nome" style={{ textTransform: "capitalize" }}>🏆 {nomeAtual}</span>
                 </div>
-                <ol className="ranking-list ranking-rest" style={{ padding: "12px", maxHeight: "none" }}>
+                <ol className="ranking-list ranking-rest" style={{ padding: "12px", maxHeight: 400, overflowY: "auto" }}>
                   {anual.map((a, i) => (
                     <li key={a.nome}
                       className={`ranking-item pos-${i + 1} ${euSou(a.nome, nomeAluno) ? "minha-linha" : ""}`}
