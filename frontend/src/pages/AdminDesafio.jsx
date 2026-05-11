@@ -128,6 +128,114 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
     carregarHoje();
   }
 
+  async function compartilharRanking() {
+    const itens = ranking.slice(0, 10);
+    if (!itens.length) return;
+
+    const W     = 600;
+    const LINHA = 58;
+    const H     = 160 + itens.length * LINHA + 48;
+
+    const canvas = document.createElement("canvas");
+    canvas.width  = W;
+    canvas.height = H;
+    const ctx = canvas.getContext("2d");
+
+    // fundo
+    ctx.fillStyle = "#141414";
+    ctx.fillRect(0, 0, W, H);
+
+    // barra lateral accent
+    ctx.fillStyle = "#e8ff47";
+    ctx.fillRect(0, 0, 5, H);
+
+    // logo
+    ctx.fillStyle = "#e8ff47";
+    ctx.font = "bold 20px system-ui,sans-serif";
+    ctx.fillText("Focus Fitness", 24, 42);
+
+    // nome do desafio
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 17px system-ui,sans-serif";
+    ctx.fillText(`🏆 ${desafio.nome}`, 24, 74);
+
+    // data
+    const dateStr = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+    ctx.fillStyle = "#888888";
+    ctx.font = "13px system-ui,sans-serif";
+    ctx.fillText(dateStr, 24, 98);
+
+    // linha divisória
+    ctx.fillStyle = "#2a2a2a";
+    ctx.fillRect(24, 112, W - 48, 1);
+
+    const MEDALS_TXT = ["🥇", "🥈", "🥉"];
+
+    itens.forEach((p, i) => {
+      const y    = 138 + i * LINHA;
+      const top3 = i < 3;
+
+      // fundo destaque top 3
+      if (top3) {
+        ctx.fillStyle = ["rgba(255,215,0,0.07)","rgba(192,192,192,0.05)","rgba(205,127,50,0.05)"][i];
+        ctx.fillRect(8, y - 4, W - 16, LINHA - 6);
+      }
+
+      // medalha / posição
+      ctx.font = top3 ? "bold 22px system-ui" : "15px system-ui";
+      ctx.fillStyle = top3 ? "#ffffff" : "#666666";
+      ctx.fillText(top3 ? MEDALS_TXT[i] : `${i + 1}º`, 24, y + 26);
+
+      // nome
+      ctx.font = `${top3 ? "bold " : ""}15px system-ui,sans-serif`;
+      ctx.fillStyle = "#ffffff";
+      const nome = exibir(p.aluno_nome, dupHoje);
+      ctx.fillText(nome, top3 ? 70 : 66, y + 26);
+
+      // apelido
+      const apelido = apelidoMap[p.aluno_nome];
+      if (apelido) {
+        ctx.font = "12px system-ui,sans-serif";
+        ctx.fillStyle = "#888888";
+        const nomeW = ctx.measureText(nome).width;
+        ctx.fillText(`· ${apelido}`, (top3 ? 70 : 66) + nomeW + 6, y + 26);
+      }
+
+      // valor
+      ctx.font = "bold 16px system-ui,sans-serif";
+      ctx.fillStyle = "#e8ff47";
+      const valStr = `${p.valor}`;
+      ctx.fillText(valStr, W - 24 - ctx.measureText(valStr).width, y + 26);
+
+      // separador
+      if (i < itens.length - 1) {
+        ctx.fillStyle = "#1e1e1e";
+        ctx.fillRect(60, y + LINHA - 8, W - 80, 1);
+      }
+    });
+
+    // rodapé
+    ctx.fillStyle = "#444444";
+    ctx.font = "11px system-ui,sans-serif";
+    ctx.fillText("Focus Fitness App", 24, H - 16);
+
+    canvas.toBlob(async blob => {
+      if (!blob) return;
+      const file = new File([blob], "ranking.png", { type: "image/png" });
+      try {
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ title: `Ranking — ${desafio.nome}`, files: [file] });
+        } else {
+          // fallback: baixar
+          const url = URL.createObjectURL(blob);
+          const a   = document.createElement("a");
+          a.href = url; a.download = "ranking.png"; a.click();
+          URL.revokeObjectURL(url);
+        }
+      } catch { /* usuário cancelou */ }
+    }, "image/png");
+  }
+
   // Sets de primeiros nomes duplicados por lista
   const dupHoje    = dupsSet(ranking.map(p => p.aluno_nome));
   const dupAnual   = dupsSet(anual.map(a => a.nome));
@@ -255,6 +363,11 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                 {/* Ranking */}
                 {ranking.length > 0 ? (
                   <>
+                    <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 14px 4px" }}>
+                      <button className="btn-compartilhar-rank" onClick={compartilharRanking}>
+                        📤 Compartilhar
+                      </button>
+                    </div>
                     <div className="podio">
                       {ranking.slice(0, 3).map((p, i) => (
                         <div key={p.id}

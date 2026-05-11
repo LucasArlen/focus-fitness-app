@@ -2510,6 +2510,19 @@ html.tema-claro .bottom-nav {
 }
 .btn-fechar-desafio:hover { border-color: var(--accent); color: var(--accent); }
 
+.btn-compartilhar-rank {
+  background: none;
+  border: 1px solid rgba(232,255,71,0.25);
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-compartilhar-rank:hover { background: rgba(232,255,71,0.08); }
+
 /* ─────────────────────────────────────────────────────────────
    Modo Aula
 ───────────────────────────────────────────────────────────── */
