@@ -387,7 +387,7 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                     </div>
 
                     {ranking.length > 3 && (
-                      <ol className="ranking-list ranking-rest" style={{ padding: "0 12px 12px" }}>
+                      <ol className="ranking-list ranking-rest" style={{ padding: "0 12px 12px", maxHeight: 340, overflowY: "auto" }}>
                         {ranking.slice(3).map((p, i) => (
                           <li key={p.id}
                             className={`ranking-item ${euSou(p.aluno_nome, nomeAluno) ? "minha-linha" : ""}`}>
