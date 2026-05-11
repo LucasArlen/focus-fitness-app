@@ -38,7 +38,11 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
   function carregar() {
     setCarregando(true);
     Promise.allSettled([
-      getTreinoHoje().then(setTreino).catch(() => setTreino(null)),
+      getTreinoHoje().then(t => {
+        const now = new Date();
+        const hojeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+        setTreino(t.data === hojeStr ? t : null);
+      }).catch(() => setTreino(null)),
       getDesafioHoje().then(setDesafio).catch(() => setDesafio(null)),
       getChamada().then(setChamada).catch(() => setChamada([])),
       getStatus().then(setStatus).catch(() => {}),

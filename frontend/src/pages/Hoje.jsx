@@ -130,12 +130,16 @@ export default function Hoje({ nomeAluno, onLogoStart, onLogoEnd, onVerDesafio }
 
   useEffect(() => {
     getTreinoHoje()
-      .then(t => { setTreino(t); setTreinoRelativo("hoje"); setEstado("ok"); })
+      .then(t => {
+        const hoje = dataHoje();
+        const rel = t.data === hoje ? "hoje" : t.data > hoje ? "proximo" : "ultimo";
+        setTreino(t); setTreinoRelativo(rel); setEstado("ok");
+      })
       .catch(() => {
-        // Sem treino hoje — tenta carregar o mais próximo (futuro ou passado)
         getTreinoUltimo()
           .then(t => {
-            const rel = t.data > dataHoje() ? "proximo" : "ultimo";
+            const hoje = dataHoje();
+            const rel = t.data === hoje ? "hoje" : t.data > hoje ? "proximo" : "ultimo";
             setTreino(t); setTreinoRelativo(rel); setEstado("ok");
           })
           .catch(() => setEstado("vazio"));

@@ -42,11 +42,17 @@ export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, 
 
   useEffect(() => {
     getTreinoHoje()
-      .then(t => { setTreino(t); setTreinoRelativo("hoje"); setTreinoEstado("ok"); })
+      .then(t => {
+        const hoje = dataHoje();
+        // Servidor pode estar em UTC e retornar treino de amanhã como "hoje"
+        const rel = t.data === hoje ? "hoje" : t.data > hoje ? "proximo" : "ultimo";
+        setTreino(t); setTreinoRelativo(rel); setTreinoEstado("ok");
+      })
       .catch(() => {
         getTreinoUltimo()
           .then(t => {
-            const rel = t.data > dataHoje() ? "proximo" : "ultimo";
+            const hoje = dataHoje();
+            const rel = t.data === hoje ? "hoje" : t.data > hoje ? "proximo" : "ultimo";
             setTreino(t); setTreinoRelativo(rel); setTreinoEstado("ok");
           })
           .catch(() => setTreinoEstado("vazio"));
