@@ -53,8 +53,14 @@ def get_historico(limite: int = 30, aluno: str = "", db: Session = Depends(get_d
 
 
 @router.get("/treino/semana")
-def get_semana(db: Session = Depends(get_db), _=Depends(require_admin)):
-    hoje = datetime.date.today()
+def get_semana(db: Session = Depends(get_db), _=Depends(require_admin), data: str = None):
+    if data:
+        try:
+            hoje = datetime.date.fromisoformat(data)
+        except ValueError:
+            hoje = datetime.date.today()
+    else:
+        hoje = datetime.date.today()
     segunda = hoje - datetime.timedelta(days=hoje.weekday())
     dias = [segunda + datetime.timedelta(days=i) for i in range(7)]
     treinos = db.query(Treino).filter(Treino.data.in_(dias)).all()
