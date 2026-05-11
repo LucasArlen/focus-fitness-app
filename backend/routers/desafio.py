@@ -34,6 +34,10 @@ def add_pontuacao(desafio_id: int, body: PontuacaoIn, db: Session = Depends(get_
         existente.valor = body.valor
         db.commit()
         db.refresh(existente)
+        try:
+            send_push_to_all(db, "🎯 Pontuação atualizada!", f"{body.aluno_nome}: {body.valor} — {desafio.nome}", tag="pontuacao")
+        except Exception:
+            pass
         return existente
 
     p = Pontuacao(
@@ -45,6 +49,10 @@ def add_pontuacao(desafio_id: int, body: PontuacaoIn, db: Session = Depends(get_
     db.add(p)
     db.commit()
     db.refresh(p)
+    try:
+        send_push_to_all(db, "🎯 Nova pontuação registrada!", f"{body.aluno_nome}: {body.valor} — {desafio.nome}", tag="pontuacao")
+    except Exception:
+        pass
     return p
 
 
@@ -76,6 +84,6 @@ def fechar_desafio(desafio_id: int, db: Session = Depends(get_db), _=Depends(req
         f"{MEDALHAS[i]} {p.aluno_nome.split()[0]} {p.valor}"
         for i, p in enumerate(ranking[:3])
     )
-    send_push_to_all(db, f"🏆 Ranking publicado!", f"{desafio.nome}\n{podio}")
+    send_push_to_all(db, "🏆 Ranking publicado!", f"{desafio.nome}\n{podio}", tag="ranking")
 
     return {"ok": True}

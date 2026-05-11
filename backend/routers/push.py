@@ -95,7 +95,7 @@ def unsubscribe(body: SubscriptionIn, db: Session = Depends(get_db)):
 
 # ── Helper called by treino router ───────────────────────────────────────────
 
-def send_push_to_all(db: Session, title: str, body: str):
+def send_push_to_all(db: Session, title: str, body: str, tag: str = "notif"):
     """Fire-and-forget push to every subscriber. Removes stale endpoints."""
     try:
         from pywebpush import webpush, WebPushException
@@ -118,7 +118,7 @@ def send_push_to_all(db: Session, title: str, body: str):
         try:
             webpush(
                 subscription_info=subscription_info,
-                data=json.dumps({"title": title, "body": body}),
+                data=json.dumps({"title": title, "body": body, "tag": tag}),
                 vapid_private_key=private_key,
                 vapid_claims={"sub": VAPID_EMAIL},
             )

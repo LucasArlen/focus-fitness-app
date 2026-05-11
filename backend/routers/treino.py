@@ -156,6 +156,7 @@ def create_treino(body: TreinoIn, db: Session = Depends(get_db), _=Depends(requi
                 db,
                 title="Treino publicado! 💪",
                 body="O treino de hoje está disponível. Bora treinar!",
+                tag="treino",
             )
         except Exception:
             pass

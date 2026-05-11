@@ -9,13 +9,13 @@ self.addEventListener("push", e => {
 
   const title   = data.title ?? "Focus Fitness";
   const options = {
-    body:    data.body ?? "Novo treino disponível!",
-    icon:    "/logo.png",
-    badge:   "/logo.png",
-    vibrate: [120, 60, 120],
-    tag:     "treino-novo",          // colapsa múltiplas notificações
-    renotify: false,
-    data:    { url: "/" },
+    body:     data.body ?? "Novo treino disponível!",
+    icon:     "/logo.png",
+    badge:    "/logo.png",
+    vibrate:  [120, 60, 120],
+    tag:      data.tag ?? "notif",   // cada tipo tem sua própria tag
+    renotify: true,                  // sempre vibra, mesmo com mesma tag
+    data:     { url: "/" },
   };
 
   e.waitUntil(self.registration.showNotification(title, options));

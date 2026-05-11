@@ -7,6 +7,7 @@ from auth import require_admin, require_any
 from database import get_db
 from models import Aviso, Confirmacao
 from schemas import AvisoIn, AvisoOut
+from routers.push import send_push_to_all
 
 router = APIRouter()
 
@@ -36,6 +37,17 @@ def criar_aviso(body: AvisoIn, db: Session = Depends(get_db), _=Depends(require_
     db.add(aviso)
     db.commit()
     db.refresh(aviso)
+
+    try:
+        if body.categoria == "evento":
+            send_push_to_all(db, "🏃 Novo evento!", body.titulo, tag="aviso")
+        elif body.categoria == "feriado":
+            send_push_to_all(db, "🎉 Feriado anunciado!", body.titulo, tag="aviso")
+        else:
+            send_push_to_all(db, "📢 Novo aviso!", body.titulo, tag="aviso")
+    except Exception:
+        pass
+
     return aviso
 
 
