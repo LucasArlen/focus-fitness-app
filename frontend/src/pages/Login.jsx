@@ -6,6 +6,7 @@ export default function Login({ onLogin }) {
   const [password, setPassword] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [verSenha,   setVerSenha]   = useState(false);
 
   async function entrar(e) {
     e.preventDefault();
@@ -40,14 +41,19 @@ export default function Login({ onLogin }) {
               onChange={e => setUsername(e.target.value)}
               autoComplete="username"
             />
-            <input
-              className="input-exercicio"
-              type="password"
-              placeholder="Senha"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
+            <div className="input-senha-wrap">
+              <input
+                className="input-exercicio"
+                type={verSenha ? "text" : "password"}
+                placeholder="Senha"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+              <button type="button" className="btn-ver-senha" onClick={() => setVerSenha(v => !v)}>
+                {verSenha ? "🙈" : "👁"}
+              </button>
+            </div>
             {erro && <p className="login-erro">{erro}</p>}
             <button className="btn-publicar" type="submit" disabled={carregando}>
               {carregando ? "Entrando..." : "Entrar"}

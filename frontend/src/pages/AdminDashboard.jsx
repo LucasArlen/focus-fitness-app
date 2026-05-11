@@ -32,6 +32,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
   const [credUser,      setCredUser]      = useState("");
   const [credPass,      setCredPass]      = useState("");
   const [credStatus,    setCredStatus]    = useState(null); // "ok" | "erro" | null
+  const [verSenha,      setVerSenha]      = useState(false);
   const [marcando,      setMarcando]      = useState(null);
   const [semana,        setSemana]        = useState([]);
 
@@ -386,14 +387,19 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
                 onChange={e => setCredUser(e.target.value)}
                 autoComplete="off"
               />
-              <input
-                className="cred-input"
-                type="password"
-                placeholder="Nova senha"
-                value={credPass}
-                onChange={e => setCredPass(e.target.value)}
-                autoComplete="new-password"
-              />
+              <div className="input-senha-wrap">
+                <input
+                  className="cred-input"
+                  type={verSenha ? "text" : "password"}
+                  placeholder="Nova senha"
+                  value={credPass}
+                  onChange={e => setCredPass(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <button type="button" className="btn-ver-senha" onClick={() => setVerSenha(v => !v)}>
+                  {verSenha ? "🙈" : "👁"}
+                </button>
+              </div>
               {credStatus === "ok"   && <p className="cred-feedback ok">✓ Salvo! Use as novas credenciais no próximo login.</p>}
               {credStatus === "erro" && <p className="cred-feedback erro">✗ Erro ao salvar. Tente novamente.</p>}
               <button
