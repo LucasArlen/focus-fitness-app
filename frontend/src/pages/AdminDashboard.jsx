@@ -144,7 +144,10 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
         {/* ── SEMANA ── */}
         {semana.length > 0 && (
           <div className="semana-strip">
-            {semana.map(dia => {
+            {(() => {
+              const now = new Date();
+              const hojeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+              return semana.map(dia => {
               const [, , d] = dia.data.split("-");
               const label = new Date(dia.data + "T12:00:00")
                 .toLocaleDateString("pt-BR", { weekday: "short" })
@@ -152,7 +155,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
               return (
                 <button
                   key={dia.data}
-                  className={`semana-dia ${dia.eh_hoje ? "hoje" : ""} ${dia.tem_treino ? "tem-treino" : ""}`}
+                  className={`semana-dia ${dia.data === hojeStr ? "hoje" : ""} ${dia.tem_treino ? "tem-treino" : ""}`}
                   onClick={onEditarTreino}
                   title={dia.tem_treino ? `${dia.total_blocos} bloco(s)` : "Sem treino"}
                 >
@@ -161,7 +164,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
                   <span className="semana-dia-dot" />
                 </button>
               );
-            })}
+            });})()}
           </div>
         )}
 
