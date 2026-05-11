@@ -303,9 +303,16 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                 <div className="bloco-header">
                   <div className="bloco-accent" />
                   <span className="bloco-nome">🏆 {desafio.nome}</span>
-                  {desafio.fechado && (
-                    <span className="status-badge publicado" style={{ marginLeft: "auto" }}>Finalizado</span>
-                  )}
+                  <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+                    {desafio.fechado && (
+                      <span className="status-badge publicado">Finalizado</span>
+                    )}
+                    {ranking.length > 0 && (
+                      <button className="btn-compartilhar-rank" onClick={compartilharRanking}>
+                        📤 Compartilhar
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* ── ADMIN: marcar pontuações ── */}
@@ -363,11 +370,6 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
                 {/* Ranking */}
                 {ranking.length > 0 ? (
                   <>
-                    <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 14px 4px" }}>
-                      <button className="btn-compartilhar-rank" onClick={compartilharRanking}>
-                        📤 Compartilhar
-                      </button>
-                    </div>
                     <div className="podio">
                       {ranking.slice(0, 3).map((p, i) => (
                         <div key={p.id}
