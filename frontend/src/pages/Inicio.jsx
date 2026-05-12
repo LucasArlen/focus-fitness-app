@@ -4,6 +4,7 @@ import { getRankingMensal } from "../api/ranking";
 import { getAvisos } from "../api/aviso";
 import { getStatus } from "../api/academia";
 import { freqMes, calcStreak } from "../hooks/useAluno";
+import { Dumbbell, Megaphone, Trophy, Calendar, Flame, ChevronRight } from "lucide-react";
 
 const STATUS_CFG = {
   vazio:     { label: "bem vazia",  emoji: "😌", cor: "#64b5f6" },
@@ -105,12 +106,12 @@ export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, 
             {apelido && <span className="apelido-sub">{apelido}</span>}
             <div className="inicio-perfil-stats">
               {streak > 0 && (
-                <span className="inicio-stat-pill streak">🔥 {streak} {streak === 1 ? "dia" : "dias"}</span>
+                <span className="inicio-stat-pill streak"><Flame size={12} /> {streak} {streak === 1 ? "dia" : "dias"}</span>
               )}
-              <span className="inicio-stat-pill">📅 {presencasMes} este mês</span>
+              <span className="inicio-stat-pill"><Calendar size={12} /> {presencasMes} este mês</span>
             </div>
           </div>
-          <span className="inicio-perfil-chevron">›</span>
+          <span className="inicio-perfil-chevron"><ChevronRight size={18} /></span>
         </div>
 
         {/* ── STATUS DA ACADEMIA ── */}
@@ -127,7 +128,7 @@ export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, 
           onClick={treinoEstado === "ok" ? onVerTreino : undefined}
         >
           <div className="inicio-card-header">
-            <span className="inicio-card-icon">💪</span>
+            <span className="inicio-card-icon"><Dumbbell size={18} /></span>
             <span className="inicio-card-titulo">
               {treinoRelativo === "proximo" ? "Próximo treino" : "Treino de hoje"}
             </span>
@@ -164,7 +165,7 @@ export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, 
         {campeao && (
           <div className="inicio-card">
             <div className="inicio-card-header">
-              <span className="inicio-card-icon">🏆</span>
+              <span className="inicio-card-icon"><Trophy size={18} /></span>
               <span className="inicio-card-titulo">Campeão do mês</span>
             </div>
             <div className="inicio-campeao">
@@ -193,7 +194,7 @@ export default function Inicio({ nome, apelido, foto, onVerTreino, onVerAvisos, 
         {avisosPreview.length > 0 && (
           <div className="inicio-card">
             <div className="inicio-card-header">
-              <span className="inicio-card-icon">📢</span>
+              <span className="inicio-card-icon"><Megaphone size={18} /></span>
               <span className="inicio-card-titulo">Avisos</span>
               <button className="inicio-ver-mais" onClick={e => { e.stopPropagation(); onVerAvisos(); }}>
                 Ver todos →
