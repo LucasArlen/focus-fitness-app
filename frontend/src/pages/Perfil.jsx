@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getPerfil, updatePerfil } from "../api/aluno";
+import { Bell, Calendar, Flame, Trophy, Smartphone } from "lucide-react";
 
 // ── Detecção de ambiente de instalação ──────────────────────────────────────
 const _standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -211,7 +212,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onSalvarFoto, o
             </div>
             {streak > 0 && (
               <div className="perfil-stat perfil-stat-streak">
-                <span className="perfil-stat-val">🔥 {streak}</span>
+                <span className="perfil-stat-val"><Flame size={18} style={{ display:"inline", verticalAlign:"middle" }} /> {streak}</span>
                 <span className="perfil-stat-label">{streak === 1 ? "dia seguido" : "dias seguidos"}</span>
               </div>
             )}
@@ -222,7 +223,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onSalvarFoto, o
         {NOTIF_SUPPORTED && (
           <div className="perfil-section">
             <div className="perfil-notif-row">
-              <span className="perfil-notif-icon">🔔</span>
+              <span className="perfil-notif-icon"><Bell size={20} /></span>
               <div style={{ flex: 1 }}>
                 <p className="perfil-notif-label">Notificações</p>
                 <p className="perfil-notif-sub">
@@ -246,7 +247,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onSalvarFoto, o
         {/* ── Evolução nos desafios ── */}
         {evolucao.length > 0 && (
           <div className="perfil-section">
-            <p className="perfil-section-titulo">🏆 Meus desafios</p>
+            <p className="perfil-section-titulo"><Trophy size={15} style={{ display:"inline", verticalAlign:"middle", marginRight:4 }} /> Meus desafios</p>
             <div className="perfil-evolucao-lista">
               {(() => {
                 // PR por tipo de desafio (nome do desafio como chave)
@@ -281,11 +282,11 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onSalvarFoto, o
         {/* ── Instalar app ── */}
         {!_standalone && _isIOSSafari && (
           <div className="perfil-section perfil-install-card">
-            <span className="perfil-install-icon">📲</span>
+            <span className="perfil-install-icon"><Smartphone size={22} /></span>
             <div className="perfil-install-texto">
               <p className="perfil-install-titulo">Instalar no iPhone</p>
               <p className="perfil-install-sub">
-                Toque em <strong>⬆</strong> e depois <strong>"Adicionar à Tela de Início"</strong> para usar o app sem o navegador.
+                Na barra inferior do Safari, toque no ícone de compartilhar <strong style={{ fontSize: 15 }}>⎋</strong> (caixa com seta pra cima) e depois em <strong>"Adicionar à Tela de Início"</strong>.
               </p>
             </div>
           </div>
@@ -293,7 +294,7 @@ export default function Perfil({ nome, apelido, onSalvarApelido, onSalvarFoto, o
 
         {!_standalone && installPrompt && (
           <div className="perfil-section perfil-install-card">
-            <span className="perfil-install-icon">📲</span>
+            <span className="perfil-install-icon"><Smartphone size={22} /></span>
             <div className="perfil-install-texto">
               <p className="perfil-install-titulo">Instalar o app</p>
               <p className="perfil-install-sub">Adicione à tela inicial para acesso rápido.</p>

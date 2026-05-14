@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
+import { ClipboardList, Users, Trophy, MapPin, Link2, KeyRound, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { getTreinoHoje, getSemana } from "../api/treino";
 import { getDesafioHoje } from "../api/desafio";
 import { getChamada, marcarPresenca } from "../api/presenca";
@@ -176,7 +177,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
         {/* ── TREINO ── */}
         <div className="dash-card">
           <div className="dash-card-header">
-            <span className="dash-card-icon">📋</span>
+            <span className="dash-card-icon"><ClipboardList size={17} /></span>
             <span className="dash-card-titulo">Treino de Hoje</span>
             <span className={`dash-badge ${treino ? "ok" : "vazio"}`} style={{ marginLeft: "auto" }}>
               {treino ? "Publicado" : "Não publicado"}
@@ -196,7 +197,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
                 </div>
                 {treino.desafio && (
                   <div className="dash-mini-stat">
-                    <span className="dash-mini-val">🏆</span>
+                    <span className="dash-mini-val"><Trophy size={18} /></span>
                     <span className="dash-mini-label">desafio</span>
                   </div>
                 )}
@@ -221,7 +222,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
         {/* ── CHAMADA ── */}
         <div className="dash-card">
           <div className="dash-card-header">
-            <span className="dash-card-icon">👥</span>
+            <span className="dash-card-icon"><Users size={17} /></span>
             <span className="dash-card-titulo">Aula de hoje</span>
             <span className="dash-badge ok" style={{ marginLeft: "auto" }}>
               {totalPresentes}/{chamada.length}
@@ -262,7 +263,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
         <div className="dash-row">
           <div className="dash-card dash-half">
             <div className="dash-card-header">
-              <span className="dash-card-icon">🏆</span>
+              <span className="dash-card-icon"><Trophy size={17} /></span>
               <span className="dash-card-titulo">Desafio</span>
             </div>
             {desafio ? (
@@ -280,7 +281,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
 
           <div className="dash-card dash-half">
             <div className="dash-card-header">
-              <span className="dash-card-icon">📍</span>
+              <span className="dash-card-icon"><MapPin size={17} /></span>
               <span className="dash-card-titulo">Status</span>
               <label className="status-toggle-wrap" style={{ marginLeft: "auto" }}>
                 <input type="checkbox" className="status-toggle-input"
@@ -318,7 +319,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
               className="dash-card-header dash-card-header-toggle"
               onClick={() => setQrColapsado(v => !v)}
             >
-              <span className="dash-card-icon">🔗</span>
+              <span className="dash-card-icon"><Link2 size={17} /></span>
               <span className="dash-card-titulo">Acesso de novos alunos</span>
               <span className="dash-badge ok" style={{ marginLeft: "auto" }}>Ativo</span>
               <span className="dash-collapse-chevron" style={{ transform: qrColapsado ? "" : "rotate(180deg)" }}>▾</span>
@@ -372,7 +373,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
             className="dash-card-header dash-card-header-toggle"
             onClick={() => { setCredAberto(v => !v); setCredStatus(null); }}
           >
-            <span className="dash-card-icon">🔑</span>
+            <span className="dash-card-icon"><KeyRound size={17} /></span>
             <span className="dash-card-titulo">Login do admin</span>
             <span className="dash-collapse-chevron" style={{ marginLeft: "auto", transform: credAberto ? "rotate(180deg)" : "" }}>▾</span>
           </div>
@@ -397,7 +398,7 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
                   autoComplete="new-password"
                 />
                 <button type="button" className="btn-ver-senha" onClick={() => setVerSenha(v => !v)}>
-                  {verSenha ? "🙈" : "👁"}
+                  {verSenha ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
               {credStatus === "ok"   && <p className="cred-feedback ok">✓ Salvo! Use as novas credenciais no próximo login.</p>}
@@ -421,12 +422,12 @@ export default function AdminDashboard({ onEditarTreino, onVerAlunos, onModoAula
 
         {/* ── VER COMO ALUNO ── */}
         <button className="dash-preview-btn" onClick={onVerComoAluno}>
-          👁  Ver como aluno
+          <Eye size={15} />  Ver como aluno
         </button>
 
         {/* ── ATUALIZAR ── */}
         <button className="dash-refresh-btn" onClick={carregar} disabled={carregando}>
-          {carregando ? "Atualizando..." : "↻  Atualizar dados"}
+          {carregando ? "Atualizando..." : <><RefreshCw size={14} />  Atualizar dados</>}
         </button>
 
       </main>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { deletePontuacao, fecharDesafio, getDesafioHoje, postPontuacao } from "../api/desafio";
 import { getRankingMensal, getEvolucaoAluno } from "../api/ranking";
 import { getChamada } from "../api/presenca";
+import { Trophy, Share2, Medal } from "lucide-react";
 
 const MEDALHAS = ["🥇", "🥈", "🥉"];
 const numVal = v => parseFloat(v) || 0;
@@ -302,14 +303,14 @@ export default function AdminDesafio({ isAdmin, nomeAluno, freqMes, onLogoStart,
               <div className="bloco-card desafio-card">
                 <div className="bloco-header">
                   <div className="bloco-accent" />
-                  <span className="bloco-nome">🏆 {desafio.nome}</span>
+                  <span className="bloco-nome"><Trophy size={15} style={{ display:"inline", verticalAlign:"middle", marginRight:4 }} />{desafio.nome}</span>
                   <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
                     {desafio.fechado && (
                       <span className="status-badge publicado">Finalizado</span>
                     )}
                     {ranking.length > 0 && (
                       <button className="btn-compartilhar-rank" onClick={compartilharRanking}>
-                        📤 Compartilhar
+                        <Share2 size={13} /> Compartilhar
                       </button>
                     )}
                   </div>

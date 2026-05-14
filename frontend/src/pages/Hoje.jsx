@@ -5,6 +5,7 @@ import { getPresencas } from "../api/presenca";
 import BlocoCard from "../components/BlocoCard";
 import SugestaoCard from "../components/SugestaoCard";
 import { getVapidKey, subscribePush, urlBase64ToUint8Array } from "../api/push";
+import { Bell, Users } from "lucide-react";
 
 const STATUS_CFG = {
   fechado:   { label: "Academia fechada", emoji: "🔒", cor: "#ff5252",  bg: "rgba(255,82,82,0.07)",    borda: "rgba(255,82,82,0.22)" },
@@ -68,7 +69,7 @@ function NotifBanner() {
 
   return (
     <div className="notif-banner">
-      <span className="notif-banner-icon">🔔</span>
+      <span className="notif-banner-icon"><Bell size={16} /></span>
       <span className="notif-banner-texto">Aviso quando o treino for publicado</span>
       <button className="notif-banner-btn" onClick={ativar} disabled={carregando}>
         {carregando ? "..." : "Ativar"}
@@ -102,7 +103,7 @@ function PresencasHoje() {
     <div className="vou-strip" onClick={() => setExpandido(e => !e)} style={{ cursor: "pointer" }}>
       <div className="vou-strip-main">
         <span className="vou-strip-texto">
-          💪 {total} {total === 1 ? "pessoa está" : "pessoas estão"} treinando hoje
+          <Users size={14} /> {total} {total === 1 ? "pessoa está" : "pessoas estão"} treinando hoje
         </span>
         <span className="vou-strip-chevron">{expandido ? "▴" : "▾"}</span>
       </div>

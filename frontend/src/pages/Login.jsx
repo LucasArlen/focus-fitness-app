@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { adminLogin } from "../api/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -51,7 +52,7 @@ export default function Login({ onLogin }) {
                 autoComplete="current-password"
               />
               <button type="button" className="btn-ver-senha" onClick={() => setVerSenha(v => !v)}>
-                {verSenha ? "🙈" : "👁"}
+                {verSenha ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
             {erro && <p className="login-erro">{erro}</p>}

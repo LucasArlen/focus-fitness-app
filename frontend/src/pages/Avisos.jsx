@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { comprimirImagem } from "../utils/imagem";
 import { getAvisos, criarAviso, deletarAviso, confirmarAviso } from "../api/aviso";
+import { Megaphone, CalendarDays, PartyPopper, Camera, Users } from "lucide-react";
+
+const CAT_ICON = { aviso: Megaphone, evento: CalendarDays, feriado: PartyPopper };
 
 const CAT_CFG = {
-  aviso:   { label: "Aviso",   emoji: "📢", cor: "#64b5f6" },
-  evento:  { label: "Evento",  emoji: "🏃", cor: "#e8ff47" },
-  feriado: { label: "Feriado", emoji: "🎉", cor: "#ff9800" },
+  aviso:   { label: "Aviso",   cor: "#64b5f6" },
+  evento:  { label: "Evento",  cor: "#e8ff47" },
+  feriado: { label: "Feriado", cor: "#ff9800" },
 };
 
 function formatarExpira(dataStr) {
@@ -32,7 +35,7 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
     <div className={`aviso-card aviso-cat-${aviso.categoria}`}>
       <div className="aviso-card-top">
         <span className="aviso-cat-badge" style={{ color: cfg.cor }}>
-          {cfg.emoji} {cfg.label}
+          {(() => { const Icon = CAT_ICON[aviso.categoria] || Megaphone; return <Icon size={13} />; })()} {cfg.label}
         </span>
         <span className="aviso-expira">até {formatarExpira(aviso.expira_em)}</span>
         {isAdmin && (
@@ -43,7 +46,7 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
       <h3 className="aviso-titulo">{aviso.titulo}</h3>
 
       {aviso.data_evento && (
-        <p className="aviso-data-evento">🗓 {aviso.data_evento}</p>
+        <p className="aviso-data-evento"><CalendarDays size={13} /> {aviso.data_evento}</p>
       )}
 
       {/* Status de confirmação — logo abaixo da data */}
@@ -67,7 +70,7 @@ function AvisoCard({ aviso, isAdmin, nomeAluno, onDeletar, onConfirmar }) {
         <div className="aviso-confs">
           {total > 0 && (
             <button className="aviso-confs-toggle" onClick={() => setExpandirConfs(v => !v)}>
-              <span className="aviso-confs-resumo">👥 {resumoConfs(aviso.confirmacoes)}</span>
+              <span className="aviso-confs-resumo"><Users size={13} /> {resumoConfs(aviso.confirmacoes)}</span>
               <span className="aviso-confs-chevron">{expandirConfs ? "▴" : "▾"}</span>
             </button>
           )}
@@ -156,15 +159,18 @@ function AdminForm({ onCriado }) {
       </div>
 
       <div className="aviso-form-cats">
-        {Object.entries(CAT_CFG).map(([val, { label, emoji }]) => (
-          <button
-            key={val}
-            className={`aviso-cat-btn ${categoria === val ? "ativo" : ""}`}
-            onClick={() => setCategoria(val)}
-          >
-            {emoji} {label}
-          </button>
-        ))}
+        {Object.entries(CAT_CFG).map(([val, { label }]) => {
+          const Icon = CAT_ICON[val] || Megaphone;
+          return (
+            <button
+              key={val}
+              className={`aviso-cat-btn ${categoria === val ? "ativo" : ""}`}
+              onClick={() => setCategoria(val)}
+            >
+              <Icon size={13} /> {label}
+            </button>
+          );
+        })}
       </div>
 
       <input
@@ -195,7 +201,7 @@ function AdminForm({ onCriado }) {
 
       <div className="aviso-form-row">
         <label className="aviso-foto-label">
-          {foto ? "✓ Foto selecionada" : "📷 Adicionar foto"}
+          {foto ? "✓ Foto selecionada" : <><Camera size={13} /> Adicionar foto</>}
           <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFoto} />
         </label>
         {foto && (
