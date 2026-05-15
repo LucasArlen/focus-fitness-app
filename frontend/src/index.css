@@ -137,6 +137,7 @@ html.tema-claro .app-header {
   text-transform: uppercase;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
   cursor: default;
 }
 
